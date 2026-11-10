@@ -7,8 +7,8 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R001 `canonical_json(obj) -> bytes`: recursively sorted keys, separators `(",", ":")`, `ensure_ascii=False`, UTF-8. Tests: key order independence, nested dicts and lists.
 - [x] R002 NFC-normalise every string key and value before encoding. Test: composed and decomposed `é` produce identical bytes.
 - [x] R003 Reject NaN and ±Infinity with `CanonError`. Tests for each.
-- [ ] R004 Tuples encode as lists; sets, bytes and arbitrary objects raise `CanonError` naming the type and the JSON path (e.g. `$.a[2]`). Tests.
-- [ ] R005 Reject non-string dict keys with `CanonError` (no silent `str()` coercion). Test.
+- [x] R004 Tuples encode as lists; sets, bytes and arbitrary objects raise `CanonError` naming the type and the JSON path (e.g. `$.a[2]`). Tests.
+- [x] R005 Reject non-string dict keys with `CanonError` (no silent `str()` coercion). Test.
 - [ ] R006 `state_hash(obj, volatile_fields=()) -> str`: SHA-256 hex of the canonical bytes. Test pins one golden hash literal so accidental encoding changes fail loudly.
 - [ ] R007 Volatile-field exclusion by dotted path (`"meta.ts"`) at any depth, including inside lists of dicts. Tests.
 - [ ] R008 Wildcard volatile paths (`"*.ts"` matches a `ts` key at any depth). Tests.

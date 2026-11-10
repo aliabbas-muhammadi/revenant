@@ -45,3 +45,40 @@ def test_non_finite_floats_rejected(value):
         canonical_json(value)
     with pytest.raises(CanonError):
         canonical_json({"a": [value]})
+
+
+def test_tuples_encode_as_lists():
+    assert canonical_json((1, (2, 3))) == canonical_json([1, [2, 3]])
+
+
+@pytest.mark.parametrize(
+    ("value", "path", "type_name"),
+    [
+        ({1, 2}, "$", "set"),
+        (b"x", "$", "bytes"),
+        (object(), "$", "object"),
+        ({"a": [1, 2, {3}]}, "$.a[2]", "set"),
+        ({"a": {"b": b"x"}}, "$.a.b", "bytes"),
+    ],
+)
+def test_unsupported_types_name_type_and_path(value, path, type_name):
+    with pytest.raises(CanonError) as exc:
+        canonical_json(value)
+    assert type_name in str(exc.value)
+    assert path in str(exc.value)
+
+
+def test_non_finite_error_names_path():
+    with pytest.raises(CanonError, match=r"\$\.a\[1\]"):
+        canonical_json({"a": [1, float("nan")]})
+
+
+@pytest.mark.parametrize("key", [1, None, 1.5, (1, 2)])
+def test_non_string_keys_rejected(key):
+    with pytest.raises(CanonError, match="non-string key"):
+        canonical_json({key: 1})
+
+
+def test_non_string_key_in_nested_dict_reports_path():
+    with pytest.raises(CanonError, match=r"\$\.a"):
+        canonical_json({"a": {1: "x"}})
