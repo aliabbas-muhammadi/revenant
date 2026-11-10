@@ -1,4 +1,6 @@
-from revenant.canon import canonical_json
+import pytest
+
+from revenant.canon import CanonError, canonical_json
 
 
 def test_key_order_independence():
@@ -35,3 +37,11 @@ def test_nfc_normalises_values():
 def test_nfc_normalises_keys_and_nested_strings():
     composed, decomposed = "café", "café"
     assert canonical_json({decomposed: [decomposed]}) == canonical_json({composed: [composed]})
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+def test_non_finite_floats_rejected(value):
+    with pytest.raises(CanonError):
+        canonical_json(value)
+    with pytest.raises(CanonError):
+        canonical_json({"a": [value]})
