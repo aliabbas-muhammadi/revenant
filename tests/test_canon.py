@@ -156,3 +156,14 @@ def test_wildcard_with_multi_segment_suffix():
         {**b, "other": {"ts": 1}}, ["*.meta.ts"]
     )
     assert state_hash(a, ["*.meta.ts"]) != state_hash(b, ["*.meta.ts"])
+
+
+def test_int_and_float_are_distinct():
+    assert canonical_json(1) == b"1"
+    assert canonical_json(1.0) == b"1.0"
+    assert state_hash({"n": 1}) != state_hash({"n": 1.0})
+
+
+def test_bool_does_not_collide_with_int():
+    assert canonical_json(True) == b"true"
+    assert state_hash([True]) != state_hash([1])

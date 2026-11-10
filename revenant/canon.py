@@ -1,4 +1,11 @@
-"""Canonical JSON encoding used for state hashing."""
+"""Canonical JSON encoding used for state hashing.
+
+Numbers keep their Python type: ``1`` encodes as ``1`` and ``1.0`` as ``1.0``,
+so they hash differently. A runtime that silently turns an int into a float (or
+back) across a checkpoint round-trip changed its state, and the harness should
+report that rather than paper over it. ``True`` and ``False`` stay JSON booleans
+and never collide with ``1`` and ``0``.
+"""
 
 from __future__ import annotations
 
