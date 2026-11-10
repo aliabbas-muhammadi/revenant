@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import unicodedata
+from collections.abc import Iterable
 from typing import Any
 
 
@@ -53,6 +54,33 @@ def canonical_json(obj: Any) -> bytes:
     ).encode("utf-8")
 
 
-def state_hash(obj: Any) -> str:
-    """Return the SHA-256 hex digest of the canonical encoding of ``obj``."""
+def _strip_volatile(obj: Any, patterns: list[list[str]], trail: tuple[str, ...]) -> Any:
+    """Drop dict keys whose dotted path matches a volatile pattern.
+
+    Paths are made of dict keys only; list positions are transparent, so
+    ``items.ts`` addresses ``ts`` in every dict inside the ``items`` list.
+    """
+    if isinstance(obj, dict):
+        out: dict[Any, Any] = {}
+        for key, value in obj.items():
+            here = (*trail, _nfc(key) if isinstance(key, str) else str(key))
+            if any(here == tuple(pat) for pat in patterns):
+                continue
+            out[key] = _strip_volatile(value, patterns, here)
+        return out
+    if isinstance(obj, list | tuple):
+        return [_strip_volatile(v, patterns, trail) for v in obj]
+    return obj
+
+
+def state_hash(obj: Any, volatile_fields: Iterable[str] = ()) -> str:
+    """Return the SHA-256 hex digest of the canonical encoding of ``obj``.
+
+    ``volatile_fields`` lists dotted paths (for example ``"meta.ts"``) that are
+    excluded before hashing, so timestamps and durations do not make a resumed
+    run look divergent.
+    """
+    patterns = [p.split(".") for p in volatile_fields]
+    if patterns:
+        obj = _strip_volatile(obj, patterns, ())
     return hashlib.sha256(canonical_json(obj)).hexdigest()

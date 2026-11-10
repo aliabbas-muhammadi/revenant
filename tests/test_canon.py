@@ -103,3 +103,34 @@ def test_state_hash_is_hex_sha256_of_canonical_bytes():
     obj = {"b": 1, "a": 2}
     assert state_hash(obj) == hashlib.sha256(canonical_json(obj)).hexdigest()
     assert len(state_hash(obj)) == 64
+
+
+def test_volatile_field_excluded():
+    a = {"meta": {"ts": 1, "id": "x"}, "n": 1}
+    b = {"meta": {"ts": 999, "id": "x"}, "n": 1}
+    assert state_hash(a) != state_hash(b)
+    assert state_hash(a, ["meta.ts"]) == state_hash(b, ["meta.ts"])
+
+
+def test_volatile_field_only_matches_exact_path():
+    a = {"meta": {"ts": 1}, "ts": 1}
+    b = {"meta": {"ts": 2}, "ts": 1}
+    assert state_hash(a, ["ts"]) != state_hash(b, ["ts"])
+
+
+def test_volatile_field_inside_list_of_dicts():
+    a = {"calls": [{"tool": "x", "ms": 5}, {"tool": "y", "ms": 7}]}
+    b = {"calls": [{"tool": "x", "ms": 50}, {"tool": "y", "ms": 70}]}
+    assert state_hash(a) != state_hash(b)
+    assert state_hash(a, ["calls.ms"]) == state_hash(b, ["calls.ms"])
+
+
+def test_volatile_field_deep_and_non_mutating():
+    a = {"a": {"b": {"c": 1, "keep": 2}}}
+    before = repr(a)
+    assert state_hash(a, ["a.b.c"]) == state_hash({"a": {"b": {"keep": 2}}})
+    assert repr(a) == before
+
+
+def test_volatile_field_absent_is_noop():
+    assert state_hash({"a": 1}, ["nope.here"]) == state_hash({"a": 1})
