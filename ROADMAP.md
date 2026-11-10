@@ -4,7 +4,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 
 ## M1 · Canonical state hashing (`revenant/canon.py`)
 
-- [ ] R001 `canonical_json(obj) -> bytes`: recursively sorted keys, separators `(",", ":")`, `ensure_ascii=False`, UTF-8. Tests: key order independence, nested dicts and lists.
+- [x] R001 `canonical_json(obj) -> bytes`: recursively sorted keys, separators `(",", ":")`, `ensure_ascii=False`, UTF-8. Tests: key order independence, nested dicts and lists.
 - [ ] R002 NFC-normalise every string key and value before encoding. Test: composed and decomposed `é` produce identical bytes.
 - [ ] R003 Reject NaN and ±Infinity with `CanonError`. Tests for each.
 - [ ] R004 Tuples encode as lists; sets, bytes and arbitrary objects raise `CanonError` naming the type and the JSON path (e.g. `$.a[2]`). Tests.
