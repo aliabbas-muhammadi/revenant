@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import unicodedata
@@ -50,3 +51,8 @@ def canonical_json(obj: Any) -> bytes:
         ensure_ascii=False,
         allow_nan=False,
     ).encode("utf-8")
+
+
+def state_hash(obj: Any) -> str:
+    """Return the SHA-256 hex digest of the canonical encoding of ``obj``."""
+    return hashlib.sha256(canonical_json(obj)).hexdigest()

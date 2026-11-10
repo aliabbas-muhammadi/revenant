@@ -1,6 +1,8 @@
+import hashlib
+
 import pytest
 
-from revenant.canon import CanonError, canonical_json
+from revenant.canon import CanonError, canonical_json, state_hash
 
 
 def test_key_order_independence():
@@ -82,3 +84,22 @@ def test_non_string_keys_rejected(key):
 def test_non_string_key_in_nested_dict_reports_path():
     with pytest.raises(CanonError, match=r"\$\.a"):
         canonical_json({"a": {1: "x"}})
+
+
+GOLDEN_STATE = {
+    "step": 3,
+    "name": "caf\u00e9",
+    "items": [1, 2.5, None, True],
+    "nested": {"b": 1, "a": []},
+}
+GOLDEN_HASH = "2a114b98d20c347da264af430d7733d3f28b76bc19e717a6992fa1ba7a81cd58"
+
+
+def test_state_hash_golden():
+    assert state_hash(GOLDEN_STATE) == GOLDEN_HASH
+
+
+def test_state_hash_is_hex_sha256_of_canonical_bytes():
+    obj = {"b": 1, "a": 2}
+    assert state_hash(obj) == hashlib.sha256(canonical_json(obj)).hexdigest()
+    assert len(state_hash(obj)) == 64
