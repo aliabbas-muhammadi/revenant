@@ -24,3 +24,14 @@ def test_list_order_is_significant():
 
 def test_non_ascii_is_emitted_as_utf8():
     assert canonical_json({"k": "é"}) == '{"k":"é"}'.encode()
+
+
+def test_nfc_normalises_values():
+    composed, decomposed = "é", "é"
+    assert composed != decomposed
+    assert canonical_json({"k": composed}) == canonical_json({"k": decomposed})
+
+
+def test_nfc_normalises_keys_and_nested_strings():
+    composed, decomposed = "café", "café"
+    assert canonical_json({decomposed: [decomposed]}) == canonical_json({composed: [composed]})
