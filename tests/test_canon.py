@@ -134,3 +134,25 @@ def test_volatile_field_deep_and_non_mutating():
 
 def test_volatile_field_absent_is_noop():
     assert state_hash({"a": 1}, ["nope.here"]) == state_hash({"a": 1})
+
+
+def test_wildcard_matches_at_any_depth():
+    a = {"ts": 1, "x": {"ts": 2, "y": [{"ts": 3, "k": 1}]}}
+    b = {"ts": 9, "x": {"ts": 8, "y": [{"ts": 7, "k": 1}]}}
+    assert state_hash(a) != state_hash(b)
+    assert state_hash(a, ["*.ts"]) == state_hash(b, ["*.ts"])
+
+
+def test_wildcard_leaves_other_keys_alone():
+    a = {"x": {"ts": 1, "keep": 1}}
+    b = {"x": {"ts": 1, "keep": 2}}
+    assert state_hash(a, ["*.ts"]) != state_hash(b, ["*.ts"])
+
+
+def test_wildcard_with_multi_segment_suffix():
+    a = {"a": {"meta": {"ts": 1}}, "meta": {"ts": 5}, "other": {"ts": 1}}
+    b = {"a": {"meta": {"ts": 2}}, "meta": {"ts": 6}, "other": {"ts": 2}}
+    assert state_hash(a, ["*.meta.ts"]) == state_hash(
+        {**b, "other": {"ts": 1}}, ["*.meta.ts"]
+    )
+    assert state_hash(a, ["*.meta.ts"]) != state_hash(b, ["*.meta.ts"])

@@ -11,7 +11,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R005 Reject non-string dict keys with `CanonError` (no silent `str()` coercion). Test.
 - [x] R006 `state_hash(obj, volatile_fields=()) -> str`: SHA-256 hex of the canonical bytes. Test pins one golden hash literal so accidental encoding changes fail loudly.
 - [x] R007 Volatile-field exclusion by dotted path (`"meta.ts"`) at any depth, including inside lists of dicts. Tests.
-- [ ] R008 Wildcard volatile paths (`"*.ts"` matches a `ts` key at any depth). Tests.
+- [x] R008 Wildcard volatile paths (`"*.ts"` matches a `ts` key at any depth). Tests.
 - [ ] R009 Decide and document int/float handling (`1` vs `1.0`); add a test that pins the chosen behaviour.
 - [ ] R010 Permutation test: hash is invariant under dict insertion order across 200 seeded random permutations (stdlib `random`, fixed seed).
 - [ ] R011 Module docstring plus `docs/canon.md` describing the encoding rules and why each exists.

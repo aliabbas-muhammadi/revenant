@@ -54,17 +54,30 @@ def canonical_json(obj: Any) -> bytes:
     ).encode("utf-8")
 
 
+def _matches(trail: tuple[str, ...], pattern: list[str]) -> bool:
+    """Match a key path against a volatile pattern.
+
+    A leading ``*`` segment matches any number of parent keys (including none),
+    so ``*.ts`` matches a ``ts`` key at every depth.
+    """
+    if pattern and pattern[0] == "*":
+        tail = pattern[1:]
+        return bool(tail) and len(trail) >= len(tail) and list(trail[-len(tail):]) == tail
+    return list(trail) == pattern
+
+
 def _strip_volatile(obj: Any, patterns: list[list[str]], trail: tuple[str, ...]) -> Any:
     """Drop dict keys whose dotted path matches a volatile pattern.
 
     Paths are made of dict keys only; list positions are transparent, so
     ``items.ts`` addresses ``ts`` in every dict inside the ``items`` list.
+    A leading ``*`` makes the pattern match at any depth.
     """
     if isinstance(obj, dict):
         out: dict[Any, Any] = {}
         for key, value in obj.items():
             here = (*trail, _nfc(key) if isinstance(key, str) else str(key))
-            if any(here == tuple(pat) for pat in patterns):
+            if any(_matches(here, pat) for pat in patterns):
                 continue
             out[key] = _strip_volatile(value, patterns, here)
         return out
