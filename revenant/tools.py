@@ -7,6 +7,7 @@ A tool performs its effect by writing to the :class:`~revenant.sink.EffectSink`.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections import Counter
 from dataclasses import dataclass
 from typing import Any
 
@@ -32,6 +33,30 @@ class Tool(ABC):
         """Carry out the effect, recording it in ``sink``."""
 
 
+class AttemptCounter:
+    """Counts every tool call, whether or not it was suppressed or performed.
+
+    It is deliberately separate from the ledger and the sink: attempts are what
+    the runtime tried, effects are what happened, and reports show both.
+    """
+
+    def __init__(self) -> None:
+        self._counts: Counter[str] = Counter()
+
+    def record(self, tool_name: str) -> None:
+        self._counts[tool_name] += 1
+
+    def count(self, tool_name: str) -> int:
+        return self._counts[tool_name]
+
+    @property
+    def total(self) -> int:
+        return sum(self._counts.values())
+
+    def by_tool(self) -> dict[str, int]:
+        return dict(self._counts)
+
+
 @dataclass(frozen=True)
 class Invocation:
     """Outcome of one ledgered call."""
@@ -41,11 +66,19 @@ class Invocation:
     result: Any = None
 
 
-def invoke(tool: Tool, args: dict[str, Any], sink: EffectSink, ledger: Ledger) -> Invocation:
+def invoke(
+    tool: Tool,
+    args: dict[str, Any],
+    sink: EffectSink,
+    ledger: Ledger,
+    attempts: AttemptCounter | None = None,
+) -> Invocation:
     """Run ``tool`` through the ledger: ``begin`` -> ``perform`` -> ``commit``.
 
     A suppressed attempt (the key is already committed) performs nothing.
     """
+    if attempts is not None:
+        attempts.record(tool.name)
     key = tool.idempotency_key(args)
     if ledger.begin(key, {"tool": tool.name, "args": args}) is Decision.SUPPRESS:
         return Invocation(key, executed=False)

@@ -4,7 +4,7 @@ import pytest
 
 from revenant.ledger import IdempotencyKeyReuse, Ledger
 from revenant.sink import EffectSink
-from revenant.tools import Tool, invoke
+from revenant.tools import AttemptCounter, Tool, invoke
 
 
 class FakeTool(Tool):
@@ -65,3 +65,29 @@ def test_key_reuse_with_new_args_fails(env):
     with pytest.raises(IdempotencyKeyReuse):
         invoke(Reuse(), {"id": 2}, sink, ledger)
     assert len(sink.effects()) == 1
+
+
+def test_attempts_count_every_call_independent_of_ledger_and_sink(env):
+    ledger, sink = env
+    attempts = AttemptCounter()
+    for _ in range(3):
+        invoke(FakeTool(), {"id": 1}, sink, ledger, attempts)
+    invoke(FakeTool(), {"id": 2}, sink, ledger, attempts)
+    assert attempts.count("fake") == 4
+    assert attempts.total == 4
+    assert attempts.by_tool() == {"fake": 4}
+    assert len(sink.effects()) == 2
+
+
+def test_attempt_is_counted_even_when_key_reuse_fails(env):
+    ledger, sink = env
+    attempts = AttemptCounter()
+
+    class Reuse(FakeTool):
+        def idempotency_key(self, args):
+            return "same"
+
+    invoke(Reuse(), {"id": 1}, sink, ledger, attempts)
+    with pytest.raises(IdempotencyKeyReuse):
+        invoke(Reuse(), {"id": 2}, sink, ledger, attempts)
+    assert attempts.count("fake") == 2
