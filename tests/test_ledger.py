@@ -3,7 +3,7 @@ import sqlite3
 import pytest
 
 from revenant.canon import state_hash
-from revenant.ledger import Ledger, payload_hash
+from revenant.ledger import Decision, Ledger, LedgerError, payload_hash
 
 
 @pytest.fixture
@@ -37,3 +37,38 @@ def test_payload_hash_matches_state_hash():
     payload = {"to": "a@example.com", "n": 1}
     assert payload_hash(payload) == state_hash(payload)
     assert payload_hash({"b": 1, "a": 2}) == payload_hash({"a": 2, "b": 1})
+
+
+def test_begin_new_key_inserts_intent_and_executes(ledger):
+    assert ledger.begin("k1", {"to": "a"}) is Decision.EXECUTE
+    assert ledger.status("k1") == ("intent", 1)
+    row = ledger._conn.execute(
+        "SELECT payload_hash FROM effects WHERE idempotency_key = 'k1'"
+    ).fetchone()
+    assert row[0] == payload_hash({"to": "a"})
+
+
+def test_begin_distinct_keys_are_independent(ledger):
+    assert ledger.begin("a", 1) is Decision.EXECUTE
+    assert ledger.begin("b", 2) is Decision.EXECUTE
+    assert ledger.status("a") == ("intent", 1)
+    assert ledger.status("b") == ("intent", 1)
+
+
+def test_commit_moves_intent_to_committed(ledger):
+    ledger.begin("k", {})
+    ledger.commit("k")
+    assert ledger.status("k") == ("committed", 1)
+
+
+def test_commit_unknown_key_raises(ledger):
+    with pytest.raises(LedgerError):
+        ledger.commit("nope")
+
+
+def test_commit_twice_raises(ledger):
+    ledger.begin("k", {})
+    ledger.commit("k")
+    with pytest.raises(LedgerError):
+        ledger.commit("k")
+    assert ledger.status("k") == ("committed", 1)

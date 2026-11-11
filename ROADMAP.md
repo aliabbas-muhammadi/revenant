@@ -20,8 +20,8 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 
 - [x] R012 `Ledger(path)` opens SQLite, sets `journal_mode=WAL` and `synchronous=FULL`, creates the `effects` table exactly as in DESIGN.md. Test asserts the pragmas and the CHECK constraint.
 - [x] R013 `payload_hash(payload)` using `canon.state_hash`. Test.
-- [ ] R014 `begin(key, payload) -> Decision` where `Decision` is an enum `EXECUTE | SUPPRESS`. New key inserts an `intent` row with `attempt_count=1` and returns `EXECUTE`. Tests.
-- [ ] R015 `commit(key)` moves `intent` to `committed`; committing an unknown or already committed key raises `LedgerError`. Tests.
+- [x] R014 `begin(key, payload) -> Decision` where `Decision` is an enum `EXECUTE | SUPPRESS`. New key inserts an `intent` row with `attempt_count=1` and returns `EXECUTE`. Tests.
+- [x] R015 `commit(key)` moves `intent` to `committed`; committing an unknown or already committed key raises `LedgerError`. Tests.
 - [ ] R016 Re-attempt on a `committed` key returns `SUPPRESS` and increments `attempt_count`. Test.
 - [ ] R017 Re-attempt on an `intent` key (crash residue) returns `EXECUTE` and increments `attempt_count`; document why in a docstring. Test.
 - [ ] R018 Same key with a different payload hash raises `IdempotencyKeyReuse`, leaving the row unchanged. Test.

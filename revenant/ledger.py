@@ -7,6 +7,9 @@ The protocol is two-phase: record ``intent``, execute the effect, mark
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Iterator
+from contextlib import contextmanager
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +27,13 @@ CREATE TABLE IF NOT EXISTS effects (
 
 class LedgerError(RuntimeError):
     """Raised on an invalid ledger operation."""
+
+
+class Decision(Enum):
+    """What the caller should do with an attempted effect."""
+
+    EXECUTE = "execute"
+    SUPPRESS = "suppress"
 
 
 def payload_hash(payload: Any) -> str:
@@ -45,3 +55,49 @@ class Ledger:
     def pragma(self, name: str) -> Any:
         """Return the current value of a SQLite pragma (for tests and reports)."""
         return self._conn.execute(f"PRAGMA {name}").fetchone()[0]
+
+    @contextmanager
+    def _tx(self) -> Iterator[sqlite3.Connection]:
+        """Run one operation in its own immediate transaction."""
+        self._conn.execute("BEGIN IMMEDIATE")
+        try:
+            yield self._conn
+        except BaseException:
+            self._conn.execute("ROLLBACK")
+            raise
+        self._conn.execute("COMMIT")
+
+    def begin(self, key: str, payload: Any) -> Decision:
+        """Record an attempt to perform the effect named by ``key``.
+
+        A new key inserts an ``intent`` row and returns ``EXECUTE``.
+        """
+        digest = payload_hash(payload)
+        with self._tx() as conn:
+            row = conn.execute(
+                "SELECT 1 FROM effects WHERE idempotency_key = ?", (key,)
+            ).fetchone()
+            if row is not None:
+                raise LedgerError(f"key {key!r} already recorded")
+            conn.execute(
+                "INSERT INTO effects VALUES (?, ?, 'intent', 1)", (key, digest)
+            )
+        return Decision.EXECUTE
+
+    def commit(self, key: str) -> None:
+        """Mark the effect for ``key`` as committed (it happened)."""
+        with self._tx() as conn:
+            cur = conn.execute(
+                "UPDATE effects SET status = 'committed' "
+                "WHERE idempotency_key = ? AND status = 'intent'",
+                (key,),
+            )
+            if cur.rowcount != 1:
+                raise LedgerError(f"cannot commit {key!r}: unknown or already committed")
+
+    def status(self, key: str) -> tuple[str, int] | None:
+        """Return ``(status, attempt_count)`` for ``key``, or None if unknown."""
+        row = self._conn.execute(
+            "SELECT status, attempt_count FROM effects WHERE idempotency_key = ?", (key,)
+        ).fetchone()
+        return None if row is None else (row[0], row[1])
