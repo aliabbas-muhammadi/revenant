@@ -3,7 +3,14 @@ import sqlite3
 import pytest
 
 from revenant.canon import state_hash
-from revenant.ledger import Decision, IdempotencyKeyReuse, Ledger, LedgerError, payload_hash
+from revenant.ledger import (
+    Decision,
+    IdempotencyKeyReuse,
+    Ledger,
+    LedgerError,
+    LedgerSummary,
+    payload_hash,
+)
 
 
 @pytest.fixture
@@ -103,3 +110,47 @@ def test_key_reuse_with_different_payload_raises_and_leaves_row(ledger):
 
 def test_key_reuse_is_a_ledger_error(ledger):
     assert issubclass(IdempotencyKeyReuse, LedgerError)
+
+
+def test_unconfirmed_lists_only_intent_keys(ledger):
+    assert ledger.unconfirmed() == []
+    ledger.begin("b", 1)
+    ledger.begin("a", 2)
+    ledger.begin("c", 3)
+    ledger.commit("c")
+    assert ledger.unconfirmed() == ["a", "b"]
+
+
+def test_summary_empty(ledger):
+    assert ledger.summary() == LedgerSummary(0, 0, 0, 0)
+
+
+def test_summary_counts(ledger):
+    ledger.begin("a", 1)
+    ledger.commit("a")
+    ledger.begin("a", 1)  # suppressed
+    ledger.begin("a", 1)  # suppressed
+    ledger.begin("b", 2)  # unconfirmed
+    ledger.begin("c", 3)
+    ledger.commit("c")
+    assert ledger.summary() == LedgerSummary(attempts=5, effects=2, suppressed=2, unconfirmed=1)
+
+
+def test_reopened_ledger_sees_committed_rows(tmp_path):
+    path = tmp_path / "l.db"
+    first = Ledger(path)
+    first.begin("a", 1)
+    first.commit("a")
+    first.begin("b", 2)
+    second = Ledger(path)  # no close on the first: each call is its own transaction
+    assert second.status("a") == ("committed", 1)
+    assert second.status("b") == ("intent", 1)
+    assert second.unconfirmed() == ["b"]
+
+
+def test_failed_operation_rolls_back(ledger):
+    ledger.begin("k", {"a": 1})
+    with pytest.raises(IdempotencyKeyReuse):
+        ledger.begin("k", {"a": 2})
+    assert not ledger._conn.in_transaction
+    ledger.commit("k")

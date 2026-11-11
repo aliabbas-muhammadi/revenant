@@ -9,6 +9,7 @@ from __future__ import annotations
 import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -43,6 +44,21 @@ class Decision(Enum):
 def payload_hash(payload: Any) -> str:
     """Hash a tool payload with the canonical state hash."""
     return state_hash(payload)
+
+
+@dataclass(frozen=True)
+class LedgerSummary:
+    """Aggregate counts, kept separate because attempts are not effects.
+
+    ``suppressed`` is the number of attempts beyond the first on committed keys.
+    The schema stores one counter per key, so a retry that executed again after
+    crash residue and then committed is counted here too; it is an upper bound.
+    """
+
+    attempts: int
+    effects: int
+    suppressed: int
+    unconfirmed: int
 
 
 class Ledger:
@@ -124,3 +140,22 @@ class Ledger:
             "SELECT status, attempt_count FROM effects WHERE idempotency_key = ?", (key,)
         ).fetchone()
         return None if row is None else (row[0], row[1])
+
+    def unconfirmed(self) -> list[str]:
+        """Keys still in ``intent``: executed-or-not is unknown. Never auto-resolved."""
+        rows = self._conn.execute(
+            "SELECT idempotency_key FROM effects WHERE status = 'intent' "
+            "ORDER BY idempotency_key"
+        ).fetchall()
+        return [r[0] for r in rows]
+
+    def summary(self) -> LedgerSummary:
+        """Return attempts, committed effects, suppressed attempts and unconfirmed keys."""
+        row = self._conn.execute(
+            "SELECT COALESCE(SUM(attempt_count), 0),"
+            " COALESCE(SUM(status = 'committed'), 0),"
+            " COALESCE(SUM(CASE WHEN status = 'committed' THEN attempt_count - 1 END), 0),"
+            " COALESCE(SUM(status = 'intent'), 0)"
+            " FROM effects"
+        ).fetchone()
+        return LedgerSummary(*row)

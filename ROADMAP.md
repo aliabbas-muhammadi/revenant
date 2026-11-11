@@ -25,9 +25,9 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R016 Re-attempt on a `committed` key returns `SUPPRESS` and increments `attempt_count`. Test.
 - [x] R017 Re-attempt on an `intent` key (crash residue) returns `EXECUTE` and increments `attempt_count`; document why in a docstring. Test.
 - [x] R018 Same key with a different payload hash raises `IdempotencyKeyReuse`, leaving the row unchanged. Test.
-- [ ] R019 `unconfirmed() -> list[str]`: keys still in `intent`. Test.
-- [ ] R020 `summary() -> LedgerSummary` dataclass: attempts, effects (committed), suppressed, unconfirmed. Tests.
-- [ ] R021 Each call runs in its own transaction; test that a reopened ledger sees every committed row.
+- [x] R019 `unconfirmed() -> list[str]`: keys still in `intent`. Test.
+- [x] R020 `summary() -> LedgerSummary` dataclass: attempts, effects (committed), suppressed, unconfirmed. Tests.
+- [x] R021 Each call runs in its own transaction; test that a reopened ledger sees every committed row.
 - [ ] R022 Crash test: a subprocess records an intent and SIGKILLs itself before commit; the parent reopens the ledger and finds exactly one unconfirmed key. Skip on non-POSIX.
 - [ ] R023 Context manager support and idempotent `close()`. Tests.
 - [ ] R024 `docs/ledger.md`: ASCII diagram of intent → execute → commit and a table of every crash window with its observable outcome.
