@@ -30,7 +30,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R021 Each call runs in its own transaction; test that a reopened ledger sees every committed row.
 - [x] R022 Crash test: a subprocess records an intent and SIGKILLs itself before commit; the parent reopens the ledger and finds exactly one unconfirmed key. Skip on non-POSIX.
 - [x] R023 Context manager support and idempotent `close()`. Tests.
-- [ ] R024 `docs/ledger.md`: ASCII diagram of intent → execute → commit and a table of every crash window with its observable outcome.
+- [x] R024 `docs/ledger.md`: ASCII diagram of intent → execute → commit and a table of every crash window with its observable outcome.
 
 ## M3 · Deterministic model, clock and tools
 
