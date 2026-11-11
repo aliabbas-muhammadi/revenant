@@ -29,6 +29,10 @@ class LedgerError(RuntimeError):
     """Raised on an invalid ledger operation."""
 
 
+class IdempotencyKeyReuse(LedgerError):
+    """Raised when a key is reused with a different payload hash."""
+
+
 class Decision(Enum):
     """What the caller should do with an attempted effect."""
 
@@ -70,19 +74,38 @@ class Ledger:
     def begin(self, key: str, payload: Any) -> Decision:
         """Record an attempt to perform the effect named by ``key``.
 
-        A new key inserts an ``intent`` row and returns ``EXECUTE``.
+        - New key: insert an ``intent`` row (attempt 1) and return ``EXECUTE``.
+        - ``committed`` key: the effect already happened, so increment the
+          attempt count and return ``SUPPRESS``.
+        - ``intent`` key: crash residue. The earlier attempt may or may not have
+          performed the effect, and the ledger cannot know which. Executing again
+          favours at-least-once; the row stays ``intent`` until a commit, and the
+          harness reports it as unconfirmed rather than guessing.
+        - Same key, different payload hash: ``IdempotencyKeyReuse``, with the row
+          left untouched.
         """
         digest = payload_hash(payload)
         with self._tx() as conn:
             row = conn.execute(
-                "SELECT 1 FROM effects WHERE idempotency_key = ?", (key,)
+                "SELECT payload_hash, status FROM effects WHERE idempotency_key = ?",
+                (key,),
             ).fetchone()
-            if row is not None:
-                raise LedgerError(f"key {key!r} already recorded")
+            if row is None:
+                conn.execute(
+                    "INSERT INTO effects VALUES (?, ?, 'intent', 1)", (key, digest)
+                )
+                return Decision.EXECUTE
+            stored_hash, status = row
+            if stored_hash != digest:
+                raise IdempotencyKeyReuse(
+                    f"key {key!r} reused with a different payload"
+                )
             conn.execute(
-                "INSERT INTO effects VALUES (?, ?, 'intent', 1)", (key, digest)
+                "UPDATE effects SET attempt_count = attempt_count + 1 "
+                "WHERE idempotency_key = ?",
+                (key,),
             )
-        return Decision.EXECUTE
+        return Decision.SUPPRESS if status == "committed" else Decision.EXECUTE
 
     def commit(self, key: str) -> None:
         """Mark the effect for ``key`` as committed (it happened)."""

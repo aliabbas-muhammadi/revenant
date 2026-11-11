@@ -22,9 +22,9 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R013 `payload_hash(payload)` using `canon.state_hash`. Test.
 - [x] R014 `begin(key, payload) -> Decision` where `Decision` is an enum `EXECUTE | SUPPRESS`. New key inserts an `intent` row with `attempt_count=1` and returns `EXECUTE`. Tests.
 - [x] R015 `commit(key)` moves `intent` to `committed`; committing an unknown or already committed key raises `LedgerError`. Tests.
-- [ ] R016 Re-attempt on a `committed` key returns `SUPPRESS` and increments `attempt_count`. Test.
-- [ ] R017 Re-attempt on an `intent` key (crash residue) returns `EXECUTE` and increments `attempt_count`; document why in a docstring. Test.
-- [ ] R018 Same key with a different payload hash raises `IdempotencyKeyReuse`, leaving the row unchanged. Test.
+- [x] R016 Re-attempt on a `committed` key returns `SUPPRESS` and increments `attempt_count`. Test.
+- [x] R017 Re-attempt on an `intent` key (crash residue) returns `EXECUTE` and increments `attempt_count`; document why in a docstring. Test.
+- [x] R018 Same key with a different payload hash raises `IdempotencyKeyReuse`, leaving the row unchanged. Test.
 - [ ] R019 `unconfirmed() -> list[str]`: keys still in `intent`. Test.
 - [ ] R020 `summary() -> LedgerSummary` dataclass: attempts, effects (committed), suppressed, unconfirmed. Tests.
 - [ ] R021 Each call runs in its own transaction; test that a reopened ledger sees every committed row.

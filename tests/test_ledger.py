@@ -3,7 +3,7 @@ import sqlite3
 import pytest
 
 from revenant.canon import state_hash
-from revenant.ledger import Decision, Ledger, LedgerError, payload_hash
+from revenant.ledger import Decision, IdempotencyKeyReuse, Ledger, LedgerError, payload_hash
 
 
 @pytest.fixture
@@ -72,3 +72,34 @@ def test_commit_twice_raises(ledger):
     with pytest.raises(LedgerError):
         ledger.commit("k")
     assert ledger.status("k") == ("committed", 1)
+
+
+def test_reattempt_on_committed_key_is_suppressed(ledger):
+    ledger.begin("k", {"a": 1})
+    ledger.commit("k")
+    assert ledger.begin("k", {"a": 1}) is Decision.SUPPRESS
+    assert ledger.begin("k", {"a": 1}) is Decision.SUPPRESS
+    assert ledger.status("k") == ("committed", 3)
+
+
+def test_reattempt_on_intent_key_executes_again(ledger):
+    ledger.begin("k", {"a": 1})
+    assert ledger.begin("k", {"a": 1}) is Decision.EXECUTE
+    assert ledger.status("k") == ("intent", 2)
+    ledger.commit("k")
+    assert ledger.status("k") == ("committed", 2)
+
+
+def test_key_reuse_with_different_payload_raises_and_leaves_row(ledger):
+    ledger.begin("k", {"a": 1})
+    with pytest.raises(IdempotencyKeyReuse):
+        ledger.begin("k", {"a": 2})
+    assert ledger.status("k") == ("intent", 1)
+    ledger.commit("k")
+    with pytest.raises(IdempotencyKeyReuse):
+        ledger.begin("k", {"a": 2})
+    assert ledger.status("k") == ("committed", 1)
+
+
+def test_key_reuse_is_a_ledger_error(ledger):
+    assert issubclass(IdempotencyKeyReuse, LedgerError)
