@@ -175,3 +175,18 @@ def test_sigkill_after_intent_leaves_one_unconfirmed_key(tmp_path):
     reopened = Ledger(path)
     assert reopened.unconfirmed() == ["send-1"]
     assert reopened.status("send-1") == ("intent", 1)
+
+
+def test_context_manager_closes_and_persists(tmp_path):
+    path = tmp_path / "ctx.db"
+    with Ledger(path) as ledger:
+        ledger.begin("a", 1)
+        ledger.commit("a")
+    with Ledger(path) as again:
+        assert again.status("a") == ("committed", 1)
+
+
+def test_close_is_idempotent(tmp_path):
+    ledger = Ledger(tmp_path / "c.db")
+    ledger.close()
+    ledger.close()

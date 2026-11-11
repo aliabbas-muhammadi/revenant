@@ -72,6 +72,18 @@ class Ledger:
         self._conn.execute("PRAGMA synchronous=FULL")
         self._conn.execute(SCHEMA)
 
+    def close(self) -> None:
+        """Close the connection. Safe to call more than once."""
+        if self._conn is not None:
+            self._conn.close()
+            self._conn = None  # type: ignore[assignment]
+
+    def __enter__(self) -> Ledger:
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        self.close()
+
     def pragma(self, name: str) -> Any:
         """Return the current value of a SQLite pragma (for tests and reports)."""
         return self._conn.execute(f"PRAGMA {name}").fetchone()[0]
