@@ -37,7 +37,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R025 `revenant/clock.py`: `InjectedClock(start)` whose `now()` advances only via `tick()`. Tests.
 - [x] R026 `revenant/model.py`: `ScriptedModel(script)` returning the scripted response for a step index; raises `ScriptExhausted` past the end. Tests.
 - [x] R027 Optional expected-prompt hashes in the script; a mismatched prompt raises `PromptDivergence` so input drift is caught at the source. Tests.
-- [ ] R028 `revenant/sink.py`: `EffectSink(path)`, an append-only fsynced JSONL file that stands for the outside world. `effects()` reads it back. Tests.
+- [x] R028 `revenant/sink.py`: `EffectSink(path)`, an append-only fsynced JSONL file that stands for the outside world. `effects()` reads it back. Tests.
 - [ ] R029 `revenant/tools.py`: `Tool` base with `name`, `idempotency_key(args)` and `perform(args, sink)`. Ledgered invocation path: `begin` → `perform` → `commit`. Tests with a fake tool.
 - [ ] R030 Attempts counter on every tool call, independent of ledger and sink. Test.
 - [ ] R031 `send_email(to, subject, body)` tool. Tests.
