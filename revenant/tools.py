@@ -11,6 +11,7 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import Any
 
+from revenant.canon import state_hash
 from revenant.ledger import Decision, Ledger
 from revenant.sink import EffectSink
 
@@ -85,3 +86,31 @@ def invoke(
     result = tool.perform(args, sink)
     ledger.commit(key)
     return Invocation(key, executed=True, result=result)
+
+
+class SendEmail(Tool):
+    """``send_email(to, subject, body)``: key is derived from the whole message."""
+
+    name = "send_email"
+
+    def idempotency_key(self, args: dict[str, Any]) -> str:
+        return f"{self.name}:{state_hash(self._message(args))[:16]}"
+
+    @staticmethod
+    def _message(args: dict[str, Any]) -> dict[str, str]:
+        try:
+            msg = {k: args[k] for k in ("to", "subject", "body")}
+        except KeyError as exc:
+            raise ToolError(
+                f"send_email requires 'to', 'subject' and 'body'; missing {exc}"
+            ) from exc
+        for field, value in msg.items():
+            if not isinstance(value, str):
+                raise ToolError(
+                    f"send_email {field!r} must be a string, got {type(value).__name__}"
+                )
+        return msg
+
+    def perform(self, args: dict[str, Any], sink: EffectSink) -> Any:
+        sink.append({"tool": self.name, **self._message(args)})
+        return "sent"
