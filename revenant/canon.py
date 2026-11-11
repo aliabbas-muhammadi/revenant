@@ -1,5 +1,7 @@
 """Canonical JSON encoding used for state hashing.
 
+See ``docs/canon.md`` for the full rule table and the reason for each rule.
+
 Numbers keep their Python type: ``1`` encodes as ``1`` and ``1.0`` as ``1.0``,
 so they hash differently. A runtime that silently turns an int into a float (or
 back) across a checkpoint round-trip changed its state, and the harness should

@@ -14,7 +14,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R008 Wildcard volatile paths (`"*.ts"` matches a `ts` key at any depth). Tests.
 - [x] R009 Decide and document int/float handling (`1` vs `1.0`); add a test that pins the chosen behaviour.
 - [x] R010 Permutation test: hash is invariant under dict insertion order across 200 seeded random permutations (stdlib `random`, fixed seed).
-- [ ] R011 Module docstring plus `docs/canon.md` describing the encoding rules and why each exists.
+- [x] R011 Module docstring plus `docs/canon.md` describing the encoding rules and why each exists.
 
 ## M2 · Effects ledger (`revenant/ledger.py`)
 
