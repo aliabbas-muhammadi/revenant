@@ -114,3 +114,34 @@ class SendEmail(Tool):
     def perform(self, args: dict[str, Any], sink: EffectSink) -> Any:
         sink.append({"tool": self.name, **self._message(args)})
         return "sent"
+
+
+class ChargeCard(Tool):
+    """``charge_card(customer, amount_cents)``: positive integer cents only."""
+
+    name = "charge_card"
+
+    def idempotency_key(self, args: dict[str, Any]) -> str:
+        return f"{self.name}:{state_hash(self._charge(args))[:16]}"
+
+    @staticmethod
+    def _charge(args: dict[str, Any]) -> dict[str, Any]:
+        try:
+            customer, amount = args["customer"], args["amount_cents"]
+        except KeyError as exc:
+            raise ToolError(
+                f"charge_card requires 'customer' and 'amount_cents'; missing {exc}"
+            ) from exc
+        if not isinstance(customer, str) or not customer:
+            raise ToolError("charge_card 'customer' must be a non-empty string")
+        if isinstance(amount, bool) or not isinstance(amount, int):
+            raise ToolError(
+                f"charge_card 'amount_cents' must be an int, got {type(amount).__name__}"
+            )
+        if amount <= 0:
+            raise ToolError(f"charge_card 'amount_cents' must be positive, got {amount}")
+        return {"customer": customer, "amount_cents": amount}
+
+    def perform(self, args: dict[str, Any], sink: EffectSink) -> Any:
+        sink.append({"tool": self.name, **self._charge(args)})
+        return "charged"

@@ -41,7 +41,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R029 `revenant/tools.py`: `Tool` base with `name`, `idempotency_key(args)` and `perform(args, sink)`. Ledgered invocation path: `begin` → `perform` → `commit`. Tests with a fake tool.
 - [x] R030 Attempts counter on every tool call, independent of ledger and sink. Test.
 - [x] R031 `send_email(to, subject, body)` tool. Tests.
-- [ ] R032 `charge_card(customer, amount_cents)` tool; rejects non-int and non-positive amounts. Tests.
+- [x] R032 `charge_card(customer, amount_cents)` tool; rejects non-int and non-positive amounts. Tests.
 - [ ] R033 `write_file(relpath, content)` tool confined to a sandbox directory; absolute paths and `..` traversal raise `ToolError`. Tests.
 - [ ] R034 Naive mode: a flag that bypasses the ledger. Test that a repeated naive call produces two sink effects.
 - [ ] R035 Tool registry `get_tool(name)` with an error listing known tools. Test.
