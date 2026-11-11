@@ -167,3 +167,30 @@ def test_int_and_float_are_distinct():
 def test_bool_does_not_collide_with_int():
     assert canonical_json(True) == b"true"
     assert state_hash([True]) != state_hash([1])
+
+
+def _shuffled(obj, rng):
+    """Rebuild ``obj`` with every dict's insertion order randomly permuted."""
+    if isinstance(obj, dict):
+        keys = list(obj)
+        rng.shuffle(keys)
+        return {k: _shuffled(obj[k], rng) for k in keys}
+    if isinstance(obj, list):
+        return [_shuffled(v, rng) for v in obj]
+    return obj
+
+
+def test_hash_invariant_under_insertion_order_permutations():
+    import random
+
+    rng = random.Random(1234)
+    state = {
+        "step": 7,
+        "meta": {"ts": 1.5, "host": "a", "tags": ["x", "y"]},
+        "items": [{"id": i, "v": {"p": i, "q": str(i), "r": None}} for i in range(4)],
+        "zeta": True,
+        "alpha": {"k1": 1, "k2": 2, "k3": 3, "k4": 4},
+    }
+    expected = state_hash(state)
+    for _ in range(200):
+        assert state_hash(_shuffled(state, rng)) == expected
