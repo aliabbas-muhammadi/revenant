@@ -1,4 +1,8 @@
+import os
+import signal
 import sqlite3
+import subprocess
+import sys
 
 import pytest
 
@@ -154,3 +158,20 @@ def test_failed_operation_rolls_back(ledger):
         ledger.begin("k", {"a": 2})
     assert not ledger._conn.in_transaction
     ledger.commit("k")
+
+
+@pytest.mark.skipif(os.name != "posix", reason="needs POSIX SIGKILL")
+def test_sigkill_after_intent_leaves_one_unconfirmed_key(tmp_path):
+    path = tmp_path / "crash.db"
+    code = (
+        "import os, signal, sys\n"
+        "from revenant.ledger import Ledger\n"
+        "ledger = Ledger(sys.argv[1])\n"
+        "ledger.begin('send-1', {'to': 'a@example.com'})\n"
+        "os.kill(os.getpid(), signal.SIGKILL)\n"
+    )
+    proc = subprocess.run([sys.executable, "-c", code, str(path)], check=False)
+    assert proc.returncode == -signal.SIGKILL
+    reopened = Ledger(path)
+    assert reopened.unconfirmed() == ["send-1"]
+    assert reopened.status("send-1") == ("intent", 1)
