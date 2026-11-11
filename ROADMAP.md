@@ -18,8 +18,8 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 
 ## M2 · Effects ledger (`revenant/ledger.py`)
 
-- [ ] R012 `Ledger(path)` opens SQLite, sets `journal_mode=WAL` and `synchronous=FULL`, creates the `effects` table exactly as in DESIGN.md. Test asserts the pragmas and the CHECK constraint.
-- [ ] R013 `payload_hash(payload)` using `canon.state_hash`. Test.
+- [x] R012 `Ledger(path)` opens SQLite, sets `journal_mode=WAL` and `synchronous=FULL`, creates the `effects` table exactly as in DESIGN.md. Test asserts the pragmas and the CHECK constraint.
+- [x] R013 `payload_hash(payload)` using `canon.state_hash`. Test.
 - [ ] R014 `begin(key, payload) -> Decision` where `Decision` is an enum `EXECUTE | SUPPRESS`. New key inserts an `intent` row with `attempt_count=1` and returns `EXECUTE`. Tests.
 - [ ] R015 `commit(key)` moves `intent` to `committed`; committing an unknown or already committed key raises `LedgerError`. Tests.
 - [ ] R016 Re-attempt on a `committed` key returns `SUPPRESS` and increments `attempt_count`. Test.
