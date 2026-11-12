@@ -28,6 +28,8 @@ from revenant.workloads import Workload, get_workload
 CHECKPOINT_NAME = "checkpoint.json"
 TRACE_NAME = "trace.jsonl"
 KILL_ENV = "REVENANT_KILL_AT"
+KILL_MODE_ENV = "REVENANT_KILL_MODE"
+KILL_MODES = ("boundary", "mid")
 
 
 class ReferenceAdapter(Adapter):
@@ -53,12 +55,22 @@ class ReferenceAdapter(Adapter):
 
     def run(self, kill_at: int | None = None) -> RunResult:
         """Run or resume. ``kill_at`` (or ``REVENANT_KILL_AT``) SIGKILLs this process
-        right after the checkpoint for that step is durable."""
+        right after the checkpoint for that step is durable. With
+        ``REVENANT_KILL_MODE=mid`` it dies after the step's tool effect but before
+        its checkpoint instead."""
         if kill_at is None and os.environ.get(KILL_ENV):
             kill_at = int(os.environ[KILL_ENV])
-        return self._execute(kill_at=kill_at)
+        mode = os.environ.get(KILL_MODE_ENV, "boundary")
+        if mode not in KILL_MODES:
+            raise ValueError(f"{KILL_MODE_ENV} must be one of {KILL_MODES}, got {mode!r}")
+        return self._execute(kill_at=kill_at, kill_mid=mode == "mid")
 
-    def _execute(self, stop_after: int | None = None, kill_at: int | None = None) -> RunResult:
+    def _execute(
+        self,
+        stop_after: int | None = None,
+        kill_at: int | None = None,
+        kill_mid: bool = False,
+    ) -> RunResult:
         """Run or resume; ``stop_after`` returns early after that many total steps."""
         workload, root = self._built()
         model = ScriptedModel(workload.script)
@@ -85,13 +97,15 @@ class ReferenceAdapter(Adapter):
                     tool = get_tool(spec.tool, root / "sandbox")
                     outcome = invoke(tool, spec.args, sink, ledger, attempts)
                     state["results"][spec.name] = outcome.key
+                if kill_mid and kill_at is not None and index + 1 == kill_at:
+                    os.kill(os.getpid(), signal.SIGKILL)
                 state["step"] = index + 1
                 state["thoughts"].append(response)
                 state["clock"] = clock.now()
                 self._trace.append(state_hash(state, workload.volatile_fields))
                 write_checkpoint(root / CHECKPOINT_NAME, {"state": state, "trace": self._trace})
                 self._append_trace_line(root, index + 1, self._trace[-1])
-                if kill_at is not None and index + 1 == kill_at:
+                if not kill_mid and kill_at is not None and index + 1 == kill_at:
                     os.kill(os.getpid(), signal.SIGKILL)
         return RunResult(True, len(self._trace), tuple(self._trace))
 
