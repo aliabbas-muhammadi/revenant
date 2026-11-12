@@ -75,8 +75,8 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 
 - [x] R055 Golden run: run uninterrupted in a fresh workdir and collect its trace. Test.
 - [x] R056 Child spawn helper with env, timeout and captured output; classifies exit as completed, killed or error. Tests with tiny fake children.
-- [ ] R057 Kill-then-resume for one boundary, returning the stitched trace. Test with reference at k=5.
-- [ ] R058 `stitch(pre, post)` as a pure function. Unit tests on synthetic traces, including overlap at the boundary.
+- [x] R057 Kill-then-resume for one boundary, returning the stitched trace. Test with reference at k=5.
+- [x] R058 `stitch(pre, post)` as a pure function. Unit tests on synthetic traces, including overlap at the boundary.
 - [ ] R059 Property 1 scorer (resume determinism). Unit tests: pass, divergent hash, divergent final state.
 - [ ] R060 Property 2 scorer (effects from sink and ledger: once, duplicated, missing, unconfirmed). Unit tests.
 - [ ] R061 Property 3 scorer (lost and phantom steps). Unit tests.
