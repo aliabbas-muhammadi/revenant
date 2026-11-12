@@ -65,11 +65,11 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R047 Resume: load the checkpoint and skip completed steps. Test resuming after a simulated stop at step 5.
 - [x] R048 Checkpoint `schema_version`; unknown versions raise `CheckpointError`. Test.
 - [x] R049 Checkpoint integrity digest; a mismatch raises `CheckpointCorrupt`. Test with a truncated file.
-- [ ] R050 Boundary kill hook: when `REVENANT_KILL_AT=k`, SIGKILL itself right after checkpoint `k` is durable. Subprocess test checks the return code is `-SIGKILL`.
+- [x] R050 Boundary kill hook: when `REVENANT_KILL_AT=k`, SIGKILL itself right after checkpoint `k` is durable. Subprocess test checks the return code is `-SIGKILL`.
 - [ ] R051 Mid-step kill mode `REVENANT_KILL_MODE=mid`: SIGKILL after the tool effect of step `k` but before its checkpoint. Subprocess test.
 - [x] R052 Per-step trace file: append `{step, hash}` JSONL and fsync. Test.
 - [x] R053 `boundaries()` returns the boundary count for a workload. Test for all three workloads.
-- [ ] R054 Child entry point `python -m revenant.adapters.reference --workload X --workdir D`. Test via subprocess.
+- [x] R054 Child entry point `python -m revenant.adapters.reference --workload X --workdir D`. Test via subprocess.
 
 ## M6 · The killer (`revenant/runner.py`)
 

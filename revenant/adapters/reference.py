@@ -6,8 +6,11 @@ from the last checkpoint in the workdir and skips completed steps.
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
+import signal
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -20,10 +23,11 @@ from revenant.model import ScriptedModel
 from revenant.result import RunResult
 from revenant.sink import EffectSink
 from revenant.tools import AttemptCounter, get_tool, invoke
-from revenant.workloads import Workload
+from revenant.workloads import Workload, get_workload
 
 CHECKPOINT_NAME = "checkpoint.json"
 TRACE_NAME = "trace.jsonl"
+KILL_ENV = "REVENANT_KILL_AT"
 
 
 class ReferenceAdapter(Adapter):
@@ -48,9 +52,13 @@ class ReferenceAdapter(Adapter):
         return self._workload, self._workdir
 
     def run(self, kill_at: int | None = None) -> RunResult:
-        return self._execute()
+        """Run or resume. ``kill_at`` (or ``REVENANT_KILL_AT``) SIGKILLs this process
+        right after the checkpoint for that step is durable."""
+        if kill_at is None and os.environ.get(KILL_ENV):
+            kill_at = int(os.environ[KILL_ENV])
+        return self._execute(kill_at=kill_at)
 
-    def _execute(self, stop_after: int | None = None) -> RunResult:
+    def _execute(self, stop_after: int | None = None, kill_at: int | None = None) -> RunResult:
         """Run or resume; ``stop_after`` returns early after that many total steps."""
         workload, root = self._built()
         model = ScriptedModel(workload.script)
@@ -83,6 +91,8 @@ class ReferenceAdapter(Adapter):
                 self._trace.append(state_hash(state, workload.volatile_fields))
                 write_checkpoint(root / CHECKPOINT_NAME, {"state": state, "trace": self._trace})
                 self._append_trace_line(root, index + 1, self._trace[-1])
+                if kill_at is not None and index + 1 == kill_at:
+                    os.kill(os.getpid(), signal.SIGKILL)
         return RunResult(True, len(self._trace), tuple(self._trace))
 
     def _rewrite_trace_file(self, root: Path) -> None:
@@ -112,3 +122,21 @@ class ReferenceAdapter(Adapter):
     def boundaries(self) -> int:
         workload, _ = self._built()
         return len(workload.steps)
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Child entry point: run one workload in ``--workdir``, honouring ``REVENANT_KILL_AT``."""
+    parser = argparse.ArgumentParser(prog="python -m revenant.adapters.reference")
+    parser.add_argument("--workload", required=True)
+    parser.add_argument("--workdir", required=True)
+    args = parser.parse_args(argv)
+    adapter = ReferenceAdapter()
+    adapter.build(get_workload(args.workload), args.workdir)
+    result = adapter.run()
+    print(json.dumps({"completed": result.completed, "steps_run": result.steps_run}))
+    sys.stdout.flush()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
