@@ -99,7 +99,36 @@ def branching() -> Workload:
     return Workload("branching", steps, script)
 
 
-_FACTORIES = {"linear": linear, "branching": branching}
+def fanout() -> Workload:
+    """Three branches with one tool call each, merged in a final step.
+
+    Serialised order (the total order every boundary is counted in): step 1
+    ``split``, steps 2-4 the branches ``a``, ``b``, ``c`` in that order, step 5
+    ``merge``. Adapters that run branches in parallel (for example LangGraph
+    supersteps) define their own boundaries and say so in the report.
+    """
+    branches = (
+        StepSpec(
+            "branch_a",
+            "send_email",
+            {"to": "a@example.com", "subject": "branch a", "body": "from a"},
+        ),
+        StepSpec("branch_b", "charge_card", {"customer": "cus_b", "amount_cents": 500}),
+        StepSpec(
+            "branch_c", "write_file", {"relpath": "out/c.txt", "content": "from c"}
+        ),
+    )
+    steps = (StepSpec("split"), *branches, StepSpec("merge"))
+    script = (
+        {"action": "split", "branches": ["a", "b", "c"]},
+        *({"action": "branch", "branch": b, "tool": s.tool, "args": s.args}
+          for b, s in zip("abc", branches, strict=True)),
+        {"action": "merge", "branches": ["a", "b", "c"]},
+    )
+    return Workload("fanout", steps, script)
+
+
+_FACTORIES = {"linear": linear, "branching": branching, "fanout": fanout}
 WORKLOAD_NAMES = tuple(_FACTORIES)
 
 

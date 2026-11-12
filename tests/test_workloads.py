@@ -57,7 +57,7 @@ def test_get_workload_registry():
     from revenant.workloads import get_workload
 
     assert get_workload("linear").name == "linear"
-    with pytest.raises(KeyError, match="known workloads: linear, branching"):
+    with pytest.raises(KeyError, match="known workloads: linear, branching, fanout"):
         get_workload("nope")
 
 
@@ -82,3 +82,16 @@ def test_branching_effect_keys_are_distinct():
     w = branching()
     keys = {get_tool(s.tool, "/tmp/b").idempotency_key(s.args) for s in w.steps if s.tool}
     assert len(keys) == 9
+
+
+def test_fanout_serialised_order():
+    from revenant.workloads import fanout
+
+    w = fanout()
+    assert [s.name for s in w.steps] == [
+        "split", "branch_a", "branch_b", "branch_c", "merge",
+    ]
+    assert w.tool_steps == (2, 3, 4)
+    assert len({s.tool for s in w.steps if s.tool}) == 3
+    assert [r["action"] for r in w.script] == ["split", "branch", "branch", "branch", "merge"]
+    assert w.script[-1]["branches"] == ["a", "b", "c"]
