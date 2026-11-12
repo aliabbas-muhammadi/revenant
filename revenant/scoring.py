@@ -90,3 +90,33 @@ def score_effects(
     return EffectsScore(
         once, tuple(duplicated), tuple(missing), tuple(unexpected), tuple(sorted(unconfirmed))
     )
+
+
+@dataclass(frozen=True)
+class StepsScore:
+    """Property 3: every golden step appears exactly once, nothing invented."""
+
+    lost: tuple[int, ...]
+    phantom: tuple[int, ...]
+
+    @property
+    def passed(self) -> bool:
+        return not (self.lost or self.phantom)
+
+
+def score_steps(golden: Sequence[str], stitched: Sequence[str | None]) -> StepsScore:
+    """Report 1-based steps that are lost (no hash recorded) or phantom (past the golden end).
+
+    A step with a wrong hash is not lost: that is property 1's finding.
+    """
+    lost = tuple(
+        step
+        for step in range(1, len(golden) + 1)
+        if step > len(stitched) or stitched[step - 1] is None
+    )
+    phantom = tuple(
+        step
+        for step in range(len(golden) + 1, len(stitched) + 1)
+        if stitched[step - 1] is not None
+    )
+    return StepsScore(lost, phantom)
