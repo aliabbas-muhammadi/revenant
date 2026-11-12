@@ -204,3 +204,19 @@ class WriteFile(Tool):
         target.write_text(content, encoding="utf-8")
         sink.append({"tool": self.name, "relpath": relpath, "content": content})
         return str(target)
+
+
+TOOL_NAMES = (SendEmail.name, ChargeCard.name, WriteFile.name)
+
+
+def get_tool(name: str, sandbox: str | Path | None = None) -> Tool:
+    """Return a fresh tool by name; ``write_file`` needs a ``sandbox`` directory."""
+    if name == SendEmail.name:
+        return SendEmail()
+    if name == ChargeCard.name:
+        return ChargeCard()
+    if name == WriteFile.name:
+        if sandbox is None:
+            raise ToolError("write_file requires a sandbox directory")
+        return WriteFile(sandbox)
+    raise ToolError(f"unknown tool {name!r}; known tools: {', '.join(TOOL_NAMES)}")

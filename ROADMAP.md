@@ -44,7 +44,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R032 `charge_card(customer, amount_cents)` tool; rejects non-int and non-positive amounts. Tests.
 - [x] R033 `write_file(relpath, content)` tool confined to a sandbox directory; absolute paths and `..` traversal raise `ToolError`. Tests.
 - [x] R034 Naive mode: a flag that bypasses the ledger. Test that a repeated naive call produces two sink effects.
-- [ ] R035 Tool registry `get_tool(name)` with an error listing known tools. Test.
+- [x] R035 Tool registry `get_tool(name)` with an error listing known tools. Test.
 
 ## M4 · Workloads (`revenant/workloads.py`)
 
