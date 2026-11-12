@@ -27,3 +27,35 @@ def test_script_length_must_match():
 def test_name_required():
     with pytest.raises(ValueError, match="name"):
         Workload("", (StepSpec("a"),), ("r",))
+
+
+def test_linear_shape():
+    from revenant.workloads import linear
+
+    w = linear()
+    assert w.name == "linear"
+    assert len(w.steps) == 12
+    assert w.tool_steps == (3, 6, 9)
+    assert [w.steps[i - 1].tool for i in w.tool_steps] == [
+        "send_email",
+        "charge_card",
+        "write_file",
+    ]
+
+
+def test_linear_tool_args_are_valid():
+    from revenant.tools import get_tool
+    from revenant.workloads import linear
+
+    w = linear()
+    for i in w.tool_steps:
+        spec = w.steps[i - 1]
+        get_tool(spec.tool, "/tmp/box").idempotency_key(spec.args)
+
+
+def test_get_workload_registry():
+    from revenant.workloads import get_workload
+
+    assert get_workload("linear").name == "linear"
+    with pytest.raises(KeyError, match="known workloads: linear"):
+        get_workload("nope")

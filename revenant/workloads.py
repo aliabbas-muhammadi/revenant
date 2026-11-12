@@ -43,3 +43,37 @@ class Workload:
     def tool_steps(self) -> tuple[int, ...]:
         """1-based positions of the steps that call a tool."""
         return tuple(i for i, s in enumerate(self.steps, 1) if s.tool is not None)
+
+
+def linear() -> Workload:
+    """12 steps; steps 3, 6 and 9 each call one tool."""
+    tools: dict[int, StepSpec] = {
+        3: StepSpec(
+            "email",
+            "send_email",
+            {"to": "ops@example.com", "subject": "report", "body": "step 3 done"},
+        ),
+        6: StepSpec("charge", "charge_card", {"customer": "cus_1", "amount_cents": 1999}),
+        9: StepSpec(
+            "write",
+            "write_file",
+            {"relpath": "out/summary.txt", "content": "summary at step 9"},
+        ),
+    }
+    steps = tuple(tools.get(i, StepSpec(f"step{i}")) for i in range(1, 13))
+    script = tuple({"thought": f"thought {i}"} for i in range(1, 13))
+    return Workload("linear", steps, script)
+
+
+_FACTORIES = {"linear": linear}
+WORKLOAD_NAMES = tuple(_FACTORIES)
+
+
+def get_workload(name: str) -> Workload:
+    """Build a workload by name; unknown names list the known ones."""
+    try:
+        return _FACTORIES[name]()
+    except KeyError:
+        raise KeyError(
+            f"unknown workload {name!r}; known workloads: {', '.join(WORKLOAD_NAMES)}"
+        ) from None
