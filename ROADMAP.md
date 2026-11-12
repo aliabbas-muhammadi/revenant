@@ -58,8 +58,8 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 
 ## M5 · Adapter contract and reference runtime
 
-- [ ] R043 `revenant/adapter.py`: `Adapter` ABC with `build(workload, workdir)`, `run(kill_at=None)`, `state_trace()`, `boundaries()`. Test that it cannot be instantiated.
-- [ ] R044 `RunResult` dataclass (completed, steps_run, trace, final_hash). Tests.
+- [x] R043 `revenant/adapter.py`: `Adapter` ABC with `build(workload, workdir)`, `run(kill_at=None)`, `state_trace()`, `boundaries()`. Test that it cannot be instantiated.
+- [x] R044 `RunResult` dataclass (completed, steps_run, trace, final_hash). Tests.
 - [ ] R045 `revenant/adapters/reference.py`: step loop executing a workload in-process with no checkpointing yet. Test a full linear run.
 - [ ] R046 Atomic checkpoint write: temp file, `fsync`, `os.replace`, then `fsync` the directory. Test file contents.
 - [ ] R047 Resume: load the checkpoint and skip completed steps. Test resuming after a simulated stop at step 5.
