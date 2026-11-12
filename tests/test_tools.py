@@ -4,7 +4,7 @@ import pytest
 
 from revenant.ledger import IdempotencyKeyReuse, Ledger
 from revenant.sink import EffectSink
-from revenant.tools import AttemptCounter, Tool, invoke
+from revenant.tools import AttemptCounter, SendEmail, Tool, invoke
 
 
 class FakeTool(Tool):
@@ -91,3 +91,15 @@ def test_attempt_is_counted_even_when_key_reuse_fails(env):
     with pytest.raises(IdempotencyKeyReuse):
         invoke(Reuse(), {"id": 2}, sink, ledger, attempts)
     assert attempts.count("fake") == 2
+
+
+def test_naive_mode_bypasses_ledger_and_duplicates_effects(tmp_path):
+    args = {"to": "a@x", "subject": "s", "body": "b"}
+    sink = EffectSink(tmp_path / "s.jsonl")
+    attempts = AttemptCounter()
+    with Ledger(tmp_path / "l.db") as ledger:
+        for _ in range(2):
+            assert invoke(SendEmail(), args, sink, ledger, attempts, naive=True).executed
+        assert ledger.summary().attempts == 0
+    assert len(sink.effects()) == 2
+    assert attempts.count("send_email") == 2

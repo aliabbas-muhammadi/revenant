@@ -74,14 +74,19 @@ def invoke(
     sink: EffectSink,
     ledger: Ledger,
     attempts: AttemptCounter | None = None,
+    naive: bool = False,
 ) -> Invocation:
     """Run ``tool`` through the ledger: ``begin`` -> ``perform`` -> ``commit``.
 
     A suppressed attempt (the key is already committed) performs nothing.
+    With ``naive=True`` the ledger is bypassed entirely: every call performs
+    its effect, which is how a runtime without idempotency keys behaves.
     """
     if attempts is not None:
         attempts.record(tool.name)
     key = tool.idempotency_key(args)
+    if naive:
+        return Invocation(key, executed=True, result=tool.perform(args, sink))
     if ledger.begin(key, {"tool": tool.name, "args": args}) is Decision.SUPPRESS:
         return Invocation(key, executed=False)
     result = tool.perform(args, sink)
