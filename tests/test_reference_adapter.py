@@ -29,3 +29,36 @@ def test_matches_in_process_executor(tmp_path, name):
     a = ReferenceAdapter()
     a.build(w, tmp_path / "ref")
     assert a.run().trace == execute(w, tmp_path / "exe").trace
+
+
+def test_checkpoint_written_after_each_step(tmp_path):
+    from revenant.checkpoint import load_checkpoint
+
+    a = ReferenceAdapter()
+    a.build(get_workload("linear"), tmp_path)
+    a._execute(stop_after=5)
+    ckpt = load_checkpoint(tmp_path / "checkpoint.json")
+    assert ckpt["state"]["step"] == 5
+    assert len(ckpt["trace"]) == 5
+
+
+@pytest.mark.parametrize("name", WORKLOAD_NAMES)
+def test_resume_after_stop_at_step_5_or_earlier(tmp_path, name):
+    w = get_workload(name)
+    golden = ReferenceAdapter()
+    golden.build(w, tmp_path / "golden")
+    expected = golden.run()
+
+    a = ReferenceAdapter()
+    a.build(w, tmp_path / "run")
+    stop = min(5, len(w.steps) - 1)
+    partial = a._execute(stop_after=stop)
+    assert not partial.completed
+    assert partial.steps_run == stop
+
+    resumed = ReferenceAdapter()
+    resumed.build(w, tmp_path / "run")
+    result = resumed.run()
+    assert result.completed
+    assert result.trace == expected.trace
+    assert len(EffectSink(tmp_path / "run" / "effects.jsonl").effects()) == len(w.tool_steps)

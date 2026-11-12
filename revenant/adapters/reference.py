@@ -1,7 +1,7 @@
 """Reference runtime: an explicit step loop, the baseline that should pass everything.
 
-This first version runs a workload in-process with no checkpointing. Durability
-is layered on in the following changes.
+After every step the state and trace are checkpointed atomically; ``run`` resumes
+from the last checkpoint in the workdir and skips completed steps.
 """
 
 from __future__ import annotations
@@ -11,6 +11,7 @@ from typing import Any
 
 from revenant.adapter import Adapter
 from revenant.canon import state_hash
+from revenant.checkpoint import load_checkpoint, write_checkpoint
 from revenant.clock import InjectedClock
 from revenant.ledger import Ledger
 from revenant.model import ScriptedModel
@@ -18,6 +19,8 @@ from revenant.result import RunResult
 from revenant.sink import EffectSink
 from revenant.tools import AttemptCounter, get_tool, invoke
 from revenant.workloads import Workload
+
+CHECKPOINT_NAME = "checkpoint.json"
 
 
 class ReferenceAdapter(Adapter):
@@ -42,6 +45,10 @@ class ReferenceAdapter(Adapter):
         return self._workload, self._workdir
 
     def run(self, kill_at: int | None = None) -> RunResult:
+        return self._execute()
+
+    def _execute(self, stop_after: int | None = None) -> RunResult:
+        """Run or resume; ``stop_after`` returns early after that many total steps."""
         workload, root = self._built()
         model = ScriptedModel(workload.script)
         clock = InjectedClock(0.0)
@@ -49,8 +56,17 @@ class ReferenceAdapter(Adapter):
         attempts = AttemptCounter()
         state: dict[str, Any] = {"step": 0, "thoughts": [], "results": {}, "clock": 0.0}
         self._trace = []
+        saved = load_checkpoint(root / CHECKPOINT_NAME)
+        if saved is not None:
+            state = saved["state"]
+            self._trace = list(saved["trace"])
+            clock = InjectedClock(state["clock"])
+        start = state["step"]
         with Ledger(root / "ledger.db") as ledger:
-            for index, spec in enumerate(workload.steps):
+            for index in range(start, len(workload.steps)):
+                if stop_after is not None and index >= stop_after:
+                    return RunResult(False, len(self._trace), tuple(self._trace))
+                spec = workload.steps[index]
                 response = model.respond(index)
                 clock.tick()
                 if spec.tool is not None:
@@ -61,6 +77,7 @@ class ReferenceAdapter(Adapter):
                 state["thoughts"].append(response)
                 state["clock"] = clock.now()
                 self._trace.append(state_hash(state, workload.volatile_fields))
+                write_checkpoint(root / CHECKPOINT_NAME, {"state": state, "trace": self._trace})
         return RunResult(True, len(self._trace), tuple(self._trace))
 
     def state_trace(self) -> tuple[str, ...]:
