@@ -65,7 +65,41 @@ def linear() -> Workload:
     return Workload("linear", steps, script)
 
 
-_FACTORIES = {"linear": linear}
+def branching() -> Workload:
+    """A tool loop: the scripted model keeps calling tools, then says stop.
+
+    Nine tool-call steps (a mix of the three tools) followed by a stop step,
+    10 steps in all. Each step's script entry is ``{"action": "call", ...}``
+    or ``{"action": "stop"}``; the executor stops once it sees the latter.
+    """
+    calls: list[StepSpec] = []
+    for n in range(1, 10):
+        if n % 3 == 1:
+            spec = StepSpec(
+                f"email{n}",
+                "send_email",
+                {"to": f"user{n}@example.com", "subject": f"update {n}", "body": f"body {n}"},
+            )
+        elif n % 3 == 2:
+            spec = StepSpec(
+                f"charge{n}", "charge_card", {"customer": f"cus_{n}", "amount_cents": 100 * n}
+            )
+        else:
+            spec = StepSpec(
+                f"write{n}",
+                "write_file",
+                {"relpath": f"out/note{n}.txt", "content": f"note {n}"},
+            )
+        calls.append(spec)
+    steps = (*calls, StepSpec("stop"))
+    script = (
+        *({"action": "call", "tool": c.tool, "args": c.args} for c in calls),
+        {"action": "stop"},
+    )
+    return Workload("branching", steps, script)
+
+
+_FACTORIES = {"linear": linear, "branching": branching}
 WORKLOAD_NAMES = tuple(_FACTORIES)
 
 

@@ -57,5 +57,28 @@ def test_get_workload_registry():
     from revenant.workloads import get_workload
 
     assert get_workload("linear").name == "linear"
-    with pytest.raises(KeyError, match="known workloads: linear"):
+    with pytest.raises(KeyError, match="known workloads: linear, branching"):
         get_workload("nope")
+
+
+def test_branching_loops_then_stops():
+    from revenant.tools import get_tool
+    from revenant.workloads import branching
+
+    w = branching()
+    assert len(w.steps) == 10
+    assert w.tool_steps == tuple(range(1, 10))
+    assert [r["action"] for r in w.script] == ["call"] * 9 + ["stop"]
+    for spec, resp in zip(w.steps, w.script, strict=True):
+        if spec.tool:
+            assert (resp["tool"], resp["args"]) == (spec.tool, spec.args)
+            get_tool(spec.tool, "/tmp/box").idempotency_key(spec.args)
+
+
+def test_branching_effect_keys_are_distinct():
+    from revenant.tools import get_tool
+    from revenant.workloads import branching
+
+    w = branching()
+    keys = {get_tool(s.tool, "/tmp/b").idempotency_key(s.args) for s in w.steps if s.tool}
+    assert len(keys) == 9

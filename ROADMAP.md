@@ -51,7 +51,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R036 `Workload` dataclass: name, ordered step specs, model script, volatile fields. Test construction and validation (empty steps rejected).
 - [x] R037 `linear` workload: 12 steps; steps 3, 6 and 9 call one tool each. Test step count and tool positions.
 - [x] R038 `get_workload(name)` registry with an error listing known names. Test.
-- [ ] R039 `branching` workload: the scripted model loops over tool calls until the script says stop (about 10 steps). Test.
+- [x] R039 `branching` workload: the scripted model loops over tool calls until the script says stop (about 10 steps). Test.
 - [ ] R040 `fanout` workload: three branches with one tool call each, merged in a final step. Document the serialised order. Test.
 - [ ] R041 In-process executor used by tests: runs a workload with no runtime and returns its state trace. Test.
 - [ ] R042 Determinism test: each workload executed twice yields identical state-hash traces.
