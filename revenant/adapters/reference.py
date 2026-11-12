@@ -6,6 +6,8 @@ from the last checkpoint in the workdir and skips completed steps.
 
 from __future__ import annotations
 
+import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +23,7 @@ from revenant.tools import AttemptCounter, get_tool, invoke
 from revenant.workloads import Workload
 
 CHECKPOINT_NAME = "checkpoint.json"
+TRACE_NAME = "trace.jsonl"
 
 
 class ReferenceAdapter(Adapter):
@@ -61,6 +64,7 @@ class ReferenceAdapter(Adapter):
             state = saved["state"]
             self._trace = list(saved["trace"])
             clock = InjectedClock(state["clock"])
+        self._rewrite_trace_file(root)
         start = state["step"]
         with Ledger(root / "ledger.db") as ledger:
             for index in range(start, len(workload.steps)):
@@ -78,10 +82,32 @@ class ReferenceAdapter(Adapter):
                 state["clock"] = clock.now()
                 self._trace.append(state_hash(state, workload.volatile_fields))
                 write_checkpoint(root / CHECKPOINT_NAME, {"state": state, "trace": self._trace})
+                self._append_trace_line(root, index + 1, self._trace[-1])
         return RunResult(True, len(self._trace), tuple(self._trace))
 
+    def _rewrite_trace_file(self, root: Path) -> None:
+        """Make the trace file match the checkpoint (a kill can leave it one line short)."""
+        path = root / TRACE_NAME
+        path.write_text("")
+        for step, digest in enumerate(self._trace, 1):
+            self._append_trace_line(root, step, digest)
+
+    @staticmethod
+    def _append_trace_line(root: Path, step: int, digest: str) -> None:
+        line = json.dumps({"step": step, "hash": digest}, sort_keys=True) + "\n"
+        with open(root / TRACE_NAME, "ab") as fh:
+            fh.write(line.encode("utf-8"))
+            fh.flush()
+            os.fsync(fh.fileno())
+
     def state_trace(self) -> tuple[str, ...]:
-        return tuple(self._trace)
+        """Hashes recorded in the trace file, in step order."""
+        _, root = self._built()
+        path = root / TRACE_NAME
+        if not path.exists():
+            return ()
+        rows = [json.loads(line) for line in path.read_text().splitlines() if line]
+        return tuple(row["hash"] for row in rows)
 
     def boundaries(self) -> int:
         workload, _ = self._built()

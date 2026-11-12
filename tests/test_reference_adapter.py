@@ -62,3 +62,37 @@ def test_resume_after_stop_at_step_5_or_earlier(tmp_path, name):
     assert result.completed
     assert result.trace == expected.trace
     assert len(EffectSink(tmp_path / "run" / "effects.jsonl").effects()) == len(w.tool_steps)
+
+
+def test_trace_file_is_jsonl_with_step_and_hash(tmp_path):
+    import json
+
+    a = ReferenceAdapter()
+    a.build(get_workload("linear"), tmp_path)
+    result = a.run()
+    rows = [json.loads(x) for x in (tmp_path / "trace.jsonl").read_text().splitlines()]
+    assert [r["step"] for r in rows] == list(range(1, 13))
+    assert tuple(r["hash"] for r in rows) == result.trace
+
+
+def test_trace_file_repaired_on_resume(tmp_path):
+    w = get_workload("linear")
+    a = ReferenceAdapter()
+    a.build(w, tmp_path)
+    a._execute(stop_after=4)
+    trace_path = tmp_path / "trace.jsonl"
+    lines = trace_path.read_text().splitlines()
+    trace_path.write_text("\n".join(lines[:-1]) + "\n")  # simulate a kill before the append
+    b = ReferenceAdapter()
+    b.build(w, tmp_path)
+    result = b.run()
+    assert b.state_trace() == result.trace
+    assert len(b.state_trace()) == 12
+
+
+@pytest.mark.parametrize("name", WORKLOAD_NAMES)
+def test_boundaries_match_step_count(tmp_path, name):
+    w = get_workload(name)
+    a = ReferenceAdapter()
+    a.build(w, tmp_path)
+    assert a.boundaries() == len(w.steps)
