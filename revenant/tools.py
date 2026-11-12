@@ -9,6 +9,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections import Counter
 from dataclasses import dataclass
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
 from revenant.canon import state_hash
@@ -145,3 +146,56 @@ class ChargeCard(Tool):
     def perform(self, args: dict[str, Any], sink: EffectSink) -> Any:
         sink.append({"tool": self.name, **self._charge(args)})
         return "charged"
+
+
+class WriteFile(Tool):
+    """``write_file(relpath, content)``: writes under a sandbox directory only."""
+
+    name = "write_file"
+
+    def __init__(self, sandbox: str | Path) -> None:
+        self.sandbox = Path(sandbox)
+
+    def idempotency_key(self, args: dict[str, Any]) -> str:
+        relpath, content = self._parse(args)
+        return f"{self.name}:{state_hash({'relpath': relpath, 'content': content})[:16]}"
+
+    @staticmethod
+    def _parse(args: dict[str, Any]) -> tuple[str, str]:
+        try:
+            relpath, content = args["relpath"], args["content"]
+        except KeyError as exc:
+            raise ToolError(
+                f"write_file requires 'relpath' and 'content'; missing {exc}"
+            ) from exc
+        if not isinstance(relpath, str) or not relpath:
+            raise ToolError("write_file 'relpath' must be a non-empty string")
+        if not isinstance(content, str):
+            raise ToolError(
+                f"write_file 'content' must be a string, got {type(content).__name__}"
+            )
+        return relpath, content
+
+    def _resolve(self, relpath: str) -> Path:
+        if (
+            relpath.startswith(("/", "\\"))
+            or PurePosixPath(relpath).is_absolute()
+            or PureWindowsPath(relpath).is_absolute()
+            or PureWindowsPath(relpath).drive
+        ):
+            raise ToolError(f"write_file path must be relative, got {relpath!r}")
+        if ".." in PurePosixPath(relpath.replace("\\", "/")).parts:
+            raise ToolError(f"write_file path may not contain '..': {relpath!r}")
+        root = self.sandbox.resolve()
+        target = (root / relpath).resolve()
+        if not target.is_relative_to(root):
+            raise ToolError(f"write_file path escapes the sandbox: {relpath!r}")
+        return target
+
+    def perform(self, args: dict[str, Any], sink: EffectSink) -> Any:
+        relpath, content = self._parse(args)
+        target = self._resolve(relpath)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+        sink.append({"tool": self.name, "relpath": relpath, "content": content})
+        return str(target)
