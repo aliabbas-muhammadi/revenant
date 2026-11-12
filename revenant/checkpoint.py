@@ -7,6 +7,7 @@ the new one, never a mixture.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -19,10 +20,19 @@ class CheckpointError(Exception):
     """The checkpoint cannot be used (for example an unknown schema version)."""
 
 
+class CheckpointCorrupt(CheckpointError):
+    """The checkpoint is truncated, damaged or fails its integrity digest."""
+
+
+def _digest(body: dict[str, Any]) -> str:
+    return hashlib.sha256(json.dumps(body, sort_keys=True).encode("utf-8")).hexdigest()
+
+
 def write_checkpoint(path: str | Path, data: dict[str, Any]) -> None:
     """Atomically replace the checkpoint at ``path`` with ``data``."""
     target = Path(path)
-    payload = {"schema_version": SCHEMA_VERSION, **data}
+    body = {"schema_version": SCHEMA_VERSION, **data}
+    payload = {"body": body, "digest": _digest(body)}
     tmp = target.with_name(target.name + ".tmp")
     with open(tmp, "wb") as fh:
         fh.write(json.dumps(payload, sort_keys=True).encode("utf-8"))
@@ -46,9 +56,13 @@ def load_checkpoint(path: str | Path) -> dict[str, Any] | None:
     try:
         data = json.loads(raw)
     except ValueError as exc:
-        raise CheckpointError(f"checkpoint {target} is not valid JSON: {exc}") from exc
-    if not isinstance(data, dict):
-        raise CheckpointError(f"checkpoint {target} is not an object")
+        raise CheckpointCorrupt(f"checkpoint {target} is not valid JSON: {exc}") from exc
+    if not isinstance(data, dict) or "body" not in data or "digest" not in data:
+        raise CheckpointCorrupt(f"checkpoint {target} has no body and digest")
+    body = data["body"]
+    if not isinstance(body, dict) or _digest(body) != data["digest"]:
+        raise CheckpointCorrupt(f"checkpoint {target} fails its integrity digest")
+    data = body
     version = data.get("schema_version")
     if version != SCHEMA_VERSION:
         raise CheckpointError(
