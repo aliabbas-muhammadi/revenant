@@ -61,9 +61,9 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R043 `revenant/adapter.py`: `Adapter` ABC with `build(workload, workdir)`, `run(kill_at=None)`, `state_trace()`, `boundaries()`. Test that it cannot be instantiated.
 - [x] R044 `RunResult` dataclass (completed, steps_run, trace, final_hash). Tests.
 - [x] R045 `revenant/adapters/reference.py`: step loop executing a workload in-process with no checkpointing yet. Test a full linear run.
-- [ ] R046 Atomic checkpoint write: temp file, `fsync`, `os.replace`, then `fsync` the directory. Test file contents.
+- [x] R046 Atomic checkpoint write: temp file, `fsync`, `os.replace`, then `fsync` the directory. Test file contents.
 - [ ] R047 Resume: load the checkpoint and skip completed steps. Test resuming after a simulated stop at step 5.
-- [ ] R048 Checkpoint `schema_version`; unknown versions raise `CheckpointError`. Test.
+- [x] R048 Checkpoint `schema_version`; unknown versions raise `CheckpointError`. Test.
 - [ ] R049 Checkpoint integrity digest; a mismatch raises `CheckpointCorrupt`. Test with a truncated file.
 - [ ] R050 Boundary kill hook: when `REVENANT_KILL_AT=k`, SIGKILL itself right after checkpoint `k` is durable. Subprocess test checks the return code is `-SIGKILL`.
 - [ ] R051 Mid-step kill mode `REVENANT_KILL_MODE=mid`: SIGKILL after the tool effect of step `k` but before its checkpoint. Subprocess test.
