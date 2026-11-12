@@ -54,7 +54,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R039 `branching` workload: the scripted model loops over tool calls until the script says stop (about 10 steps). Test.
 - [x] R040 `fanout` workload: three branches with one tool call each, merged in a final step. Document the serialised order. Test.
 - [x] R041 In-process executor used by tests: runs a workload with no runtime and returns its state trace. Test.
-- [ ] R042 Determinism test: each workload executed twice yields identical state-hash traces.
+- [x] R042 Determinism test: each workload executed twice yields identical state-hash traces.
 
 ## M5 · Adapter contract and reference runtime
 

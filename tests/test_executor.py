@@ -25,3 +25,12 @@ def test_each_tool_step_makes_one_effect(tmp_path, name):
 def test_linear_writes_sandbox_file(tmp_path):
     execute(get_workload("linear"), tmp_path)
     assert (tmp_path / "sandbox" / "out" / "summary.txt").exists()
+
+
+@pytest.mark.parametrize("name", WORKLOAD_NAMES)
+def test_two_runs_yield_identical_traces(tmp_path, name):
+    w = get_workload(name)
+    first = execute(w, tmp_path / "a")
+    second = execute(w, tmp_path / "b")
+    assert first.trace == second.trace
+    assert first.state == second.state
