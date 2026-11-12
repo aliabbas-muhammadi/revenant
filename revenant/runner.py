@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Callable, Iterator
+import signal
+import subprocess
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 
 from revenant.adapter import Adapter
@@ -37,3 +41,48 @@ def golden_run(factory: AdapterFactory, workload: Workload, workdir: str | Path)
     if not result.completed:
         raise RuntimeError("golden run did not complete")
     return result
+
+
+class ChildStatus(Enum):
+    """How a child process ended."""
+
+    COMPLETED = "completed"
+    KILLED = "killed"
+    ERROR = "error"
+
+
+@dataclass(frozen=True)
+class ChildOutcome:
+    """Exit classification plus captured output of one child process."""
+
+    status: ChildStatus
+    returncode: int
+    stdout: str
+    stderr: str
+
+
+def classify_exit(returncode: int) -> ChildStatus:
+    """0 is completed, death by SIGKILL is killed, anything else is an error."""
+    if returncode == 0:
+        return ChildStatus.COMPLETED
+    if returncode == -signal.SIGKILL:
+        return ChildStatus.KILLED
+    return ChildStatus.ERROR
+
+
+def spawn_child(
+    argv: Sequence[str],
+    env: Mapping[str, str] | None = None,
+    timeout: float = 60.0,
+) -> ChildOutcome:
+    """Run ``argv`` with ``env`` layered over the current environment.
+
+    Kill variables are scrubbed from the inherited environment, so only values
+    passed in ``env`` can trigger a kill in the child.
+    """
+    full = {k: v for k, v in os.environ.items() if k not in (KILL_ENV, KILL_MODE_ENV)}
+    full.update(env or {})
+    proc = subprocess.run(
+        list(argv), env=full, capture_output=True, text=True, timeout=timeout, check=False
+    )
+    return ChildOutcome(classify_exit(proc.returncode), proc.returncode, proc.stdout, proc.stderr)
