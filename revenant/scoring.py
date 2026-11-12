@@ -45,3 +45,48 @@ def score_determinism(
 
 def _final(golden: Sequence[str], stitched: Sequence[str | None]) -> bool:
     return bool(stitched) and bool(golden) and stitched[-1] == golden[-1]
+
+
+@dataclass(frozen=True)
+class EffectsScore:
+    """Property 2: effects (not attempts) happened exactly once.
+
+    ``unconfirmed`` keys are reported, never counted as passed or failed effects:
+    deciding whether they happened needs domain knowledge.
+    """
+
+    once: int
+    duplicated: tuple[str, ...]
+    missing: tuple[str, ...]
+    unexpected: tuple[str, ...]
+    unconfirmed: tuple[str, ...]
+
+    @property
+    def passed(self) -> bool:
+        """True when nothing was duplicated, missing or invented."""
+        return not (self.duplicated or self.missing or self.unexpected)
+
+
+def score_effects(
+    expected: Sequence[dict[str, object]],
+    observed: Sequence[dict[str, object]],
+    unconfirmed: Sequence[str] = (),
+) -> EffectsScore:
+    """Compare the effects in the sink with the golden run's effects.
+
+    Effects are identified by their canonical hash, so ordering is ignored.
+    ``expected`` is the golden sink; ``observed`` is the sink after kill and resume.
+    """
+    from collections import Counter
+
+    from revenant.canon import state_hash
+
+    want = Counter(state_hash(e) for e in expected)
+    got = Counter(state_hash(e) for e in observed)
+    once = sum(1 for h, n in want.items() if got.get(h, 0) == n == 1)
+    duplicated = sorted(h for h in want if got.get(h, 0) > want[h])
+    missing = sorted(h for h in want if got.get(h, 0) < want[h])
+    unexpected = sorted(h for h in got if h not in want)
+    return EffectsScore(
+        once, tuple(duplicated), tuple(missing), tuple(unexpected), tuple(sorted(unconfirmed))
+    )
