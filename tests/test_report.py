@@ -25,3 +25,18 @@ def test_planned_count_and_unconfirmed():
     line = summary_line(r, planned=4)
     assert line.startswith("killed at 1/4 boundaries")
     assert "unconfirmed: 1" in line and line.endswith("PASS_WITH_UNCONFIRMED")
+
+
+def test_markdown_has_one_row_per_boundary():
+    from revenant.report import markdown_report
+
+    r = aggregate("reference", "linear", [_b(1), _b(2, ok=False), _b(3, unconf=["k"])])
+    md = markdown_report(r)
+    lines = md.splitlines()
+    assert lines[0] == "# reference · linear"
+    rows = [ln for ln in lines if ln.startswith("| ") and not ln.startswith("| boundary")]
+    assert len(rows) == 3
+    assert rows[0] == "| 1 | boundary | identical | 3 | 0 | 0 | 0 | 0 | 0 | pass |"
+    assert "diverged at step 3" in rows[1] and rows[1].endswith("| FAIL |")
+    assert rows[2].count("| 1 |") >= 1
+    assert md.endswith("\n")

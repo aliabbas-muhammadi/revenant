@@ -25,3 +25,29 @@ def summary_line(result: ConformanceResult, planned: int | None = None) -> str:
     parts.append(f"unconfirmed: {result.unconfirmed}")
     parts.append(f"verdict: {result.verdict.value}")
     return " · ".join(parts)
+
+
+def markdown_report(result: ConformanceResult, planned: int | None = None) -> str:
+    """A heading, the summary line and one table row per boundary."""
+    lines = [
+        f"# {result.adapter} · {result.workload}",
+        "",
+        summary_line(result, planned),
+        "",
+        "| boundary | mode | resume | effects once | duplicated | missing | unconfirmed "
+        "| lost | phantom | result |",
+        "|---:|---|---|---:|---:|---:|---:|---:|---:|---|",
+    ]
+    for b in result.boundaries:
+        resume = "identical" if b.determinism.passed else (
+            f"diverged at step {b.determinism.first_divergent_step}"
+            if b.determinism.first_divergent_step is not None
+            else "final state differs"
+        )
+        e = b.effects
+        lines.append(
+            f"| {b.boundary} | {b.mode} | {resume} | {e.once} | {len(e.duplicated)} "
+            f"| {len(e.missing)} | {len(e.unconfirmed)} | {len(b.steps.lost)} "
+            f"| {len(b.steps.phantom)} | {'pass' if b.passed else 'FAIL'} |"
+        )
+    return "\n".join(lines) + "\n"
