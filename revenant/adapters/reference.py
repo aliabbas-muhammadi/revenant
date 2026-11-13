@@ -107,11 +107,20 @@ class ReferenceAdapter(Adapter):
                 state["thoughts"].append(response)
                 state["clock"] = clock.now()
                 self._trace.append(state_hash(state, workload.volatile_fields))
-                write_checkpoint(root / CHECKPOINT_NAME, {"state": state, "trace": self._trace})
+                self._write_checkpoint(
+                    root / CHECKPOINT_NAME,
+                    {"state": state, "trace": self._trace},
+                    dying=not kill_mid and kill_at is not None and index + 1 == kill_at,
+                )
                 self._append_trace_line(root, index + 1, self._trace[-1])
                 if not kill_mid and kill_at is not None and index + 1 == kill_at:
                     os.kill(os.getpid(), signal.SIGKILL)
         return RunResult(True, len(self._trace), tuple(self._trace))
+
+    def _write_checkpoint(self, path: Path, data: dict[str, Any], dying: bool) -> None:
+        """Persist one checkpoint. ``dying`` says the process is about to be killed
+        right after this write, which lets mutants die part-way through it."""
+        write_checkpoint(path, data)
 
     @staticmethod
     def _forget_local_state(root: Path) -> None:
