@@ -36,6 +36,8 @@ class ReferenceAdapter(Adapter):
     """Step loop over a workload: model response, tool call, state hash."""
 
     name = "reference"
+    #: Subclasses that deliberately skip loading the checkpoint set this to False.
+    resume_from_checkpoint = True
 
     def __init__(self) -> None:
         self._workload: Workload | None = None
@@ -79,7 +81,9 @@ class ReferenceAdapter(Adapter):
         attempts = AttemptCounter()
         state: dict[str, Any] = {"step": 0, "thoughts": [], "results": {}, "clock": 0.0}
         self._trace = []
-        saved = load_checkpoint(root / CHECKPOINT_NAME)
+        if not self.resume_from_checkpoint:
+            self._forget_local_state(root)
+        saved = load_checkpoint(root / CHECKPOINT_NAME) if self.resume_from_checkpoint else None
         if saved is not None:
             state = saved["state"]
             self._trace = list(saved["trace"])
@@ -108,6 +112,12 @@ class ReferenceAdapter(Adapter):
                 if not kill_mid and kill_at is not None and index + 1 == kill_at:
                     os.kill(os.getpid(), signal.SIGKILL)
         return RunResult(True, len(self._trace), tuple(self._trace))
+
+    @staticmethod
+    def _forget_local_state(root: Path) -> None:
+        """Drop the runtime's own durable state; the effect sink is the outside world."""
+        for name in (CHECKPOINT_NAME, "ledger.db", "ledger.db-wal", "ledger.db-shm"):
+            (root / name).unlink(missing_ok=True)
 
     def _rewrite_trace_file(self, root: Path) -> None:
         """Make the trace file match the checkpoint (a kill can leave it one line short)."""
@@ -138,13 +148,13 @@ class ReferenceAdapter(Adapter):
         return len(workload.steps)
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None, adapter_cls: type[ReferenceAdapter] | None = None) -> int:
     """Child entry point: run one workload in ``--workdir``, honouring ``REVENANT_KILL_AT``."""
     parser = argparse.ArgumentParser(prog="python -m revenant.adapters.reference")
     parser.add_argument("--workload", required=True)
     parser.add_argument("--workdir", required=True)
     args = parser.parse_args(argv)
-    adapter = ReferenceAdapter()
+    adapter = (adapter_cls or ReferenceAdapter)()
     adapter.build(get_workload(args.workload), args.workdir)
     result = adapter.run()
     print(json.dumps({"completed": result.completed, "steps_run": result.steps_run}))
