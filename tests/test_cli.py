@@ -78,3 +78,43 @@ def test_list_shows_adapters_and_workloads(capsys):
         "adapters:  reference",
         "workloads: linear, branching, fanout",
     ]
+
+
+def test_exit_code_one_for_a_failing_report(tmp_path, capsys):
+    from test_conformance import _b
+
+    from revenant.conformance import aggregate
+    from revenant.report import json_report
+
+    path = tmp_path / "fail.json"
+    path.write_text(json_report(aggregate("a", "w", [_b(1, ok=False)]), versions={}))
+    assert main(["report", str(path)]) == 1
+    assert capsys.readouterr().out.endswith("verdict: FAIL\n")
+
+
+def test_exit_code_zero_for_pass_with_unconfirmed(tmp_path):
+    from test_conformance import _b
+
+    from revenant.conformance import aggregate
+    from revenant.report import json_report
+
+    path = tmp_path / "u.json"
+    path.write_text(json_report(aggregate("a", "w", [_b(1, unconf=["k"])]), versions={}))
+    assert main(["report", str(path)]) == 0
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["run"],
+        ["run", "--adapter", "reference"],
+        ["run", "--adapter", "reference", "--workload", "linear", "--jobs", "0"],
+        ["run", "--adapter", "reference", "--workload", "linear", "--mode", "bogus"],
+        ["report"],
+        ["frobnicate"],
+    ],
+)
+def test_usage_errors_exit_two(argv):
+    with pytest.raises(SystemExit) as exc:
+        main(argv)
+    assert exc.value.code == 2

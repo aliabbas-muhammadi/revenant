@@ -1,4 +1,8 @@
-"""Command-line entry point."""
+"""Command-line entry point.
+
+Exit codes: 0 conformance passed (including pass with unconfirmed effects),
+1 conformance failed, 2 usage error.
+"""
 
 from __future__ import annotations
 
