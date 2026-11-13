@@ -11,7 +11,7 @@ from revenant import __version__
 from revenant.adapters.reference import ReferenceAdapter
 from revenant.report import markdown_from_dict, summary_line
 from revenant.runner import AdapterFactory, sweep
-from revenant.workloads import get_workload
+from revenant.workloads import WORKLOAD_NAMES, get_workload
 
 ADAPTERS: dict[str, AdapterFactory] = {"reference": ReferenceAdapter}
 
@@ -26,6 +26,7 @@ def _build_parser() -> argparse.ArgumentParser:
     run.add_argument("--kill-at", type=int, default=None, help="one boundary instead of all")
     run.add_argument("--mode", choices=("boundary", "mid"), default="boundary")
     run.add_argument("--jobs", type=int, default=1)
+    sub.add_parser("list", help="show known adapters and workloads")
     report = sub.add_parser("report", help="render a saved JSON report")
     report.add_argument("path")
     report.add_argument("--format", choices=("text", "md", "json"), default="text")
@@ -73,6 +74,10 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "run":
         return _run(args, parser)
+    if args.command == "list":
+        print("adapters:  " + ", ".join(sorted(ADAPTERS)))
+        print("workloads: " + ", ".join(WORKLOAD_NAMES))
+        return 0
     if args.command == "report":
         return _report(args, parser)
     parser.print_help()

@@ -69,3 +69,12 @@ def test_report_rejects_bad_input(tmp_path):
         with pytest.raises(SystemExit) as exc:
             main(["report", str(target)])
         assert exc.value.code == 2
+
+
+def test_list_shows_adapters_and_workloads(capsys):
+    assert main(["list"]) == 0
+    out = capsys.readouterr().out.splitlines()
+    assert out == [
+        "adapters:  reference",
+        "workloads: linear, branching, fanout",
+    ]
