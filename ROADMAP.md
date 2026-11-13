@@ -83,7 +83,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R062 `BoundaryResult` and `ConformanceResult` dataclasses with aggregation. Tests.
 - [x] R063 Full sweep k=1..N. Integration test: reference + linear passes every property.
 - [x] R064 Mid-step sweep. Integration test: unconfirmed effects are reported, never hidden.
-- [ ] R065 Fresh temporary workdir per boundary; test no state leaks between boundaries.
+- [x] R065 Fresh temporary workdir per boundary; test no state leaks between boundaries.
 - [ ] R066 Child timeout recorded as `HANG`, distinct from crash. Test with a sleeping fake child.
 - [ ] R067 `--jobs N` parallel sweep with deterministic result ordering. Test ordering is identical for jobs=1 and jobs=4.
 

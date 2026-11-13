@@ -59,3 +59,26 @@ def test_unconfirmed_residue_is_reported_not_hidden(tmp_path):
     )  # fmt: skip
     assert res.unconfirmed == 2
     assert all(b.effects.unconfirmed == ("charge:c1",) for b in res.boundaries)
+
+
+@posix
+def test_each_boundary_gets_its_own_fresh_workdir(tmp_path):
+    from revenant.sink import EffectSink
+
+    wl = get_workload("linear")
+    sweep(ReferenceAdapter, wl, tmp_path, boundaries=[1, 6, 12])
+    golden = EffectSink(tmp_path / "golden" / "effects.jsonl").effects()
+    for k in (1, 6, 12):
+        d = tmp_path / f"k{k}"
+        assert d.is_dir()
+        # No boundary sees another's effects: a resumed run holds exactly the golden set.
+        assert EffectSink(d / "effects.jsonl").effects() == golden
+
+
+@posix
+def test_sweep_refuses_a_dirty_boundary_workdir(tmp_path):
+    stale = tmp_path / "k2"
+    stale.mkdir()
+    (stale / "checkpoint.json").write_text("{}")
+    with pytest.raises(ValueError, match="start empty"):
+        sweep(ReferenceAdapter, get_workload("linear"), tmp_path, boundaries=[2])

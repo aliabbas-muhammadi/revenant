@@ -194,6 +194,8 @@ def sweep(
     results = []
     for k in points:
         workdir = root / f"k{k}"
+        if workdir.exists() and any(workdir.iterdir()):
+            raise ValueError(f"boundary workdir must start empty, got {workdir}")
         argv = argv_for(workdir) if argv_for is not None else None
         run = kill_and_resume(factory, workload, workdir, k, mode=mode, argv=argv)
         results.append(
