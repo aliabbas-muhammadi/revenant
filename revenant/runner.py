@@ -14,7 +14,11 @@ from pathlib import Path
 
 from revenant.adapter import Adapter
 from revenant.adapters.reference import KILL_ENV, KILL_MODE_ENV
+from revenant.conformance import BoundaryResult, ConformanceResult, aggregate
+from revenant.ledger import Ledger
 from revenant.result import RunResult
+from revenant.scoring import score_determinism, score_effects, score_steps
+from revenant.sink import EffectSink
 from revenant.workloads import Workload
 
 AdapterFactory = Callable[[], Adapter]
@@ -116,6 +120,7 @@ class KillResume:
     killed: ChildOutcome
     resumed: ChildOutcome
     stitched: tuple[str | None, ...]
+    residue: tuple[str, ...] = ()
 
 
 def reference_argv(workload: str, workdir: str | Path) -> list[str]:
@@ -124,6 +129,15 @@ def reference_argv(workload: str, workdir: str | Path) -> list[str]:
         sys.executable, "-m", "revenant.adapters.reference",
         "--workload", workload, "--workdir", str(workdir),
     ]  # fmt: skip
+
+
+def _ledger_residue(workdir: Path) -> tuple[str, ...]:
+    """Keys left in ``intent`` by the killed run, read before the resume can touch them."""
+    path = workdir / "ledger.db"
+    if not path.exists():
+        return ()
+    with Ledger(path) as ledger:
+        return tuple(sorted(ledger.unconfirmed()))
 
 
 def kill_and_resume(
@@ -144,10 +158,51 @@ def kill_and_resume(
     killed = spawn_child(
         cmd, {KILL_ENV: str(boundary), KILL_MODE_ENV: mode}, timeout=timeout
     )
+    residue = _ledger_residue(workdir)
     adapter = factory()
     adapter.build(workload, workdir)
     pre = adapter.state_trace()
     resumed = spawn_child(cmd, timeout=timeout)
     post = adapter.state_trace()
     # The reference trace is cumulative, so the post-resume trace starts at step 1.
-    return KillResume(boundary, killed, resumed, stitch(pre, post))
+    return KillResume(boundary, killed, resumed, stitch(pre, post), residue)
+
+
+def _read_effects(workdir: Path) -> list[dict[str, object]]:
+    path = workdir / "effects.jsonl"
+    return list(EffectSink(path).effects()) if path.exists() else []
+
+
+def sweep(
+    factory: AdapterFactory,
+    workload: Workload,
+    root: str | Path,
+    mode: str = "boundary",
+    boundaries: Sequence[int] | None = None,
+    argv_for: Callable[[Path], Sequence[str]] | None = None,
+) -> ConformanceResult:
+    """Kill and resume at every boundary (default ``1..N``) and score all three properties.
+
+    ``root`` receives a ``golden`` directory and one ``k<boundary>`` directory per kill.
+    ``argv_for(workdir)`` builds the child command for an adapter other than the reference.
+    """
+    root = Path(root)
+    golden = golden_run(factory, workload, root / "golden")
+    golden_effects = _read_effects(root / "golden")
+    adapter_name = factory().name
+    points = list(boundaries) if boundaries is not None else range(1, len(golden.trace) + 1)
+    results = []
+    for k in points:
+        workdir = root / f"k{k}"
+        argv = argv_for(workdir) if argv_for is not None else None
+        run = kill_and_resume(factory, workload, workdir, k, mode=mode, argv=argv)
+        results.append(
+            BoundaryResult(
+                k,
+                mode,
+                score_determinism(golden.trace, run.stitched, k),
+                score_effects(golden_effects, _read_effects(workdir), run.residue),
+                score_steps(golden.trace, run.stitched),
+            )
+        )
+    return aggregate(adapter_name, workload.name, results)
