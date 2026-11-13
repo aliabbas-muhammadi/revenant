@@ -10,14 +10,43 @@ import argparse
 import json
 import sys
 import tempfile
+from collections.abc import Callable
+from pathlib import Path
 
 from revenant import __version__
+from revenant.adapters.mutant_checkpoint_first import CheckpointFirstMutant
+from revenant.adapters.mutant_inplace import InPlaceMutant
+from revenant.adapters.mutant_nocheckpoint import NoCheckpointMutant
+from revenant.adapters.mutant_noledger import NoLedgerMutant
+from revenant.adapters.mutant_volatile import VolatileMutant
 from revenant.adapters.reference import ReferenceAdapter
 from revenant.report import json_report, markdown_from_dict, summary_line
 from revenant.runner import AdapterFactory, sweep
 from revenant.workloads import WORKLOAD_NAMES, get_workload
 
-ADAPTERS: dict[str, AdapterFactory] = {"reference": ReferenceAdapter}
+ADAPTERS: dict[str, AdapterFactory] = {
+    cls.name: cls
+    for cls in (
+        ReferenceAdapter,
+        NoCheckpointMutant,
+        InPlaceMutant,
+        CheckpointFirstMutant,
+        NoLedgerMutant,
+        VolatileMutant,
+    )
+}
+
+
+def _argv_for(adapter: str, workload: str) -> Callable[[Path], list[str]]:
+    """Child command builder: every adapter name is also its module under ``revenant.adapters``."""
+
+    def build(workdir: Path) -> list[str]:
+        return [
+            sys.executable, "-m", f"revenant.adapters.{adapter}",
+            "--workload", workload, "--workdir", str(workdir),
+        ]  # fmt: skip
+
+    return build
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -69,6 +98,7 @@ def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
         result = sweep(
             ADAPTERS[args.adapter], workload, root,
             mode=args.mode, boundaries=points, jobs=args.jobs,
+            argv_for=_argv_for(args.adapter, args.workload),
         )  # fmt: skip
     if args.out:
         planned = len(points) if points is not None else None

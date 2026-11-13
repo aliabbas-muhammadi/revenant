@@ -75,7 +75,8 @@ def test_list_shows_adapters_and_workloads(capsys):
     assert main(["list"]) == 0
     out = capsys.readouterr().out.splitlines()
     assert out == [
-        "adapters:  reference",
+        "adapters:  mutant_checkpoint_first, mutant_inplace, mutant_nocheckpoint, "
+        "mutant_noledger, mutant_volatile, reference",
         "workloads: linear, branching, fanout",
     ]
 
@@ -141,3 +142,9 @@ def test_run_out_unwritable_is_usage_error(tmp_path):
     with pytest.raises(SystemExit) as exc:
         main(argv)
     assert exc.value.code == 2
+
+
+def test_mutants_are_runnable_by_name(capsys):
+    assert main(["run", "--adapter", "mutant_nocheckpoint", "--workload", "linear",
+                 "--kill-at", "3"]) == 1  # fmt: skip
+    assert "verdict: FAIL" in capsys.readouterr().out
