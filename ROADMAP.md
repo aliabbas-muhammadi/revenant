@@ -85,7 +85,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R064 Mid-step sweep. Integration test: unconfirmed effects are reported, never hidden.
 - [x] R065 Fresh temporary workdir per boundary; test no state leaks between boundaries.
 - [x] R066 Child timeout recorded as `HANG`, distinct from crash. Test with a sleeping fake child.
-- [ ] R067 `--jobs N` parallel sweep with deterministic result ordering. Test ordering is identical for jobs=1 and jobs=4.
+- [x] R067 `--jobs N` parallel sweep with deterministic result ordering. Test ordering is identical for jobs=1 and jobs=4.
 
 ## M7 · Reports and CLI
 

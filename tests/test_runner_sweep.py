@@ -82,3 +82,17 @@ def test_sweep_refuses_a_dirty_boundary_workdir(tmp_path):
     (stale / "checkpoint.json").write_text("{}")
     with pytest.raises(ValueError, match="start empty"):
         sweep(ReferenceAdapter, get_workload("linear"), tmp_path, boundaries=[2])
+
+
+@posix
+def test_parallel_sweep_orders_like_serial(tmp_path):
+    wl = get_workload("linear")
+    serial = sweep(ReferenceAdapter, wl, tmp_path / "a", boundaries=range(1, 7), jobs=1)
+    parallel = sweep(ReferenceAdapter, wl, tmp_path / "b", boundaries=range(1, 7), jobs=4)
+    assert [b.boundary for b in parallel.boundaries] == [1, 2, 3, 4, 5, 6]
+    assert parallel == serial
+
+
+def test_jobs_must_be_positive(tmp_path):
+    with pytest.raises(ValueError, match="jobs"):
+        sweep(ReferenceAdapter, get_workload("linear"), tmp_path, jobs=0)

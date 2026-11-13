@@ -7,6 +7,7 @@ import signal
 import subprocess
 import sys
 from collections.abc import Callable, Iterator, Mapping, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import Enum
@@ -196,31 +197,39 @@ def sweep(
     mode: str = "boundary",
     boundaries: Sequence[int] | None = None,
     argv_for: Callable[[Path], Sequence[str]] | None = None,
+    jobs: int = 1,
 ) -> ConformanceResult:
     """Kill and resume at every boundary (default ``1..N``) and score all three properties.
 
     ``root`` receives a ``golden`` directory and one ``k<boundary>`` directory per kill.
     ``argv_for(workdir)`` builds the child command for an adapter other than the reference.
+    ``jobs`` runs that many boundaries at once; results are always ordered by boundary.
     """
     root = Path(root)
     golden = golden_run(factory, workload, root / "golden")
     golden_effects = _read_effects(root / "golden")
     adapter_name = factory().name
     points = list(boundaries) if boundaries is not None else range(1, len(golden.trace) + 1)
-    results = []
-    for k in points:
+    if jobs < 1:
+        raise ValueError("jobs must be at least 1")
+
+    def one(k: int) -> BoundaryResult:
         workdir = root / f"k{k}"
         if workdir.exists() and any(workdir.iterdir()):
             raise ValueError(f"boundary workdir must start empty, got {workdir}")
         argv = argv_for(workdir) if argv_for is not None else None
         run = kill_and_resume(factory, workload, workdir, k, mode=mode, argv=argv)
-        results.append(
-            BoundaryResult(
-                k,
-                mode,
-                score_determinism(golden.trace, run.stitched, k),
-                score_effects(golden_effects, _read_effects(workdir), run.residue),
-                score_steps(golden.trace, run.stitched),
-            )
+        return BoundaryResult(
+            k,
+            mode,
+            score_determinism(golden.trace, run.stitched, k),
+            score_effects(golden_effects, _read_effects(workdir), run.residue),
+            score_steps(golden.trace, run.stitched),
         )
+
+    if jobs == 1:
+        results = [one(k) for k in points]
+    else:
+        with ThreadPoolExecutor(max_workers=jobs) as pool:
+            results = list(pool.map(one, points))
     return aggregate(adapter_name, workload.name, results)
