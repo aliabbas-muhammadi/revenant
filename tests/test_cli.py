@@ -39,3 +39,33 @@ def test_run_rejects_unknown_adapter_and_workload(capsys):
             main(argv)
         assert exc.value.code == 2
     assert "known" in capsys.readouterr().err
+
+
+def _saved_report(tmp_path):
+    from test_conformance import _b
+
+    from revenant.conformance import aggregate
+    from revenant.report import json_report
+
+    path = tmp_path / "r.json"
+    path.write_text(json_report(aggregate("a", "w", [_b(1), _b(2)]), versions={"python": "x"}))
+    return path
+
+
+def test_report_formats(tmp_path, capsys):
+    path = _saved_report(tmp_path)
+    assert main(["report", str(path)]) == 0
+    assert capsys.readouterr().out.startswith("killed at 2/2 boundaries")
+    assert main(["report", str(path), "--format", "md"]) == 0
+    assert capsys.readouterr().out.startswith("# a · w")
+    assert main(["report", str(path), "--format", "json"]) == 0
+    assert capsys.readouterr().out == path.read_text()
+
+
+def test_report_rejects_bad_input(tmp_path):
+    bad = tmp_path / "bad.json"
+    bad.write_text("{}")
+    for target in (bad, tmp_path / "missing.json"):
+        with pytest.raises(SystemExit) as exc:
+            main(["report", str(target)])
+        assert exc.value.code == 2

@@ -94,7 +94,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R070 Markdown table report (one row per boundary). Test.
 - [x] R071 JSON report with `schema_version` and a versions header (Python, revenant, platform). Test.
 - [x] R072 `revenant run --adapter A --workload W [--kill-at K] [--mode boundary|mid] [--jobs N]`. Tests through `main(argv)`.
-- [ ] R073 `revenant report PATH --format text|md|json`. Tests.
+- [x] R073 `revenant report PATH --format text|md|json`. Tests.
 - [ ] R074 `revenant list` prints adapters and workloads. Test.
 - [ ] R075 Exit codes: 0 pass, 1 conformance failure, 2 usage error. Tests.
 - [ ] R076 `--out PATH` writes the JSON report. Test.

@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import json
+import sys
 import tempfile
 
 from revenant import __version__
 from revenant.adapters.reference import ReferenceAdapter
-from revenant.report import summary_line
+from revenant.report import markdown_from_dict, summary_line
 from revenant.runner import AdapterFactory, sweep
 from revenant.workloads import get_workload
 
@@ -24,7 +26,27 @@ def _build_parser() -> argparse.ArgumentParser:
     run.add_argument("--kill-at", type=int, default=None, help="one boundary instead of all")
     run.add_argument("--mode", choices=("boundary", "mid"), default="boundary")
     run.add_argument("--jobs", type=int, default=1)
+    report = sub.add_parser("report", help="render a saved JSON report")
+    report.add_argument("path")
+    report.add_argument("--format", choices=("text", "md", "json"), default="text")
     return parser
+
+
+def _report(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
+    try:
+        with open(args.path, encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (OSError, ValueError) as exc:
+        parser.error(f"cannot read report {args.path!r}: {exc}")
+    if not isinstance(data, dict) or "boundaries" not in data or "summary" not in data:
+        parser.error(f"{args.path!r} is not a revenant report")
+    if args.format == "text":
+        sys.stdout.write(f"{data['summary']}\n")
+    elif args.format == "md":
+        sys.stdout.write(markdown_from_dict(data))
+    else:
+        sys.stdout.write(json.dumps(data, indent=2, sort_keys=True) + "\n")
+    return 0 if data.get("verdict") != "FAIL" else 1
 
 
 def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
@@ -51,6 +73,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "run":
         return _run(args, parser)
+    if args.command == "report":
+        return _report(args, parser)
     parser.print_help()
     return 0
 
