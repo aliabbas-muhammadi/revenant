@@ -13,7 +13,7 @@ import tempfile
 
 from revenant import __version__
 from revenant.adapters.reference import ReferenceAdapter
-from revenant.report import markdown_from_dict, summary_line
+from revenant.report import json_report, markdown_from_dict, summary_line
 from revenant.runner import AdapterFactory, sweep
 from revenant.workloads import WORKLOAD_NAMES, get_workload
 
@@ -30,6 +30,7 @@ def _build_parser() -> argparse.ArgumentParser:
     run.add_argument("--kill-at", type=int, default=None, help="one boundary instead of all")
     run.add_argument("--mode", choices=("boundary", "mid"), default="boundary")
     run.add_argument("--jobs", type=int, default=1)
+    run.add_argument("--out", default=None, help="write the JSON report to this path")
     sub.add_parser("list", help="show known adapters and workloads")
     report = sub.add_parser("report", help="render a saved JSON report")
     report.add_argument("path")
@@ -69,6 +70,13 @@ def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
             ADAPTERS[args.adapter], workload, root,
             mode=args.mode, boundaries=points, jobs=args.jobs,
         )  # fmt: skip
+    if args.out:
+        planned = len(points) if points is not None else None
+        try:
+            with open(args.out, "w", encoding="utf-8") as fh:
+                fh.write(json_report(result, planned))
+        except OSError as exc:
+            parser.error(f"cannot write {args.out!r}: {exc}")
     print(summary_line(result))
     return 0 if result.passed else 1
 

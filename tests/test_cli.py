@@ -118,3 +118,26 @@ def test_usage_errors_exit_two(argv):
     with pytest.raises(SystemExit) as exc:
         main(argv)
     assert exc.value.code == 2
+
+
+def test_run_out_writes_json_report(tmp_path, capsys):
+    import json
+
+    out = tmp_path / "r.json"
+    argv = ["run", "--adapter", "reference", "--workload", "linear",
+            "--kill-at", "3", "--out", str(out)]  # fmt: skip
+    assert main(argv) == 0
+    data = json.loads(out.read_text())
+    assert data["schema_version"] == 1
+    assert data["verdict"] == "PASS"
+    assert len(data["boundaries"]) == 1
+    assert capsys.readouterr().out.strip() == data["summary"]
+    assert main(["report", str(out)]) == 0
+
+
+def test_run_out_unwritable_is_usage_error(tmp_path):
+    argv = ["run", "--adapter", "reference", "--workload", "linear", "--kill-at", "1",
+            "--out", str(tmp_path / "no" / "dir" / "r.json")]  # fmt: skip
+    with pytest.raises(SystemExit) as exc:
+        main(argv)
+    assert exc.value.code == 2
