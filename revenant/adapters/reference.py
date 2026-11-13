@@ -136,11 +136,15 @@ class ReferenceAdapter(Adapter):
         state["step"] += 1
         state["thoughts"].append(response)
         state["clock"] = clock.now()
+        self._stamp(state)
         self._trace.append(state_hash(state, workload.volatile_fields))
         self._write_checkpoint(
             root / CHECKPOINT_NAME, {"state": state, "trace": self._trace}, dying=dying
         )
         self._append_trace_line(root, state["step"], self._trace[-1])
+
+    def _stamp(self, state: dict[str, Any]) -> None:
+        """Hook for mutants that smuggle extra fields into hashed state."""
 
     def _write_checkpoint(self, path: Path, data: dict[str, Any], dying: bool) -> None:
         """Persist one checkpoint. ``dying`` says the process is about to be killed
