@@ -40,3 +40,30 @@ def test_markdown_has_one_row_per_boundary():
     assert "diverged at step 3" in rows[1] and rows[1].endswith("| FAIL |")
     assert rows[2].count("| 1 |") >= 1
     assert md.endswith("\n")
+
+
+def test_json_report_has_schema_and_versions():
+    import json
+    import sys
+
+    from revenant import __version__
+    from revenant.report import REPORT_SCHEMA_VERSION, json_report
+
+    r = aggregate("reference", "linear", [_b(1), _b(2, unconf=["k"])])
+    doc = json.loads(json_report(r))
+    assert doc["schema_version"] == REPORT_SCHEMA_VERSION
+    assert doc["versions"]["revenant"] == __version__
+    assert doc["versions"]["python"] == sys.version.split()[0]
+    assert set(doc["versions"]) == {"python", "revenant", "platform"}
+    assert doc["verdict"] == "PASS_WITH_UNCONFIRMED"
+    assert [b["boundary"] for b in doc["boundaries"]] == [1, 2]
+    assert doc["boundaries"][1]["effects"]["unconfirmed"] == ["k"]
+
+
+def test_json_report_is_stable_for_fixed_versions():
+    from revenant.report import json_report
+
+    r = aggregate("a", "w", [_b(1)])
+    v = {"python": "3", "revenant": "0", "platform": "x"}
+    assert json_report(r, versions=v) == json_report(r, versions=v)
+    assert json_report(r, versions=v).endswith("}\n")

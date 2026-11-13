@@ -51,3 +51,69 @@ def markdown_report(result: ConformanceResult, planned: int | None = None) -> st
             f"| {len(b.steps.phantom)} | {'pass' if b.passed else 'FAIL'} |"
         )
     return "\n".join(lines) + "\n"
+
+
+REPORT_SCHEMA_VERSION = 1
+
+
+def versions_header() -> dict[str, str]:
+    """Library and platform versions; durability behaviour changes across releases."""
+    import platform
+    import sys
+
+    from revenant import __version__
+
+    return {
+        "python": sys.version.split()[0],
+        "revenant": __version__,
+        "platform": platform.platform(),
+    }
+
+
+def report_dict(
+    result: ConformanceResult,
+    planned: int | None = None,
+    versions: dict[str, str] | None = None,
+) -> dict[str, object]:
+    """The full report as plain data, ready for ``json.dumps``."""
+    return {
+        "schema_version": REPORT_SCHEMA_VERSION,
+        "versions": versions if versions is not None else versions_header(),
+        "adapter": result.adapter,
+        "workload": result.workload,
+        "verdict": result.verdict.value,
+        "summary": summary_line(result, planned),
+        "boundaries": [
+            {
+                "boundary": b.boundary,
+                "mode": b.mode,
+                "passed": b.passed,
+                "determinism": {
+                    "passed": b.determinism.passed,
+                    "first_divergent_step": b.determinism.first_divergent_step,
+                    "final_state_matches": b.determinism.final_state_matches,
+                    "detail": b.determinism.detail,
+                },
+                "effects": {
+                    "once": b.effects.once,
+                    "duplicated": list(b.effects.duplicated),
+                    "missing": list(b.effects.missing),
+                    "unexpected": list(b.effects.unexpected),
+                    "unconfirmed": list(b.effects.unconfirmed),
+                },
+                "steps": {"lost": list(b.steps.lost), "phantom": list(b.steps.phantom)},
+            }
+            for b in result.boundaries
+        ],
+    }
+
+
+def json_report(
+    result: ConformanceResult,
+    planned: int | None = None,
+    versions: dict[str, str] | None = None,
+) -> str:
+    """Stable JSON text: sorted keys, two-space indent, trailing newline."""
+    import json
+
+    return json.dumps(report_dict(result, planned, versions), indent=2, sort_keys=True) + "\n"

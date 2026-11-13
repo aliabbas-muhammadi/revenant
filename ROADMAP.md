@@ -92,7 +92,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R068 One-line text summary exactly as in DESIGN.md. Test the exact string.
 - [x] R069 Verdict rules: `PASS`, `PASS_WITH_UNCONFIRMED`, `FAIL`. Tests for each.
 - [x] R070 Markdown table report (one row per boundary). Test.
-- [ ] R071 JSON report with `schema_version` and a versions header (Python, revenant, platform). Test.
+- [x] R071 JSON report with `schema_version` and a versions header (Python, revenant, platform). Test.
 - [ ] R072 `revenant run --adapter A --workload W [--kill-at K] [--mode boundary|mid] [--jobs N]`. Tests through `main(argv)`.
 - [ ] R073 `revenant report PATH --format text|md|json`. Tests.
 - [ ] R074 `revenant list` prints adapters and workloads. Test.
