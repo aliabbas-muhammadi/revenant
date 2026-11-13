@@ -4,8 +4,17 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from enum import Enum
 
 from revenant.scoring import DeterminismScore, EffectsScore, StepsScore
+
+
+class Verdict(Enum):
+    """Overall outcome. Unconfirmed effects soften a pass but never hide."""
+
+    PASS = "PASS"
+    PASS_WITH_UNCONFIRMED = "PASS_WITH_UNCONFIRMED"
+    FAIL = "FAIL"
 
 
 @dataclass(frozen=True)
@@ -63,6 +72,13 @@ class ConformanceResult:
     @property
     def passed(self) -> bool:
         return all(b.passed for b in self.boundaries)
+
+    @property
+    def verdict(self) -> Verdict:
+        """FAIL on any failed property; otherwise PASS, or PASS_WITH_UNCONFIRMED on residue."""
+        if not self.passed:
+            return Verdict.FAIL
+        return Verdict.PASS_WITH_UNCONFIRMED if self.unconfirmed else Verdict.PASS
 
     def failing(self) -> tuple[int, ...]:
         """Boundaries that failed any property, in order."""

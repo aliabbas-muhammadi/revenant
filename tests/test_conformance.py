@@ -40,3 +40,22 @@ def test_aggregate_sorts_boundaries():
 def test_empty_result_is_vacuously_passing_with_zero_totals():
     r = ConformanceResult("a", "w", ())
     assert r.total == 0 and r.effects_once == 0
+
+
+def test_verdict_pass():
+    from revenant.conformance import Verdict
+
+    assert aggregate("a", "w", [_b(1), _b(2)]).verdict is Verdict.PASS
+
+
+def test_verdict_pass_with_unconfirmed():
+    from revenant.conformance import Verdict
+
+    assert aggregate("a", "w", [_b(1, unconf=["k"])]).verdict is Verdict.PASS_WITH_UNCONFIRMED
+
+
+def test_verdict_fail_wins_over_unconfirmed():
+    from revenant.conformance import Verdict
+
+    r = aggregate("a", "w", [_b(1, unconf=["k"]), _b(2, ok=False)])
+    assert r.verdict is Verdict.FAIL
