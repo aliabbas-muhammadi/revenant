@@ -1,0 +1,278 @@
+{
+  "adapter": "mutant_volatile",
+  "boundaries": [
+    {
+      "boundary": 1,
+      "determinism": {
+        "detail": "step 2: expected abeec9886882, got 545b980cdefd",
+        "final_state_matches": false,
+        "first_divergent_step": 2,
+        "passed": false
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 3,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": false,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 2,
+      "determinism": {
+        "detail": "step 3: expected b09b05a9f143, got 34ac85212a93",
+        "final_state_matches": false,
+        "first_divergent_step": 3,
+        "passed": false
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 3,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": false,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 3,
+      "determinism": {
+        "detail": "step 4: expected e811bf9a6277, got ab612f273833",
+        "final_state_matches": false,
+        "first_divergent_step": 4,
+        "passed": false
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 3,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": false,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 4,
+      "determinism": {
+        "detail": "step 5: expected af2e94421f36, got 819b58a4961d",
+        "final_state_matches": false,
+        "first_divergent_step": 5,
+        "passed": false
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 3,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": false,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 5,
+      "determinism": {
+        "detail": "step 6: expected e317c067795c, got 029eac6d7202",
+        "final_state_matches": false,
+        "first_divergent_step": 6,
+        "passed": false
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 3,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": false,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 6,
+      "determinism": {
+        "detail": "step 7: expected 19d969f4c18c, got 5d006df4e6b9",
+        "final_state_matches": false,
+        "first_divergent_step": 7,
+        "passed": false
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 3,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": false,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 7,
+      "determinism": {
+        "detail": "step 8: expected d9b0cfc89b95, got 2edec900b07d",
+        "final_state_matches": false,
+        "first_divergent_step": 8,
+        "passed": false
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 3,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": false,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 8,
+      "determinism": {
+        "detail": "step 9: expected 6d3bcc89d238, got a2dde3594d87",
+        "final_state_matches": false,
+        "first_divergent_step": 9,
+        "passed": false
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 3,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": false,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 9,
+      "determinism": {
+        "detail": "step 10: expected d58b7f41c36b, got 040dc8f31ae7",
+        "final_state_matches": false,
+        "first_divergent_step": 10,
+        "passed": false
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 3,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": false,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 10,
+      "determinism": {
+        "detail": "step 11: expected 3ea9f5519fea, got 0168826c6ae7",
+        "final_state_matches": false,
+        "first_divergent_step": 11,
+        "passed": false
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 3,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": false,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 11,
+      "determinism": {
+        "detail": "step 12: expected cd88be3611f6, got 341b1ae53a7e",
+        "final_state_matches": false,
+        "first_divergent_step": 12,
+        "passed": false
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 3,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": false,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 12,
+      "determinism": {
+        "detail": "final state hash differs from the golden run",
+        "final_state_matches": false,
+        "first_divergent_step": null,
+        "passed": false
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 3,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": false,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    }
+  ],
+  "schema_version": 1,
+  "summary": "killed at 12/12 boundaries \u00b7 resumes: 0/12 identical \u00b7 effects: 3 once each \u00b7 unconfirmed: 0 \u00b7 verdict: FAIL",
+  "verdict": "FAIL",
+  "versions": {
+    "platform": "Linux-6.18.44-fc-v445-x86_64-with-glibc2.39",
+    "python": "3.11.18",
+    "revenant": "0.0.1"
+  },
+  "workload": "linear"
+}
