@@ -38,6 +38,8 @@ class ReferenceAdapter(Adapter):
     name = "reference"
     #: Subclasses that deliberately skip loading the checkpoint set this to False.
     resume_from_checkpoint = True
+    #: Mutants that checkpoint a step before performing its effect set this to True.
+    checkpoint_before_effect = False
 
     def __init__(self) -> None:
         self._workload: Workload | None = None
@@ -97,25 +99,44 @@ class ReferenceAdapter(Adapter):
                 spec = workload.steps[index]
                 response = model.respond(index)
                 clock.tick()
-                if spec.tool is not None:
-                    tool = get_tool(spec.tool, root / "sandbox")
+                tool = get_tool(spec.tool, root / "sandbox") if spec.tool is not None else None
+                if self.checkpoint_before_effect:
+                    if tool is not None:
+                        state["results"][spec.name] = tool.idempotency_key(spec.args)
+                    self._advance(state, response, clock, workload, root, False)
+                    if kill_mid and kill_at is not None and index + 1 == kill_at:
+                        # dies between the checkpoint and the effect it promised
+                        os.kill(os.getpid(), signal.SIGKILL)
+                if tool is not None:
                     outcome = invoke(tool, spec.args, sink, ledger, attempts)
                     state["results"][spec.name] = outcome.key
                 if kill_mid and kill_at is not None and index + 1 == kill_at:
                     os.kill(os.getpid(), signal.SIGKILL)
-                state["step"] = index + 1
-                state["thoughts"].append(response)
-                state["clock"] = clock.now()
-                self._trace.append(state_hash(state, workload.volatile_fields))
-                self._write_checkpoint(
-                    root / CHECKPOINT_NAME,
-                    {"state": state, "trace": self._trace},
-                    dying=not kill_mid and kill_at is not None and index + 1 == kill_at,
-                )
-                self._append_trace_line(root, index + 1, self._trace[-1])
+                if not self.checkpoint_before_effect:
+                    dying = not kill_mid and kill_at is not None and index + 1 == kill_at
+                    self._advance(state, response, clock, workload, root, dying)
                 if not kill_mid and kill_at is not None and index + 1 == kill_at:
                     os.kill(os.getpid(), signal.SIGKILL)
         return RunResult(True, len(self._trace), tuple(self._trace))
+
+    def _advance(
+        self,
+        state: dict[str, Any],
+        response: Any,
+        clock: InjectedClock,
+        workload: Workload,
+        root: Path,
+        dying: bool,
+    ) -> None:
+        """Record a finished step: update state, hash it, checkpoint and trace it."""
+        state["step"] += 1
+        state["thoughts"].append(response)
+        state["clock"] = clock.now()
+        self._trace.append(state_hash(state, workload.volatile_fields))
+        self._write_checkpoint(
+            root / CHECKPOINT_NAME, {"state": state, "trace": self._trace}, dying=dying
+        )
+        self._append_trace_line(root, state["step"], self._trace[-1])
 
     def _write_checkpoint(self, path: Path, data: dict[str, Any], dying: bool) -> None:
         """Persist one checkpoint. ``dying`` says the process is about to be killed

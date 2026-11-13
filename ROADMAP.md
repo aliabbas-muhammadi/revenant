@@ -106,7 +106,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 
 - [x] R080 `adapters/mutant_nocheckpoint.py`: restarts from step 0 on every run. Test it FAILS property 2 or 3 on the linear sweep.
 - [x] R081 `adapters/mutant_inplace.py`: writes the checkpoint in place (no temp + rename). Add a kill-during-checkpoint-write hook. Test that the harness detects corruption.
-- [ ] R082 `adapters/mutant_checkpoint_first.py`: checkpoints before performing the step's effect. Test that a mid-step kill produces a lost effect.
+- [x] R082 `adapters/mutant_checkpoint_first.py`: checkpoints before performing the step's effect. Test that a mid-step kill produces a lost effect.
 - [ ] R083 `adapters/mutant_noledger.py`: reference runtime with naive tools. Test duplicate effects under mid-step kills.
 - [ ] R084 `adapters/mutant_volatile.py`: puts a wall-clock timestamp in state without declaring it volatile. Test the harness flags divergence and the message points at the field.
 - [ ] R085 Mutant matrix test: every mutant fails with its expected property and no other.
