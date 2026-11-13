@@ -47,3 +47,16 @@ def test_classify_exit_codes():
     assert classify_exit(-9) is ChildStatus.KILLED
     assert classify_exit(1) is ChildStatus.ERROR
     assert classify_exit(-15) is ChildStatus.ERROR
+
+
+def test_timeout_is_a_hang_not_a_crash():
+    import sys
+
+    from revenant.runner import ChildStatus, spawn_child
+
+    out = spawn_child(
+        [sys.executable, "-c", "import time; print('hi', flush=True); time.sleep(30)"],
+        timeout=1.0,
+    )
+    assert out.status is ChildStatus.HANG
+    assert out.status is not ChildStatus.KILLED and out.status is not ChildStatus.ERROR

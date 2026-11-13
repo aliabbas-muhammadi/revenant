@@ -54,6 +54,7 @@ class ChildStatus(Enum):
     COMPLETED = "completed"
     KILLED = "killed"
     ERROR = "error"
+    HANG = "hang"
 
 
 @dataclass(frozen=True)
@@ -64,6 +65,15 @@ class ChildOutcome:
     returncode: int
     stdout: str
     stderr: str
+
+
+HANG_RETURNCODE = -1000  # sentinel: no exit code exists for a child we had to kill
+
+
+def _text(data: str | bytes | None) -> str:
+    if data is None:
+        return ""
+    return data.decode("utf-8", "replace") if isinstance(data, bytes) else data
 
 
 def classify_exit(returncode: int) -> ChildStatus:
@@ -87,9 +97,15 @@ def spawn_child(
     """
     full = {k: v for k, v in os.environ.items() if k not in (KILL_ENV, KILL_MODE_ENV)}
     full.update(env or {})
-    proc = subprocess.run(
-        list(argv), env=full, capture_output=True, text=True, timeout=timeout, check=False
-    )
+    try:
+        proc = subprocess.run(
+            list(argv), env=full, capture_output=True, text=True, timeout=timeout, check=False
+        )
+    except subprocess.TimeoutExpired as exc:
+        # A hang is not a crash: the child was still alive when we gave up on it.
+        return ChildOutcome(
+            ChildStatus.HANG, HANG_RETURNCODE, _text(exc.stdout), _text(exc.stderr)
+        )
     return ChildOutcome(classify_exit(proc.returncode), proc.returncode, proc.stdout, proc.stderr)
 
 
