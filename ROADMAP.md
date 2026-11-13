@@ -89,7 +89,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 
 ## M7 · Reports and CLI
 
-- [ ] R068 One-line text summary exactly as in DESIGN.md. Test the exact string.
+- [x] R068 One-line text summary exactly as in DESIGN.md. Test the exact string.
 - [x] R069 Verdict rules: `PASS`, `PASS_WITH_UNCONFIRMED`, `FAIL`. Tests for each.
 - [ ] R070 Markdown table report (one row per boundary). Test.
 - [ ] R071 JSON report with `schema_version` and a versions header (Python, revenant, platform). Test.
