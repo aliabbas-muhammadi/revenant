@@ -67,3 +67,15 @@ def test_json_report_is_stable_for_fixed_versions():
     v = {"python": "3", "revenant": "0", "platform": "x"}
     assert json_report(r, versions=v) == json_report(r, versions=v)
     assert json_report(r, versions=v).endswith("}\n")
+
+
+def test_markdown_from_dict_matches_markdown_report():
+    from revenant.report import markdown_from_dict, markdown_report, report_dict
+
+    results = (
+        aggregate("reference", "linear", [_b(1), _b(2)]),
+        aggregate("a", "w", [_b(1, ok=False), _b(2, unconf=["k"]), _b(3, dup=["h"], lost=[2])]),
+    )
+    for result in results:
+        data = report_dict(result, versions={"python": "x"})
+        assert markdown_from_dict(data) == markdown_report(result)

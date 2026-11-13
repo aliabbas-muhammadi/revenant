@@ -117,3 +117,31 @@ def json_report(
     import json
 
     return json.dumps(report_dict(result, planned, versions), indent=2, sort_keys=True) + "\n"
+
+
+def markdown_from_dict(data: dict[str, object]) -> str:
+    """Render the markdown report from a parsed JSON report (see :func:`report_dict`)."""
+    lines = [
+        f"# {data['adapter']} · {data['workload']}",
+        "",
+        str(data["summary"]),
+        "",
+        "| boundary | mode | resume | effects once | duplicated | missing | unconfirmed "
+        "| lost | phantom | result |",
+        "|---:|---|---|---:|---:|---:|---:|---:|---:|---|",
+    ]
+    for b in data["boundaries"]:  # type: ignore[attr-defined]
+        det, eff, steps = b["determinism"], b["effects"], b["steps"]
+        if det["passed"]:
+            resume = "identical"
+        elif det["first_divergent_step"] is not None:
+            resume = f"diverged at step {det['first_divergent_step']}"
+        else:
+            resume = "final state differs"
+        lines.append(
+            f"| {b['boundary']} | {b['mode']} | {resume} | {eff['once']} "
+            f"| {len(eff['duplicated'])} | {len(eff['missing'])} | {len(eff['unconfirmed'])} "
+            f"| {len(steps['lost'])} | {len(steps['phantom'])} "
+            f"| {'pass' if b['passed'] else 'FAIL'} |"
+        )
+    return "\n".join(lines) + "\n"
