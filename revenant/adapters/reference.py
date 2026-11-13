@@ -40,6 +40,8 @@ class ReferenceAdapter(Adapter):
     resume_from_checkpoint = True
     #: Mutants that checkpoint a step before performing its effect set this to True.
     checkpoint_before_effect = False
+    #: Mutants that bypass the effects ledger set this to True.
+    naive_tools = False
 
     def __init__(self) -> None:
         self._workload: Workload | None = None
@@ -108,7 +110,9 @@ class ReferenceAdapter(Adapter):
                         # dies between the checkpoint and the effect it promised
                         os.kill(os.getpid(), signal.SIGKILL)
                 if tool is not None:
-                    outcome = invoke(tool, spec.args, sink, ledger, attempts)
+                    outcome = invoke(
+                        tool, spec.args, sink, ledger, attempts, naive=self.naive_tools
+                    )
                     state["results"][spec.name] = outcome.key
                 if kill_mid and kill_at is not None and index + 1 == kill_at:
                     os.kill(os.getpid(), signal.SIGKILL)
