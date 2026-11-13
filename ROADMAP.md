@@ -98,7 +98,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R074 `revenant list` prints adapters and workloads. Test.
 - [x] R075 Exit codes: 0 pass, 1 conformance failure, 2 usage error. Tests.
 - [x] R076 `--out PATH` writes the JSON report. Test.
-- [ ] R077 Commit `results/reference-linear.{json,md}` produced by the CLI.
+- [x] R077 Commit `results/reference-linear.{json,md}` produced by the CLI.
 - [ ] R078 Commit reference results for `branching` and `fanout`.
 - [ ] R079 README quickstart showing a real run and its output.
 
