@@ -110,7 +110,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R083 `adapters/mutant_noledger.py`: reference runtime with naive tools. Test duplicate effects under mid-step kills.
 - [x] R084 `adapters/mutant_volatile.py`: puts a wall-clock timestamp in state without declaring it volatile. Test the harness flags divergence and the message points at the field. Field attribution in the message lands with R139.
 - [x] R085 Mutant matrix test: every mutant fails with its expected property and no other.
-- [ ] R086 `docs/mutants.md`: table of mutant → bug → property that catches it → committed result.
+- [x] R086 `docs/mutants.md`: table of mutant → bug → property that catches it → committed result.
 - [x] R087 Commit mutant results under `results/mutants/`.
 
 ## M9 · LangGraph adapter
