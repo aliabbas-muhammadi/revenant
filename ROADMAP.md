@@ -100,7 +100,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R076 `--out PATH` writes the JSON report. Test.
 - [x] R077 Commit `results/reference-linear.{json,md}` produced by the CLI.
 - [x] R078 Commit reference results for `branching` and `fanout`.
-- [ ] R079 README quickstart showing a real run and its output.
+- [x] R079 README quickstart showing a real run and its output.
 
 ## M8 · Mutant adapters (prove the harness catches bugs)
 
