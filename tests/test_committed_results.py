@@ -1,0 +1,22 @@
+import json
+from pathlib import Path
+
+import pytest
+
+from revenant.cli import main
+from revenant.report import REPORT_SCHEMA_VERSION, markdown_from_dict
+from revenant.workloads import WORKLOAD_NAMES
+
+RESULTS = Path(__file__).resolve().parent.parent / "results"
+
+
+@pytest.mark.parametrize("workload", WORKLOAD_NAMES)
+def test_committed_reference_results_are_consistent(workload, capsys):
+    json_path = RESULTS / f"reference-{workload}.json"
+    data = json.loads(json_path.read_text())
+    assert data["schema_version"] == REPORT_SCHEMA_VERSION
+    assert data["verdict"] == "PASS"
+    assert set(data["versions"]) == {"python", "revenant", "platform"}
+    assert (RESULTS / f"reference-{workload}.md").read_text() == markdown_from_dict(data)
+    assert main(["report", str(json_path)]) == 0
+    assert capsys.readouterr().out.strip() == data["summary"]
