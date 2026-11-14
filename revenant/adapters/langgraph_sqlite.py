@@ -90,6 +90,29 @@ def open_checkpointer(workdir: str | Path) -> SqliteSaver:
     return SqliteSaver(conn)
 
 
-def compile_graph(workload: Workload, workdir: str | Path, checkpointer: SqliteSaver) -> Any:
-    """Compile the workload graph with ``checkpointer`` attached."""
-    return build_graph(workload, workdir).compile(checkpointer=checkpointer)
+def compile_graph(
+    workload: Workload,
+    workdir: str | Path,
+    checkpointer: SqliteSaver,
+    interrupt_after: list[str] | None = None,
+) -> Any:
+    """Compile the workload graph with ``checkpointer`` attached.
+
+    ``interrupt_after`` names nodes to pause after; it exists so tests can leave a
+    partial run behind without killing a process.
+    """
+    return build_graph(workload, workdir).compile(
+        checkpointer=checkpointer, interrupt_after=interrupt_after
+    )
+
+
+def run_or_resume(graph: Any) -> dict[str, Any]:
+    """Start the workload, or continue it if the thread already has a checkpoint.
+
+    Resuming invokes the same ``thread_id`` with ``None`` as input, which tells
+    LangGraph to continue from the last saved superstep instead of restarting.
+    """
+    config = thread_config()
+    if graph.get_state(config).created_at is None:
+        return graph.invoke(initial_state(), config)
+    return graph.invoke(None, config)
