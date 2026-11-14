@@ -79,3 +79,24 @@ def test_markdown_from_dict_matches_markdown_report():
     for result in results:
         data = report_dict(result, versions={"python": "x"})
         assert markdown_from_dict(data) == markdown_report(result)
+
+
+def test_langgraph_reports_carry_the_installed_langgraph_version():
+    import json
+    from importlib.metadata import version
+
+    import pytest
+
+    pytest.importorskip("langgraph")
+    from revenant.report import json_report
+
+    doc = json.loads(json_report(aggregate("langgraph_sqlite", "linear", [_b(1)])))
+    assert doc["versions"]["langgraph"] == version("langgraph")
+    assert doc["versions"]["langgraph-checkpoint-sqlite"] == version("langgraph-checkpoint-sqlite")
+
+
+def test_other_adapters_do_not_list_langgraph():
+    from revenant.report import versions_header
+
+    assert "langgraph" not in versions_header("reference")
+    assert "langgraph" not in versions_header()

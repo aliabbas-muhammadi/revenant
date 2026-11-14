@@ -56,18 +56,35 @@ def markdown_report(result: ConformanceResult, planned: int | None = None) -> st
 REPORT_SCHEMA_VERSION = 1
 
 
-def versions_header() -> dict[str, str]:
-    """Library and platform versions; durability behaviour changes across releases."""
+def _installed(dist: str) -> str:
+    from importlib.metadata import PackageNotFoundError, version
+
+    try:
+        return version(dist)
+    except PackageNotFoundError:
+        return "unknown"
+
+
+def versions_header(adapter: str | None = None) -> dict[str, str]:
+    """Library and platform versions; durability behaviour changes across releases.
+
+    Adapters built on a third-party runtime add that runtime's version, since its
+    checkpointing behaviour is what the report is really about.
+    """
     import platform
     import sys
 
     from revenant import __version__
 
-    return {
+    header = {
         "python": sys.version.split()[0],
         "revenant": __version__,
         "platform": platform.platform(),
     }
+    if adapter == "langgraph_sqlite":
+        header["langgraph"] = _installed("langgraph")
+        header["langgraph-checkpoint-sqlite"] = _installed("langgraph-checkpoint-sqlite")
+    return header
 
 
 def report_dict(
@@ -78,7 +95,7 @@ def report_dict(
     """The full report as plain data, ready for ``json.dumps``."""
     return {
         "schema_version": REPORT_SCHEMA_VERSION,
-        "versions": versions if versions is not None else versions_header(),
+        "versions": versions if versions is not None else versions_header(result.adapter),
         "adapter": result.adapter,
         "workload": result.workload,
         "verdict": result.verdict.value,
