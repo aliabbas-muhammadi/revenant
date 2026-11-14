@@ -134,7 +134,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 
 - [x] R102 Duplicate-delivery injection: the same tool result delivered twice. Tests on reference.
 - [x] R103 Tool-timeout injection: a tool attempt hangs and is retried. Tests.
-- [ ] R104 Checkpoint truncation: adapters must raise a named error. Tests for reference and LangGraph.
+- [x] R104 Checkpoint truncation: adapters must raise a named error. Tests for reference and LangGraph.
 - [ ] R105 Checkpoint bit-flip corruption. Tests.
 - [ ] R106 Ledger file deleted between kill and resume: must be detected, not silently re-run. Tests.
 - [ ] R107 Sink file truncated mid-line: reader reports the partial record. Tests.

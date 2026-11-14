@@ -30,6 +30,7 @@ from langgraph.graph import END, START, StateGraph
 from revenant.adapter import Adapter
 from revenant.adapters.reference import KILL_ENV, KILL_MODE_ENV, KILL_MODES
 from revenant.canon import state_hash
+from revenant.checkpoint import CheckpointCorrupt
 from revenant.clock import InjectedClock
 from revenant.ledger import Ledger
 from revenant.model import ScriptedModel
@@ -228,6 +229,25 @@ def open_checkpointer(workdir: str | Path) -> SqliteSaver:
     return SqliteSaver(conn)
 
 
+def open_checked_checkpointer(workdir: str | Path) -> SqliteSaver:
+    """Like :func:`open_checkpointer`, but a damaged database raises ``CheckpointCorrupt``.
+
+    A zero-byte file is what truncation leaves behind; SQLite would treat it as a
+    fresh database and silently restart the run, so it is rejected up front.
+    """
+    path = Path(workdir) / CHECKPOINT_DB
+    if path.exists() and path.stat().st_size == 0:
+        raise CheckpointCorrupt(f"checkpoint {path} is empty (truncated)")
+    saver = open_checkpointer(workdir)
+    try:
+        saver.conn.execute("PRAGMA schema_version").fetchall()
+        saver.conn.execute("PRAGMA quick_check").fetchall()
+    except sqlite3.DatabaseError as exc:
+        saver.conn.close()
+        raise CheckpointCorrupt(f"checkpoint {path} is damaged: {exc}") from exc
+    return saver
+
+
 def compile_graph(
     workload: Workload,
     workdir: str | Path,
@@ -302,7 +322,7 @@ class LangGraphAdapter(Adapter):
         mode = os.environ.get(KILL_MODE_ENV, "boundary")
         if mode not in KILL_MODES:
             raise ValueError(f"{KILL_MODE_ENV} must be one of {KILL_MODES}, got {mode!r}")
-        saver = open_checkpointer(root)
+        saver = open_checked_checkpointer(root)
         try:
             graph = compile_graph(
                 workload, root, saver,
@@ -320,7 +340,7 @@ class LangGraphAdapter(Adapter):
         workload, root = self._built()
         if not (root / CHECKPOINT_DB).exists():
             return ()
-        saver = open_checkpointer(root)
+        saver = open_checked_checkpointer(root)
         try:
             return hash_trace(compile_graph(workload, root, saver), workload)
         finally:
