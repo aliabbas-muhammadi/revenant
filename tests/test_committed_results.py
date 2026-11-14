@@ -35,3 +35,26 @@ def test_committed_mutant_results_fail_and_match_markdown(name):
     assert data["schema_version"] == REPORT_SCHEMA_VERSION
     assert data["verdict"] == "FAIL"
     assert (RESULTS / "mutants" / f"{name}.md").read_text() == markdown_from_dict(data)
+
+
+LANGGRAPH = sorted(p.name[: -len(".json")] for p in (RESULTS / "langgraph").glob("*.json"))
+
+
+def test_langgraph_results_cover_both_tool_modes_for_every_workload():
+    assert LANGGRAPH == sorted(f"{m}-{w}" for m in ("ledgered", "naive") for w in WORKLOAD_NAMES)
+
+
+@pytest.mark.parametrize("name", LANGGRAPH)
+def test_committed_langgraph_results_match_markdown_and_name_langgraph(name):
+    data = json.loads((RESULTS / "langgraph" / f"{name}.json").read_text())
+    assert data["adapter"] == "langgraph_sqlite"
+    assert data["schema_version"] == REPORT_SCHEMA_VERSION
+    assert {"langgraph", "langgraph-checkpoint-sqlite"} <= set(data["versions"])
+    assert (RESULTS / "langgraph" / f"{name}.md").read_text() == markdown_from_dict(data)
+
+
+@pytest.mark.parametrize("workload", WORKLOAD_NAMES)
+def test_committed_naive_langgraph_runs_duplicate_effects(workload):
+    data = json.loads((RESULTS / "langgraph" / f"naive-{workload}.json").read_text())
+    assert data["verdict"] == "FAIL"
+    assert any(b["effects"]["duplicated"] for b in data["boundaries"])
