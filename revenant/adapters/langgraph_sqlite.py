@@ -14,21 +14,28 @@ LangGraph re-runs that node on resume.
 
 from __future__ import annotations
 
+import argparse
+import json
 import os
 import signal
 import sqlite3
+import sys
 from pathlib import Path
 from typing import Any, TypedDict
 
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 
+from revenant.adapter import Adapter
+from revenant.adapters.reference import KILL_ENV, KILL_MODE_ENV, KILL_MODES
+from revenant.canon import state_hash
 from revenant.clock import InjectedClock
 from revenant.ledger import Ledger
 from revenant.model import ScriptedModel
+from revenant.result import RunResult
 from revenant.sink import EffectSink
 from revenant.tools import AttemptCounter, get_tool, invoke
-from revenant.workloads import Workload
+from revenant.workloads import Workload, get_workload
 
 
 class GraphState(TypedDict):
@@ -146,3 +153,91 @@ def run_or_resume(graph: Any) -> dict[str, Any]:
     if graph.get_state(config).created_at is None:
         return graph.invoke(initial_state(), config)
     return graph.invoke(None, config)
+
+
+def hash_trace(graph: Any, workload: Workload) -> tuple[str, ...]:
+    """Per-step state hashes read back from the saved supersteps, in step order.
+
+    Volatile fields are excluded exactly as for the reference runtime, so a clean
+    LangGraph run produces the same trace as the reference.
+    """
+    by_step: dict[int, str] = {}
+    for snap in graph.get_state_history(thread_config()):
+        step = snap.values.get("step", 0)
+        if step >= 1:
+            by_step[step] = state_hash(dict(snap.values), workload.volatile_fields)
+    return tuple(by_step[k] for k in sorted(by_step))
+
+
+class LangGraphAdapter(Adapter):
+    """LangGraph with ``SqliteSaver``, resumed by ``thread_id``."""
+
+    name = "langgraph_sqlite"
+
+    def __init__(self) -> None:
+        self._workload: Workload | None = None
+        self._workdir: Path | None = None
+
+    def build(self, workload: Workload, workdir: str | Path) -> None:
+        self._workload = workload
+        self._workdir = Path(workdir)
+        self._workdir.mkdir(parents=True, exist_ok=True)
+
+    def _built(self) -> tuple[Workload, Path]:
+        if self._workload is None or self._workdir is None:
+            raise RuntimeError("call build() before run()")
+        return self._workload, self._workdir
+
+    def run(self, kill_at: int | None = None) -> RunResult:
+        """Run or resume; ``kill_at`` (or ``REVENANT_KILL_AT``) kills at that boundary."""
+        workload, root = self._built()
+        if kill_at is None and os.environ.get(KILL_ENV):
+            kill_at = int(os.environ[KILL_ENV])
+        mode = os.environ.get(KILL_MODE_ENV, "boundary")
+        if mode not in KILL_MODES:
+            raise ValueError(f"{KILL_MODE_ENV} must be one of {KILL_MODES}, got {mode!r}")
+        saver = open_checkpointer(root)
+        try:
+            graph = compile_graph(
+                workload, root, saver, kill_at=kill_at, kill_mid=mode == "mid"
+            )
+            run_or_resume(graph)
+            if kill_at == len(workload.steps) and mode == "boundary":
+                die()  # the last boundary: everything saved, nothing left to run
+            trace = hash_trace(graph, workload)
+        finally:
+            saver.conn.close()
+        return RunResult(True, len(trace), trace)
+
+    def state_trace(self) -> tuple[str, ...]:
+        workload, root = self._built()
+        if not (root / CHECKPOINT_DB).exists():
+            return ()
+        saver = open_checkpointer(root)
+        try:
+            return hash_trace(compile_graph(workload, root, saver), workload)
+        finally:
+            saver.conn.close()
+
+    def boundaries(self) -> int:
+        """Superstep count: one per step for the linear graph."""
+        workload, _ = self._built()
+        return len(workload.steps)
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Child entry point, mirroring the reference adapter's."""
+    parser = argparse.ArgumentParser(prog="python -m revenant.adapters.langgraph_sqlite")
+    parser.add_argument("--workload", required=True)
+    parser.add_argument("--workdir", required=True)
+    args = parser.parse_args(argv)
+    adapter = LangGraphAdapter()
+    adapter.build(get_workload(args.workload), args.workdir)
+    result = adapter.run()
+    print(json.dumps({"completed": result.completed, "steps_run": result.steps_run}))
+    sys.stdout.flush()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
