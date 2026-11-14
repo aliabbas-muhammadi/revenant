@@ -117,7 +117,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 
 - [x] R088 Add the `langgraph` extra (`langgraph`, `langgraph-checkpoint-sqlite`) with `uv add --optional langgraph`. Tests needing it use `pytest.importorskip`.
 - [x] R089 Graph builder for `linear`: one node per step.
-- [ ] R090 `SqliteSaver` checkpointer in the workdir and a fixed `thread_id`.
+- [x] R090 `SqliteSaver` checkpointer in the workdir and a fixed `thread_id`.
 - [ ] R091 Resume by invoking with the same `thread_id` and `None` input. Test.
 - [ ] R092 Kill hook inside nodes; define and document `boundaries()` as superstep count.
 - [ ] R093 State hashing with the adapter's volatile fields. Test.
