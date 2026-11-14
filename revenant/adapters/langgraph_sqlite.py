@@ -61,7 +61,10 @@ def build_graph(
     kill_mid: bool = False,
     naive_tools: bool = False,
 ) -> StateGraph:
-    """One node per step, chained ``START -> step_0 -> ... -> END`` (uncompiled).
+    """One node per step, ``START -> step_0 -> ... -> END`` (uncompiled).
+
+    Every node leaves through a conditional edge, so a ``stop`` response from the
+    scripted model ends the run early (the ``branching`` tool loop).
 
     With ``kill_at=k`` the process dies at boundary ``k`` (``1..N-1`` here; the final
     boundary is the caller's, once the graph returns). ``kill_mid`` instead dies in
@@ -105,10 +108,26 @@ def build_graph(
     for i, name in enumerate(names):
         graph.add_node(name, make_node(i))
     graph.add_edge(START, names[0])
-    for a, b in zip(names, names[1:], strict=False):
-        graph.add_edge(a, b)
-    graph.add_edge(names[-1], END)
+    for i, name in enumerate(names):
+        following = names[i + 1] if i + 1 < len(names) else END
+        graph.add_conditional_edges(name, make_router(following), [following, END])
     return graph
+
+
+def make_router(following: str):
+    """Conditional edge: end the run once the model's last response says ``stop``.
+
+    Otherwise continue to ``following``. Scripts without an ``action`` key (the
+    linear workload) never stop early, so they run every node.
+    """
+
+    def route(state: GraphState) -> str:
+        last = state["thoughts"][-1] if state["thoughts"] else None
+        if isinstance(last, dict) and last.get("action") == "stop":
+            return END
+        return following
+
+    return route
 
 
 CHECKPOINT_DB = "langgraph.sqlite"
