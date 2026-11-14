@@ -140,7 +140,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R107 Sink file truncated mid-line: reader reports the partial record. Tests.
 - [x] R108 `--chaos none|dup|timeout|corrupt|all` CLI flag. Tests.
 - [x] R109 Chaos columns in text, markdown and JSON reports. Tests.
-- [ ] R110 Commit chaos results.
+- [x] R110 Commit chaos results.
 
 ## M11 · Hardening
 

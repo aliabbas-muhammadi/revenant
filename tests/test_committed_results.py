@@ -58,3 +58,18 @@ def test_committed_naive_langgraph_runs_duplicate_effects(workload):
     data = json.loads((RESULTS / "langgraph" / f"naive-{workload}.json").read_text())
     assert data["verdict"] == "FAIL"
     assert any(b["effects"]["duplicated"] for b in data["boundaries"])
+
+
+CHAOS_MODES_COMMITTED = ("dup", "timeout", "corrupt", "all")
+
+
+@pytest.mark.parametrize("workload", WORKLOAD_NAMES)
+@pytest.mark.parametrize("mode", CHAOS_MODES_COMMITTED)
+def test_committed_chaos_results_pass_and_match_markdown(workload, mode):
+    stem = RESULTS / "chaos" / f"reference-{workload}-{mode}"
+    data = json.loads(stem.with_suffix(".json").read_text())
+    assert data["chaos"] == mode
+    assert data["verdict"] == "PASS"
+    assert stem.with_suffix(".md").read_text() == markdown_from_dict(data)
+    if mode in ("corrupt", "all"):
+        assert all(b["detected"] is True for b in data["boundaries"])

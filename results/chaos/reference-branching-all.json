@@ -1,0 +1,245 @@
+{
+  "adapter": "reference",
+  "boundaries": [
+    {
+      "boundary": 1,
+      "detected": true,
+      "determinism": {
+        "detail": "",
+        "final_state_matches": true,
+        "first_divergent_step": null,
+        "passed": true
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 9,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": true,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 2,
+      "detected": true,
+      "determinism": {
+        "detail": "",
+        "final_state_matches": true,
+        "first_divergent_step": null,
+        "passed": true
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 9,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": true,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 3,
+      "detected": true,
+      "determinism": {
+        "detail": "",
+        "final_state_matches": true,
+        "first_divergent_step": null,
+        "passed": true
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 9,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": true,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 4,
+      "detected": true,
+      "determinism": {
+        "detail": "",
+        "final_state_matches": true,
+        "first_divergent_step": null,
+        "passed": true
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 9,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": true,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 5,
+      "detected": true,
+      "determinism": {
+        "detail": "",
+        "final_state_matches": true,
+        "first_divergent_step": null,
+        "passed": true
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 9,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": true,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 6,
+      "detected": true,
+      "determinism": {
+        "detail": "",
+        "final_state_matches": true,
+        "first_divergent_step": null,
+        "passed": true
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 9,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": true,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 7,
+      "detected": true,
+      "determinism": {
+        "detail": "",
+        "final_state_matches": true,
+        "first_divergent_step": null,
+        "passed": true
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 9,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": true,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 8,
+      "detected": true,
+      "determinism": {
+        "detail": "",
+        "final_state_matches": true,
+        "first_divergent_step": null,
+        "passed": true
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 9,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": true,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 9,
+      "detected": true,
+      "determinism": {
+        "detail": "",
+        "final_state_matches": true,
+        "first_divergent_step": null,
+        "passed": true
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 9,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": true,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    },
+    {
+      "boundary": 10,
+      "detected": true,
+      "determinism": {
+        "detail": "",
+        "final_state_matches": true,
+        "first_divergent_step": null,
+        "passed": true
+      },
+      "effects": {
+        "duplicated": [],
+        "missing": [],
+        "once": 9,
+        "unconfirmed": [],
+        "unexpected": []
+      },
+      "mode": "boundary",
+      "passed": true,
+      "steps": {
+        "lost": [],
+        "phantom": []
+      }
+    }
+  ],
+  "chaos": "all",
+  "schema_version": 1,
+  "summary": "killed at 10/10 boundaries \u00b7 resumes: 10/10 identical \u00b7 effects: 9 once each \u00b7 unconfirmed: 0 \u00b7 chaos: all \u00b7 damage refused: 10/10 \u00b7 verdict: PASS",
+  "verdict": "PASS",
+  "versions": {
+    "platform": "Linux-6.18.44-fc-v470-x86_64-with-glibc2.39",
+    "python": "3.11.18",
+    "revenant": "0.0.1"
+  },
+  "workload": "branching"
+}
