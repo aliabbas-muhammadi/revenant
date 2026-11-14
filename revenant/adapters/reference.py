@@ -44,6 +44,8 @@ class ReferenceAdapter(Adapter):
     naive_tools = False
     #: Chaos: deliver every tool call twice (the same result arriving again).
     duplicate_delivery = False
+    #: Chaos: the first attempt of every tool call hangs before its effect and is retried.
+    timeout_retry = False
 
     def __init__(self) -> None:
         self._workload: Workload | None = None
@@ -112,6 +114,8 @@ class ReferenceAdapter(Adapter):
                         # dies between the checkpoint and the effect it promised
                         os.kill(os.getpid(), signal.SIGKILL)
                 if tool is not None:
+                    if self.timeout_retry:
+                        self._hung_attempt(tool, spec.args, ledger, attempts)
                     outcome = invoke(
                         tool, spec.args, sink, ledger, attempts, naive=self.naive_tools
                     )
@@ -126,6 +130,18 @@ class ReferenceAdapter(Adapter):
                 if not kill_mid and kill_at is not None and index + 1 == kill_at:
                     os.kill(os.getpid(), signal.SIGKILL)
         return RunResult(True, len(self._trace), tuple(self._trace))
+
+    @staticmethod
+    def _hung_attempt(
+        tool: Any, args: dict[str, Any], ledger: Ledger, attempts: AttemptCounter
+    ) -> None:
+        """A first attempt that recorded its intent and then hung before performing anything.
+
+        The caller gives up and retries; the retry finds the ``intent`` row left behind,
+        is told to execute, and commits, so the effect still lands exactly once.
+        """
+        attempts.record(tool.name)
+        ledger.begin(tool.idempotency_key(args), {"tool": tool.name, "args": args})
 
     def _advance(
         self,
