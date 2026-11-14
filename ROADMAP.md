@@ -128,7 +128,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R098 Integration test: naive tools under mid-step kills record duplicate effects > 0. The test asserts the measurement, not a pass.
 - [x] R099 Report header includes the installed LangGraph version.
 - [x] R100 Commit LangGraph results, naive and ledgered, for all three workloads.
-- [ ] R101 `docs/langgraph.md`: superstep granularity, what was measured, and the naive vs ledgered delta.
+- [x] R101 `docs/langgraph.md`: superstep granularity, what was measured, and the naive vs ledgered delta.
 
 ## M10 · Chaos extensions
 
