@@ -21,6 +21,7 @@ from revenant.adapters.mutant_nocheckpoint import NoCheckpointMutant
 from revenant.adapters.mutant_noledger import NoLedgerMutant
 from revenant.adapters.mutant_volatile import VolatileMutant
 from revenant.adapters.reference import ReferenceAdapter
+from revenant.chaos import CHAOS_MODES
 from revenant.report import json_report, markdown_from_dict, summary_line
 from revenant.runner import AdapterFactory, sweep
 from revenant.workloads import WORKLOAD_NAMES, get_workload
@@ -71,6 +72,8 @@ def _build_parser() -> argparse.ArgumentParser:
     run.add_argument("--mode", choices=("boundary", "mid"), default="boundary")
     run.add_argument("--naive-tools", action="store_true",
                      help="langgraph_sqlite only: bypass the effects ledger")  # fmt: skip
+    run.add_argument("--chaos", choices=CHAOS_MODES, default="none",
+                     help="inject faults (reference-based adapters only)")  # fmt: skip
     run.add_argument("--jobs", type=int, default=1)
     run.add_argument("--out", default=None, help="write the JSON report to this path")
     sub.add_parser("list", help="show known adapters and workloads")
@@ -113,11 +116,13 @@ def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
             parser.error("--naive-tools only applies to --adapter langgraph_sqlite")
         factory = functools.partial(LangGraphAdapter, naive_tools=True)
         extra = ("--naive-tools",)
+    if args.chaos != "none" and not issubclass(factory, ReferenceAdapter):
+        parser.error("--chaos only applies to adapters built on the reference runtime")
     points = [args.kill_at] if args.kill_at is not None else None
     with tempfile.TemporaryDirectory(prefix="revenant-") as root:
         result = sweep(
             factory, workload, root,
-            mode=args.mode, boundaries=points, jobs=args.jobs,
+            mode=args.mode, boundaries=points, jobs=args.jobs, chaos=args.chaos,
             argv_for=_argv_for(args.adapter, args.workload, extra),
         )  # fmt: skip
     if args.out:

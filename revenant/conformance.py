@@ -26,9 +26,14 @@ class BoundaryResult:
     determinism: DeterminismScore
     effects: EffectsScore
     steps: StepsScore
+    #: Chaos damage injected before the resume: ``None`` none, ``True`` the runtime
+    #: refused the damaged state with a named error, ``False`` it carried on regardless.
+    detected: bool | None = None
 
     @property
     def passed(self) -> bool:
+        if self.detected is not None:
+            return self.detected
         return self.determinism.passed and self.effects.passed and self.steps.passed
 
 
@@ -39,6 +44,7 @@ class ConformanceResult:
     adapter: str
     workload: str
     boundaries: tuple[BoundaryResult, ...]
+    chaos: str = "none"
 
     def __post_init__(self) -> None:
         if not isinstance(self.boundaries, tuple):
@@ -86,7 +92,9 @@ class ConformanceResult:
 
 
 def aggregate(
-    adapter: str, workload: str, results: Sequence[BoundaryResult]
+    adapter: str, workload: str, results: Sequence[BoundaryResult], chaos: str = "none"
 ) -> ConformanceResult:
     """Build a result with boundaries sorted so ordering is deterministic."""
-    return ConformanceResult(adapter, workload, tuple(sorted(results, key=lambda r: r.boundary)))
+    return ConformanceResult(
+        adapter, workload, tuple(sorted(results, key=lambda r: r.boundary)), chaos
+    )

@@ -15,6 +15,12 @@ from pathlib import Path
 
 from revenant.adapter import Adapter
 from revenant.adapters.reference import KILL_ENV, KILL_MODE_ENV
+from revenant.chaos import (
+    CHAOS_ENV,
+    corrupt_checkpoint,
+    damages_checkpoint,
+    injections,
+)
 from revenant.conformance import BoundaryResult, ConformanceResult, aggregate
 from revenant.ledger import Ledger
 from revenant.result import RunResult
@@ -138,6 +144,16 @@ class KillResume:
     resumed: ChildOutcome
     stitched: tuple[str | None, ...]
     residue: tuple[str, ...] = ()
+    #: Whether chaos damaged the durable state between the kill and the resume.
+    damaged: bool = False
+
+    @property
+    def refused(self) -> bool:
+        """The resume stopped with a named checkpoint error instead of carrying on."""
+        text = self.resumed.stderr
+        return self.resumed.status is ChildStatus.ERROR and (
+            "CheckpointCorrupt" in text or "CheckpointError" in text
+        )
 
 
 def reference_argv(workload: str, workdir: str | Path) -> list[str]:
@@ -165,10 +181,12 @@ def kill_and_resume(
     mode: str = "boundary",
     argv: Sequence[str] | None = None,
     timeout: float = 60.0,
+    damage: Callable[[Path], bool] | None = None,
 ) -> KillResume:
     """Kill a child at ``boundary``, resume it in the same workdir, stitch the traces.
 
-    ``argv`` is the child command (default: the reference entry point).
+    ``argv`` is the child command (default: the reference entry point). ``damage``
+    runs on the workdir between the kill and the resume and says whether it harmed anything.
     """
     workdir = Path(workdir)
     cmd = list(argv) if argv is not None else reference_argv(workload.name, workdir)
@@ -176,13 +194,14 @@ def kill_and_resume(
         cmd, {KILL_ENV: str(boundary), KILL_MODE_ENV: mode}, timeout=timeout
     )
     residue = _ledger_residue(workdir)
+    damaged = damage(workdir) if damage is not None else False
     adapter = factory()
     adapter.build(workload, workdir)
     pre = adapter.state_trace()
     resumed = spawn_child(cmd, timeout=timeout)
     post = adapter.state_trace()
     # The reference trace is cumulative, so the post-resume trace starts at step 1.
-    return KillResume(boundary, killed, resumed, stitch(pre, post), residue)
+    return KillResume(boundary, killed, resumed, stitch(pre, post), residue, damaged)
 
 
 def _read_effects(workdir: Path) -> list[dict[str, object]]:
@@ -198,14 +217,52 @@ def sweep(
     boundaries: Sequence[int] | None = None,
     argv_for: Callable[[Path], Sequence[str]] | None = None,
     jobs: int = 1,
+    chaos: str = "none",
 ) -> ConformanceResult:
     """Kill and resume at every boundary (default ``1..N``) and score all three properties.
 
     ``root`` receives a ``golden`` directory and one ``k<boundary>`` directory per kill.
     ``argv_for(workdir)`` builds the child command for an adapter other than the reference.
     ``jobs`` runs that many boundaries at once; results are always ordered by boundary.
+    ``chaos`` is a mode from :data:`revenant.chaos.CHAOS_MODES`: ``dup`` and ``timeout``
+    reach the children through ``REVENANT_CHAOS``; ``corrupt`` flips a checkpoint bit
+    before each resume, and a boundary then passes only if the resume refused it.
     """
     root = Path(root)
+    damage = corrupt_checkpoint if damages_checkpoint(chaos) else None
+    with _chaos_env(chaos):
+        return _sweep(factory, workload, root, mode, boundaries, argv_for, jobs, chaos, damage)
+
+
+@contextmanager
+def _chaos_env(chaos: str) -> Iterator[None]:
+    """Expose the mode's injections to this process and the children it spawns."""
+    wanted = ",".join(sorted(injections(chaos)))
+    saved = os.environ.get(CHAOS_ENV)
+    if wanted:
+        os.environ[CHAOS_ENV] = wanted
+    else:
+        os.environ.pop(CHAOS_ENV, None)
+    try:
+        yield
+    finally:
+        if saved is None:
+            os.environ.pop(CHAOS_ENV, None)
+        else:
+            os.environ[CHAOS_ENV] = saved
+
+
+def _sweep(
+    factory: AdapterFactory,
+    workload: Workload,
+    root: Path,
+    mode: str,
+    boundaries: Sequence[int] | None,
+    argv_for: Callable[[Path], Sequence[str]] | None,
+    jobs: int,
+    chaos: str,
+    damage: Callable[[Path], bool] | None,
+) -> ConformanceResult:
     golden = golden_run(factory, workload, root / "golden")
     golden_effects = _read_effects(root / "golden")
     adapter_name = factory().name
@@ -218,7 +275,20 @@ def sweep(
         if workdir.exists() and any(workdir.iterdir()):
             raise ValueError(f"boundary workdir must start empty, got {workdir}")
         argv = argv_for(workdir) if argv_for is not None else None
-        run = kill_and_resume(factory, workload, workdir, k, mode=mode, argv=argv)
+        run = kill_and_resume(
+            factory, workload, workdir, k, mode=mode, argv=argv, damage=damage
+        )
+        if run.damaged:
+            # The golden scores stand in for the properties: a refused resume has no
+            # trace to compare, and what is being judged is only whether it refused.
+            return BoundaryResult(
+                k,
+                mode,
+                score_determinism(golden.trace, golden.trace, k),
+                score_effects(golden_effects, golden_effects),
+                score_steps(golden.trace, golden.trace),
+                detected=run.refused,
+            )
         return BoundaryResult(
             k,
             mode,
@@ -232,4 +302,4 @@ def sweep(
     else:
         with ThreadPoolExecutor(max_workers=jobs) as pool:
             results = list(pool.map(one, points))
-    return aggregate(adapter_name, workload.name, results)
+    return aggregate(adapter_name, workload.name, results, chaos)

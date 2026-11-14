@@ -138,7 +138,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R105 Checkpoint bit-flip corruption. Tests.
 - [x] R106 Ledger file deleted between kill and resume: must be detected, not silently re-run. Tests.
 - [x] R107 Sink file truncated mid-line: reader reports the partial record. Tests.
-- [ ] R108 `--chaos none|dup|timeout|corrupt|all` CLI flag. Tests.
+- [x] R108 `--chaos none|dup|timeout|corrupt|all` CLI flag. Tests.
 - [ ] R109 Chaos columns in text, markdown and JSON reports. Tests.
 - [ ] R110 Commit chaos results.
 

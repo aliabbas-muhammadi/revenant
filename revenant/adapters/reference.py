@@ -16,6 +16,7 @@ from typing import Any
 
 from revenant.adapter import Adapter
 from revenant.canon import state_hash
+from revenant.chaos import injections_from_env
 from revenant.checkpoint import load_checkpoint, write_checkpoint
 from revenant.clock import InjectedClock
 from revenant.ledger import Ledger, LedgerLost
@@ -52,6 +53,9 @@ class ReferenceAdapter(Adapter):
         self._workload: Workload | None = None
         self._workdir: Path | None = None
         self._trace: list[str] = []
+        chaos = injections_from_env()
+        self.duplicate_delivery = self.duplicate_delivery or "dup" in chaos
+        self.timeout_retry = self.timeout_retry or "timeout" in chaos
 
     def build(self, workload: Workload, workdir: str | Path) -> None:
         self._workload = workload
