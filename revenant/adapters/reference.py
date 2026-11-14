@@ -18,7 +18,7 @@ from revenant.adapter import Adapter
 from revenant.canon import state_hash
 from revenant.checkpoint import load_checkpoint, write_checkpoint
 from revenant.clock import InjectedClock
-from revenant.ledger import Ledger
+from revenant.ledger import Ledger, LedgerLost
 from revenant.model import ScriptedModel
 from revenant.result import RunResult
 from revenant.sink import EffectSink
@@ -27,6 +27,7 @@ from revenant.workloads import Workload, get_workload
 
 CHECKPOINT_NAME = "checkpoint.json"
 TRACE_NAME = "trace.jsonl"
+LEDGER_NAME = "ledger.db"
 KILL_ENV = "REVENANT_KILL_AT"
 KILL_MODE_ENV = "REVENANT_KILL_MODE"
 KILL_MODES = ("boundary", "mid")
@@ -96,9 +97,13 @@ class ReferenceAdapter(Adapter):
             state = saved["state"]
             self._trace = list(saved["trace"])
             clock = InjectedClock(state["clock"])
+            if state["step"] > 0 and not (root / LEDGER_NAME).exists():
+                raise LedgerLost(
+                    f"checkpoint is at step {state['step']} but {root / LEDGER_NAME} is missing"
+                )
         self._rewrite_trace_file(root)
         start = state["step"]
-        with Ledger(root / "ledger.db") as ledger:
+        with Ledger(root / LEDGER_NAME) as ledger:
             for index in range(start, len(workload.steps)):
                 if stop_after is not None and index >= stop_after:
                     return RunResult(False, len(self._trace), tuple(self._trace))
@@ -174,7 +179,7 @@ class ReferenceAdapter(Adapter):
     @staticmethod
     def _forget_local_state(root: Path) -> None:
         """Drop the runtime's own durable state; the effect sink is the outside world."""
-        for name in (CHECKPOINT_NAME, "ledger.db", "ledger.db-wal", "ledger.db-shm"):
+        for name in (CHECKPOINT_NAME, LEDGER_NAME, LEDGER_NAME + "-wal", LEDGER_NAME + "-shm"):
             (root / name).unlink(missing_ok=True)
 
     def _rewrite_trace_file(self, root: Path) -> None:

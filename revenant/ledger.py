@@ -30,6 +30,14 @@ class LedgerError(RuntimeError):
     """Raised on an invalid ledger operation."""
 
 
+class LedgerLost(LedgerError):
+    """The ledger file vanished while a checkpoint says effects may already have run.
+
+    Starting a fresh ledger would forget which keys are committed and silently
+    re-run their effects, so a resume refuses to continue instead.
+    """
+
+
 class IdempotencyKeyReuse(LedgerError):
     """Raised when a key is reused with a different payload hash."""
 
