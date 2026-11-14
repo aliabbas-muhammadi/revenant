@@ -76,6 +76,16 @@ class ConformanceResult:
         return sum(len(b.steps.lost) + len(b.steps.phantom) for b in self.boundaries)
 
     @property
+    def damaged(self) -> int:
+        """Boundaries where chaos damaged the durable state before the resume."""
+        return sum(1 for b in self.boundaries if b.detected is not None)
+
+    @property
+    def refused(self) -> int:
+        """Damaged boundaries where the runtime refused to resume."""
+        return sum(1 for b in self.boundaries if b.detected)
+
+    @property
     def passed(self) -> bool:
         return all(b.passed for b in self.boundaries)
 
