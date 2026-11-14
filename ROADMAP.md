@@ -121,7 +121,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R091 Resume by invoking with the same `thread_id` and `None` input. Test.
 - [x] R092 Kill hook inside nodes; define and document `boundaries()` as superstep count.
 - [x] R093 State hashing with the adapter's volatile fields. Test.
-- [ ] R094 Naive-tools flag (`--naive-tools`) and ledgered tools as default.
+- [x] R094 Naive-tools flag (`--naive-tools`) and ledgered tools as default.
 - [ ] R095 `branching` graph with conditional edges.
 - [ ] R096 `fanout` graph with parallel branches.
 - [ ] R097 Integration test: linear + ledgered passes effects exactly-once.

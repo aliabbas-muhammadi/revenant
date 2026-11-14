@@ -59,12 +59,14 @@ def build_graph(
     workdir: str | Path,
     kill_at: int | None = None,
     kill_mid: bool = False,
+    naive_tools: bool = False,
 ) -> StateGraph:
     """One node per step, chained ``START -> step_0 -> ... -> END`` (uncompiled).
 
     With ``kill_at=k`` the process dies at boundary ``k`` (``1..N-1`` here; the final
     boundary is the caller's, once the graph returns). ``kill_mid`` instead dies in
     node ``k - 1`` after its tool effect and before its superstep is saved.
+    ``naive_tools`` bypasses the effects ledger (the default is ledgered tools).
     """
     root = Path(workdir)
     root.mkdir(parents=True, exist_ok=True)
@@ -84,7 +86,9 @@ def build_graph(
             if spec.tool is not None:
                 tool = get_tool(spec.tool, root / "sandbox")
                 with Ledger(root / "ledger.db") as ledger:
-                    results[spec.name] = invoke(tool, spec.args, sink, ledger, attempts).key
+                    results[spec.name] = invoke(
+                        tool, spec.args, sink, ledger, attempts, naive=naive_tools
+                    ).key
             if kill_at is not None and kill_mid and index + 1 == kill_at:
                 die()
             return {
@@ -132,13 +136,14 @@ def compile_graph(
     interrupt_after: list[str] | None = None,
     kill_at: int | None = None,
     kill_mid: bool = False,
+    naive_tools: bool = False,
 ) -> Any:
     """Compile the workload graph with ``checkpointer`` attached.
 
     ``interrupt_after`` names nodes to pause after; it exists so tests can leave a
     partial run behind without killing a process.
     """
-    return build_graph(workload, workdir, kill_at, kill_mid).compile(
+    return build_graph(workload, workdir, kill_at, kill_mid, naive_tools).compile(
         checkpointer=checkpointer, interrupt_after=interrupt_after
     )
 
@@ -174,7 +179,9 @@ class LangGraphAdapter(Adapter):
 
     name = "langgraph_sqlite"
 
-    def __init__(self) -> None:
+    def __init__(self, naive_tools: bool = False) -> None:
+        #: Bypass the ledger; the default routes every tool call through it.
+        self.naive_tools = naive_tools
         self._workload: Workload | None = None
         self._workdir: Path | None = None
 
@@ -199,8 +206,9 @@ class LangGraphAdapter(Adapter):
         saver = open_checkpointer(root)
         try:
             graph = compile_graph(
-                workload, root, saver, kill_at=kill_at, kill_mid=mode == "mid"
-            )
+                workload, root, saver,
+                kill_at=kill_at, kill_mid=mode == "mid", naive_tools=self.naive_tools,
+            )  # fmt: skip
             run_or_resume(graph)
             if kill_at == len(workload.steps) and mode == "boundary":
                 die()  # the last boundary: everything saved, nothing left to run
@@ -230,8 +238,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m revenant.adapters.langgraph_sqlite")
     parser.add_argument("--workload", required=True)
     parser.add_argument("--workdir", required=True)
+    parser.add_argument("--naive-tools", action="store_true", help="bypass the effects ledger")
     args = parser.parse_args(argv)
-    adapter = LangGraphAdapter()
+    adapter = LangGraphAdapter(naive_tools=args.naive_tools)
     adapter.build(get_workload(args.workload), args.workdir)
     result = adapter.run()
     print(json.dumps({"completed": result.completed, "steps_run": result.steps_run}))

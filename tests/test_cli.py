@@ -74,8 +74,14 @@ def test_report_rejects_bad_input(tmp_path):
 def test_list_shows_adapters_and_workloads(capsys):
     assert main(["list"]) == 0
     out = capsys.readouterr().out.splitlines()
+    try:  # registered only when the langgraph extra is installed
+        import langgraph.graph  # noqa: F401
+
+        extra = "langgraph_sqlite, "
+    except ImportError:
+        extra = ""
     assert out == [
-        "adapters:  mutant_checkpoint_first, mutant_inplace, mutant_nocheckpoint, "
+        f"adapters:  {extra}mutant_checkpoint_first, mutant_inplace, mutant_nocheckpoint, "
         "mutant_noledger, mutant_volatile, reference",
         "workloads: linear, branching, fanout",
     ]
