@@ -16,12 +16,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import operator
 import os
 import signal
 import sqlite3
 import sys
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Annotated, Any, TypedDict
 
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
@@ -71,6 +72,8 @@ def build_graph(
     node ``k - 1`` after its tool effect and before its superstep is saved.
     ``naive_tools`` bypasses the effects ledger (the default is ledgered tools).
     """
+    if workload.name == "fanout":
+        return build_fanout_graph(workload, workdir, kill_at, kill_mid, naive_tools)
     root = Path(workdir)
     root.mkdir(parents=True, exist_ok=True)
     model = ScriptedModel(workload.script)
@@ -111,6 +114,83 @@ def build_graph(
     for i, name in enumerate(names):
         following = names[i + 1] if i + 1 < len(names) else END
         graph.add_conditional_edges(name, make_router(following), [following, END])
+    return graph
+
+
+class FanState(TypedDict):
+    """Like ``GraphState`` but with reducers, so parallel nodes can write deltas."""
+
+    step: Annotated[int, operator.add]
+    thoughts: Annotated[list[Any], operator.add]
+    results: Annotated[dict[str, str], _merge]
+    clock: Annotated[float, operator.add]
+
+
+def _merge(a: dict[str, str], b: dict[str, str]) -> dict[str, str]:
+    return {**a, **b}
+
+
+#: Supersteps of the fanout workload as step indices: split, three branches, merge.
+FANOUT_LAYERS = ((0,), (1, 2, 3), (4,))
+
+
+def build_fanout_graph(
+    workload: Workload,
+    workdir: str | Path,
+    kill_at: int | None = None,
+    kill_mid: bool = False,
+    naive_tools: bool = False,
+) -> StateGraph:
+    """``split -> (a | b | c) -> merge``: the three branches share one superstep.
+
+    Boundaries are supersteps, so this graph has 3 rather than the reference's 5.
+    Boundary ``k`` kills with ``k`` supersteps saved; a mid kill ``k`` dies inside
+    superstep ``k`` after a node's effect, losing the whole superstep (including
+    effects its sibling branches already performed).
+    """
+    if len(workload.steps) != 5:
+        raise ValueError("the fanout graph expects split, three branches and merge")
+    root = Path(workdir)
+    root.mkdir(parents=True, exist_ok=True)
+    model = ScriptedModel(workload.script)
+    sink = EffectSink(root / "effects.jsonl")
+    attempts = AttemptCounter()
+    # Create the ledger (and switch it to WAL) before parallel branches open it.
+    Ledger(root / "ledger.db").close()
+
+    def make_node(index: int, layer: int):
+        spec = workload.steps[index]
+
+        def node(state: FanState) -> dict[str, Any]:
+            if kill_at is not None and not kill_mid and layer == kill_at:
+                die()
+            results: dict[str, str] = {}
+            if spec.tool is not None:
+                tool = get_tool(spec.tool, root / "sandbox")
+                with Ledger(root / "ledger.db") as ledger:
+                    results[spec.name] = invoke(
+                        tool, spec.args, sink, ledger, attempts, naive=naive_tools
+                    ).key
+            if kill_at is not None and kill_mid and layer + 1 == kill_at:
+                die()
+            return {
+                "step": 1,
+                "thoughts": [model.respond(index)],
+                "results": results,
+                "clock": 1.0,
+            }
+
+        return node
+
+    graph = StateGraph(FanState)
+    for layer, indices in enumerate(FANOUT_LAYERS):
+        for i in indices:
+            graph.add_node(f"step_{i}", make_node(i, layer))
+    graph.add_edge(START, "step_0")
+    for i in FANOUT_LAYERS[1]:
+        graph.add_edge("step_0", f"step_{i}")
+    graph.add_edge([f"step_{i}" for i in FANOUT_LAYERS[1]], "step_4")
+    graph.add_edge("step_4", END)
     return graph
 
 
@@ -229,7 +309,7 @@ class LangGraphAdapter(Adapter):
                 kill_at=kill_at, kill_mid=mode == "mid", naive_tools=self.naive_tools,
             )  # fmt: skip
             run_or_resume(graph)
-            if kill_at == len(workload.steps) and mode == "boundary":
+            if kill_at == self.boundaries() and mode == "boundary":
                 die()  # the last boundary: everything saved, nothing left to run
             trace = hash_trace(graph, workload)
         finally:
@@ -247,8 +327,10 @@ class LangGraphAdapter(Adapter):
             saver.conn.close()
 
     def boundaries(self) -> int:
-        """Superstep count: one per step for the linear graph."""
+        """Superstep count: one per step, except that fanout branches share one."""
         workload, _ = self._built()
+        if workload.name == "fanout":
+            return len(FANOUT_LAYERS)
         return len(workload.steps)
 
 
