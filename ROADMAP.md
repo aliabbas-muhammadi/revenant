@@ -119,7 +119,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R089 Graph builder for `linear`: one node per step.
 - [x] R090 `SqliteSaver` checkpointer in the workdir and a fixed `thread_id`.
 - [x] R091 Resume by invoking with the same `thread_id` and `None` input. Test.
-- [ ] R092 Kill hook inside nodes; define and document `boundaries()` as superstep count.
+- [x] R092 Kill hook inside nodes; define and document `boundaries()` as superstep count.
 - [ ] R093 State hashing with the adapter's volatile fields. Test.
 - [ ] R094 Naive-tools flag (`--naive-tools`) and ledgered tools as default.
 - [ ] R095 `branching` graph with conditional edges.
