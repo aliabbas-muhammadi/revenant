@@ -132,7 +132,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 
 ## M10 · Chaos extensions
 
-- [ ] R102 Duplicate-delivery injection: the same tool result delivered twice. Tests on reference.
+- [x] R102 Duplicate-delivery injection: the same tool result delivered twice. Tests on reference.
 - [ ] R103 Tool-timeout injection: a tool attempt hangs and is retried. Tests.
 - [ ] R104 Checkpoint truncation: adapters must raise a named error. Tests for reference and LangGraph.
 - [ ] R105 Checkpoint bit-flip corruption. Tests.

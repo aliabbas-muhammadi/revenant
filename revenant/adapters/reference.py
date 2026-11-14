@@ -42,6 +42,8 @@ class ReferenceAdapter(Adapter):
     checkpoint_before_effect = False
     #: Mutants that bypass the effects ledger set this to True.
     naive_tools = False
+    #: Chaos: deliver every tool call twice (the same result arriving again).
+    duplicate_delivery = False
 
     def __init__(self) -> None:
         self._workload: Workload | None = None
@@ -113,6 +115,8 @@ class ReferenceAdapter(Adapter):
                     outcome = invoke(
                         tool, spec.args, sink, ledger, attempts, naive=self.naive_tools
                     )
+                    if self.duplicate_delivery:
+                        invoke(tool, spec.args, sink, ledger, attempts, naive=self.naive_tools)
                     state["results"][spec.name] = outcome.key
                 if kill_mid and kill_at is not None and index + 1 == kill_at:
                     os.kill(os.getpid(), signal.SIGKILL)
