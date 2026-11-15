@@ -1,4 +1,4 @@
-.PHONY: test lint conformance table ci-conformance
+.PHONY: test lint conformance table ci-conformance ci-langgraph
 
 WORKLOADS := linear branching fanout
 BOUNDARY_MUTANTS := mutant_nocheckpoint mutant_inplace mutant_volatile
@@ -50,3 +50,8 @@ table:
 # Reduced matrix used by CI: reference passes, every mutant fails.
 ci-conformance:
 	scripts/ci_conformance.sh ci-results
+
+# CI check for the LangGraph adapter: ledgered tools must pass on `linear`.
+ci-langgraph:
+	mkdir -p ci-results
+	$(RUN) --adapter langgraph_sqlite --workload linear --mode mid --jobs 2 --out ci-results/langgraph-linear.json

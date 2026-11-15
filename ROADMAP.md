@@ -172,7 +172,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R130 `examples/custom_adapter/`: a runnable skeleton that passes on `linear`. Test it.
 - [x] R131 `Makefile` with `test`, `lint`, `conformance` (full matrix) targets.
 - [x] R132 CI reduced conformance job: `linear` on reference and every mutant.
-- [ ] R133 CI conformance job for LangGraph `linear`.
+- [x] R133 CI conformance job for LangGraph `linear`.
 - [ ] R134 CONTRIBUTING.md.
 - [ ] R135 CHANGELOG.md following Keep a Changelog.
 - [ ] R136 CI badge and results summary in README.

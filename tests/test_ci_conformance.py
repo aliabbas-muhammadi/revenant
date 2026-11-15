@@ -25,3 +25,14 @@ def test_script_runs_green(tmp_path: Path) -> None:
 
 def test_ci_workflow_runs_conformance() -> None:
     assert "make ci-conformance" in (ROOT / ".github" / "workflows" / "ci.yml").read_text()
+
+
+def test_langgraph_target_and_job() -> None:
+    assert "ci-langgraph:" in (ROOT / "Makefile").read_text()
+    assert "make ci-langgraph" in (ROOT / ".github" / "workflows" / "ci.yml").read_text()
+
+
+def test_langgraph_target_runs(tmp_path: Path) -> None:
+    proc = subprocess.run(["make", "ci-langgraph"], capture_output=True, text=True, cwd=ROOT)
+    assert proc.returncode == 0, proc.stderr
+    assert "PASS" in proc.stdout
