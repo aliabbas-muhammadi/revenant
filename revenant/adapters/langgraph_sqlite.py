@@ -21,6 +21,7 @@ import os
 import signal
 import sqlite3
 import sys
+from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated, Any, TypedDict
 
@@ -62,7 +63,7 @@ def build_graph(
     kill_at: int | None = None,
     kill_mid: bool = False,
     naive_tools: bool = False,
-) -> StateGraph:
+) -> StateGraph[Any]:
     """One node per step, ``START -> step_0 -> ... -> END`` (uncompiled).
 
     Every node leaves through a conditional edge, so a ``stop`` response from the
@@ -81,7 +82,7 @@ def build_graph(
     sink = EffectSink(root / "effects.jsonl")
     attempts = AttemptCounter()
 
-    def make_node(index: int):
+    def make_node(index: int) -> Callable[[Any], Any]:
         spec = workload.steps[index]
 
         def node(state: GraphState) -> GraphState:
@@ -110,7 +111,7 @@ def build_graph(
     graph = StateGraph(GraphState)
     names = [f"step_{i}" for i in range(len(workload.steps))]
     for i, name in enumerate(names):
-        graph.add_node(name, make_node(i))
+        graph.add_node(name, make_node(i))  # type: ignore[call-overload]
     graph.add_edge(START, names[0])
     for i, name in enumerate(names):
         following = names[i + 1] if i + 1 < len(names) else END
@@ -141,7 +142,7 @@ def build_fanout_graph(
     kill_at: int | None = None,
     kill_mid: bool = False,
     naive_tools: bool = False,
-) -> StateGraph:
+) -> StateGraph[Any]:
     """``split -> (a | b | c) -> merge``: the three branches share one superstep.
 
     Boundaries are supersteps, so this graph has 3 rather than the reference's 5.
@@ -159,7 +160,7 @@ def build_fanout_graph(
     # Create the ledger (and switch it to WAL) before parallel branches open it.
     Ledger(root / "ledger.db").close()
 
-    def make_node(index: int, layer: int):
+    def make_node(index: int, layer: int) -> Callable[[Any], Any]:
         spec = workload.steps[index]
 
         def node(state: FanState) -> dict[str, Any]:
@@ -186,7 +187,7 @@ def build_fanout_graph(
     graph = StateGraph(FanState)
     for layer, indices in enumerate(FANOUT_LAYERS):
         for i in indices:
-            graph.add_node(f"step_{i}", make_node(i, layer))
+            graph.add_node(f"step_{i}", make_node(i, layer))  # type: ignore[call-overload]
     graph.add_edge(START, "step_0")
     for i in FANOUT_LAYERS[1]:
         graph.add_edge("step_0", f"step_{i}")
@@ -195,7 +196,7 @@ def build_fanout_graph(
     return graph
 
 
-def make_router(following: str):
+def make_router(following: str) -> Callable[[Any], str]:
     """Conditional edge: end the run once the model's last response says ``stop``.
 
     Otherwise continue to ``following``. Scripts without an ``action`` key (the
@@ -275,8 +276,10 @@ def run_or_resume(graph: Any) -> dict[str, Any]:
     """
     config = thread_config()
     if graph.get_state(config).created_at is None:
-        return graph.invoke(initial_state(), config)
-    return graph.invoke(None, config)
+        first: dict[str, Any] = graph.invoke(initial_state(), config)
+        return first
+    resumed: dict[str, Any] = graph.invoke(None, config)
+    return resumed
 
 
 def hash_trace(graph: Any, workload: Workload) -> tuple[str, ...]:

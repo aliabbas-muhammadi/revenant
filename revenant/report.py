@@ -76,6 +76,31 @@ def report_dict(
     versions: dict[str, str] | None = None,
 ) -> dict[str, object]:
     """The full report as plain data, ready for ``json.dumps``."""
+    boundaries: list[dict[str, object]] = [
+        {
+            "boundary": b.boundary,
+            "mode": b.mode,
+            "passed": b.passed,
+            "determinism": {
+                "passed": b.determinism.passed,
+                "first_divergent_step": b.determinism.first_divergent_step,
+                "final_state_matches": b.determinism.final_state_matches,
+                "detail": b.determinism.detail,
+            },
+            "effects": {
+                "once": b.effects.once,
+                "duplicated": list(b.effects.duplicated),
+                "missing": list(b.effects.missing),
+                "unexpected": list(b.effects.unexpected),
+                "unconfirmed": list(b.effects.unconfirmed),
+            },
+            "steps": {"lost": list(b.steps.lost), "phantom": list(b.steps.phantom)},
+        }
+        for b in result.boundaries
+    ]
+    for entry, b in zip(boundaries, result.boundaries, strict=True):
+        if b.wall_seconds is not None:
+            entry["wall_seconds"] = round(b.wall_seconds, 3)
     data: dict[str, object] = {
         "schema_version": REPORT_SCHEMA_VERSION,
         "versions": versions if versions is not None else versions_header(result.adapter),
@@ -83,38 +108,14 @@ def report_dict(
         "workload": result.workload,
         "verdict": result.verdict.value,
         "summary": summary_line(result, planned),
-        "boundaries": [
-            {
-                "boundary": b.boundary,
-                "mode": b.mode,
-                "passed": b.passed,
-                "determinism": {
-                    "passed": b.determinism.passed,
-                    "first_divergent_step": b.determinism.first_divergent_step,
-                    "final_state_matches": b.determinism.final_state_matches,
-                    "detail": b.determinism.detail,
-                },
-                "effects": {
-                    "once": b.effects.once,
-                    "duplicated": list(b.effects.duplicated),
-                    "missing": list(b.effects.missing),
-                    "unexpected": list(b.effects.unexpected),
-                    "unconfirmed": list(b.effects.unconfirmed),
-                },
-                "steps": {"lost": list(b.steps.lost), "phantom": list(b.steps.phantom)},
-            }
-            for b in result.boundaries
-        ],
+        "boundaries": boundaries,
     }
     if result.chaos != "none":
         # Additive keys: reports of plain runs keep their original shape.
         data["chaos"] = result.chaos
-        for entry, b in zip(data["boundaries"], result.boundaries, strict=True):  # type: ignore[arg-type]
+        for entry, b in zip(boundaries, result.boundaries, strict=True):
             if b.detected is not None:
-                entry["detected"] = b.detected  # type: ignore[index]
-    for entry, b in zip(data["boundaries"], result.boundaries, strict=True):  # type: ignore[arg-type]
-        if b.wall_seconds is not None:
-            entry["wall_seconds"] = round(b.wall_seconds, 3)  # type: ignore[index]
+                entry["detected"] = b.detected
     return data
 
 

@@ -134,7 +134,8 @@ def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
             parser.error("--naive-tools only applies to --adapter langgraph_sqlite")
         factory = functools.partial(LangGraphAdapter, naive_tools=True)
         extra = ("--naive-tools",)
-    if args.chaos != "none" and not issubclass(factory, ReferenceAdapter):
+    is_reference = isinstance(factory, type) and issubclass(factory, ReferenceAdapter)
+    if args.chaos != "none" and not is_reference:
         parser.error("--chaos only applies to adapters built on the reference runtime")
     if args.verbose:
         _enable_logging()
