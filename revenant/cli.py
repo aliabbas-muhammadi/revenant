@@ -15,6 +15,7 @@ import sys
 import tempfile
 from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 from revenant import __version__
 from revenant.adapters.mutant_checkpoint_first import CheckpointFirstMutant
@@ -25,6 +26,7 @@ from revenant.adapters.mutant_volatile import VolatileMutant
 from revenant.adapters.reference import ReferenceAdapter
 from revenant.adapters.reference_sqlite import SqliteOutboxAdapter, SqliteReferenceAdapter
 from revenant.chaos import CHAOS_MODES
+from revenant.diff import diff_reports
 from revenant.report import json_report, markdown_from_dict, summary_line
 from revenant.runner import AdapterFactory, UnsupportedPlatform, require_sigkill, sweep
 from revenant.workloads import WORKLOAD_NAMES, get_workload
@@ -88,7 +90,30 @@ def _build_parser() -> argparse.ArgumentParser:
     report = sub.add_parser("report", help="render a saved JSON report")
     report.add_argument("path")
     report.add_argument("--format", choices=("text", "md", "json"), default="text")
+    diff = sub.add_parser("diff", help="compare two saved JSON reports boundary by boundary")
+    diff.add_argument("a")
+    diff.add_argument("b")
     return parser
+
+
+def _load_report(path: str, parser: argparse.ArgumentParser) -> dict[str, Any]:
+    try:
+        with open(path, encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (OSError, ValueError) as exc:
+        parser.error(f"cannot read report {path!r}: {exc}")
+    if not isinstance(data, dict) or "boundaries" not in data or "summary" not in data:
+        parser.error(f"{path!r} is not a revenant report")
+    return data
+
+
+def _diff(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
+    changes = diff_reports(_load_report(args.a, parser), _load_report(args.b, parser))
+    for line in changes:
+        print(line)
+    if not changes:
+        print("reports are equivalent")
+    return 1 if changes else 0
 
 
 def _report(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
@@ -181,6 +206,8 @@ def main(argv: list[str] | None = None) -> int:
         print("adapters:  " + ", ".join(sorted(ADAPTERS)))
         print("workloads: " + ", ".join(WORKLOAD_NAMES))
         return 0
+    if args.command == "diff":
+        return _diff(args, parser)
     if args.command == "report":
         return _report(args, parser)
     parser.print_help()

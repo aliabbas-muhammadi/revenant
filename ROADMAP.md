@@ -180,7 +180,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 
 ## M14 · Deeper analysis
 
-- [ ] R138 `revenant diff A.json B.json`: compare two reports boundary by boundary. Tests.
+- [x] R138 `revenant diff A.json B.json`: compare two reports boundary by boundary. Tests.
 - [ ] R139 Report the first divergent step and field when determinism fails. Tests.
 - [ ] R140 Per-tool attempts/effects breakdown in reports. Tests.
 - [ ] R141 Histogram of attempts per effect in markdown reports. Tests.
