@@ -111,6 +111,8 @@ Both resume identically, so determinism cannot tell them apart. Only the effect 
 
 ## Development
 
+`make test`, `make lint` and `make conformance` (the full matrix; it regenerates `results/` and the table above, and needs the `langgraph` extra) wrap the commands below.
+
 ```bash
 uv sync
 uv run pytest
