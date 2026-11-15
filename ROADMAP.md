@@ -173,7 +173,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R131 `Makefile` with `test`, `lint`, `conformance` (full matrix) targets.
 - [x] R132 CI reduced conformance job: `linear` on reference and every mutant.
 - [x] R133 CI conformance job for LangGraph `linear`.
-- [ ] R134 CONTRIBUTING.md.
+- [x] R134 CONTRIBUTING.md.
 - [ ] R135 CHANGELOG.md following Keep a Changelog.
 - [ ] R136 CI badge and results summary in README.
 - [ ] R137 Bump to 0.1.0 and update the changelog.
