@@ -175,7 +175,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R133 CI conformance job for LangGraph `linear`.
 - [x] R134 CONTRIBUTING.md.
 - [x] R135 CHANGELOG.md following Keep a Changelog.
-- [ ] R136 CI badge and results summary in README.
+- [x] R136 CI badge and results summary in README.
 - [ ] R137 Bump to 0.1.0 and update the changelog.
 
 ## M14 · Deeper analysis

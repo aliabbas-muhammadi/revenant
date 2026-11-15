@@ -1,5 +1,7 @@
 # revenant
 
+[![ci](https://github.com/aliabbas-muhammadi/revenant/actions/workflows/ci.yml/badge.svg)](https://github.com/aliabbas-muhammadi/revenant/actions/workflows/ci.yml)
+
 A durability conformance harness for agent runtimes. It kills an agent process with `SIGKILL` at **every** step boundary, resumes it, and checks three properties:
 
 1. **Resume determinism**: the resumed run produces the same per-step state hashes as an uninterrupted golden run.
@@ -25,6 +27,8 @@ killed at 12/12 boundaries · resumes: 12/12 identical · effects: 3 once each �
 Exit codes: `0` pass (including pass with unconfirmed effects), `1` conformance failure, `2` usage error. Committed sweeps live in [results/](results/); the SQLite and outbox variants are compared in [docs/outbox.md](docs/outbox.md).
 
 ## Results
+
+In short: the reference adapter and its SQLite and outbox variants pass every boundary on all three workloads, including under chaos. Every mutant fails, each for its own reason. LangGraph with ledgered tools passes `linear` and `branching`; naive tools fail all three.
 
 Every committed sweep, generated from `results/` by `scripts/render_tables.py`:
 
