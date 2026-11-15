@@ -20,7 +20,7 @@ uv run revenant run --adapter reference --workload linear --out report.json
 killed at 12/12 boundaries · resumes: 12/12 identical · effects: 3 once each · unconfirmed: 0 · verdict: PASS
 ```
 
-`--kill-at K` kills at a single boundary, `--mode mid` kills after the tool effect but before the checkpoint, and `--jobs N` runs boundaries in parallel. Saved reports can be re-rendered with `revenant report report.json --format text|md|json`.
+`--kill-at K` kills at a single boundary, `--mode mid` kills after the tool effect but before the checkpoint, and `--jobs N` runs boundaries in parallel. `--kill-at` must lie within the adapter's boundaries (out of range is a usage error). `--verbose` logs progress to stderr, and `--keep-workdirs` keeps the golden and per-boundary workdirs and prints where they are. Each boundary records its wall time as `wall_seconds`, a volatile field that is ignored when comparing runs. To crash inside the checkpoint write itself, set `REVENANT_KILL_AT_WRITE` to 1-4 (temp written, fsynced, renamed, directory fsynced) next to `REVENANT_KILL_AT`. Saved reports can be re-rendered with `revenant report report.json --format text|md|json`.
 
 Exit codes: `0` pass (including pass with unconfirmed effects), `1` conformance failure, `2` usage error. Committed sweeps live in [results/](results/).
 
