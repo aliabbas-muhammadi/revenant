@@ -158,7 +158,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 ## M12 · Transactional reference variant (outbox pattern)
 
 - [x] R121 `adapters/reference_sqlite.py`: checkpoint state and ledger rows in one SQLite transaction.
-- [ ] R122 Outbox: effects recorded in the same transaction and dispatched after commit. Tests.
+- [x] R122 Outbox: effects recorded in the same transaction and dispatched after commit. Tests.
 - [ ] R123 Dispatcher resumes undelivered outbox rows after a kill. Tests.
 - [ ] R124 Full sweeps for all workloads. Integration tests.
 - [ ] R125 Commit results and a `docs/outbox.md` comparison with the file-checkpoint reference.

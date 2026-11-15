@@ -127,14 +127,9 @@ class ReferenceAdapter(Adapter):
                         # dies between the checkpoint and the effect it promised
                         os.kill(os.getpid(), signal.SIGKILL)
                 if tool is not None:
-                    if self.timeout_retry:
-                        self._hung_attempt(tool, spec.args, ledger, attempts)
-                    outcome = invoke(
-                        tool, spec.args, sink, ledger, attempts, naive=self.naive_tools
+                    state["results"][spec.name] = self._call_tool(
+                        tool, spec.args, ledger, sink, attempts
                     )
-                    if self.duplicate_delivery:
-                        invoke(tool, spec.args, sink, ledger, attempts, naive=self.naive_tools)
-                    state["results"][spec.name] = outcome.key
                 if kill_mid and kill_at is not None and index + 1 == kill_at:
                     os.kill(os.getpid(), signal.SIGKILL)
                 if not self.checkpoint_before_effect:
@@ -143,6 +138,22 @@ class ReferenceAdapter(Adapter):
                 if not kill_mid and kill_at is not None and index + 1 == kill_at:
                     os.kill(os.getpid(), signal.SIGKILL)
         return RunResult(True, len(self._trace), tuple(self._trace))
+
+    def _call_tool(
+        self,
+        tool: Any,
+        args: dict[str, Any],
+        ledger: Ledger,
+        sink: EffectSink,
+        attempts: AttemptCounter,
+    ) -> str:
+        """Perform one tool call through the ledger and return its idempotency key."""
+        if self.timeout_retry:
+            self._hung_attempt(tool, args, ledger, attempts)
+        outcome = invoke(tool, args, sink, ledger, attempts, naive=self.naive_tools)
+        if self.duplicate_delivery:
+            invoke(tool, args, sink, ledger, attempts, naive=self.naive_tools)
+        return outcome.key
 
     def _load_saved(self, root: Path) -> dict[str, Any] | None:
         """Load the last durable checkpoint, or ``None`` on a fresh start."""

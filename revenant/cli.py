@@ -23,7 +23,7 @@ from revenant.adapters.mutant_nocheckpoint import NoCheckpointMutant
 from revenant.adapters.mutant_noledger import NoLedgerMutant
 from revenant.adapters.mutant_volatile import VolatileMutant
 from revenant.adapters.reference import ReferenceAdapter
-from revenant.adapters.reference_sqlite import SqliteReferenceAdapter
+from revenant.adapters.reference_sqlite import SqliteOutboxAdapter, SqliteReferenceAdapter
 from revenant.chaos import CHAOS_MODES
 from revenant.report import json_report, markdown_from_dict, summary_line
 from revenant.runner import AdapterFactory, UnsupportedPlatform, require_sigkill, sweep
@@ -34,6 +34,7 @@ ADAPTERS: dict[str, AdapterFactory] = {
     for cls in (
         ReferenceAdapter,
         SqliteReferenceAdapter,
+        SqliteOutboxAdapter,
         NoCheckpointMutant,
         InPlaceMutant,
         CheckpointFirstMutant,
