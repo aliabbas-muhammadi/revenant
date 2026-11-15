@@ -73,3 +73,24 @@ def test_committed_chaos_results_pass_and_match_markdown(workload, mode):
     assert stem.with_suffix(".md").read_text() == markdown_from_dict(data)
     if mode in ("corrupt", "all"):
         assert all(b["detected"] is True for b in data["boundaries"])
+
+
+OUTBOX = sorted(p.name[: -len(".json")] for p in (RESULTS / "outbox").glob("*.json"))
+
+
+def test_outbox_results_cover_both_variants_workloads_and_modes():
+    expected = sorted(
+        f"{a}-{w}{suffix}"
+        for a in ("reference_outbox", "reference_sqlite")
+        for w in WORKLOAD_NAMES
+        for suffix in ("", "-mid")
+    )
+    assert OUTBOX == expected
+
+
+@pytest.mark.parametrize("name", OUTBOX)
+def test_committed_outbox_results_pass_and_match_markdown(name):
+    data = json.loads((RESULTS / "outbox" / f"{name}.json").read_text())
+    assert data["schema_version"] == REPORT_SCHEMA_VERSION
+    assert data["verdict"] == "PASS"
+    assert (RESULTS / "outbox" / f"{name}.md").read_text() == markdown_from_dict(data)
