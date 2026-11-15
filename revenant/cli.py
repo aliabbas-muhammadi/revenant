@@ -25,7 +25,7 @@ from revenant.adapters.mutant_volatile import VolatileMutant
 from revenant.adapters.reference import ReferenceAdapter
 from revenant.chaos import CHAOS_MODES
 from revenant.report import json_report, markdown_from_dict, summary_line
-from revenant.runner import AdapterFactory, sweep
+from revenant.runner import AdapterFactory, UnsupportedPlatform, require_sigkill, sweep
 from revenant.workloads import WORKLOAD_NAMES, get_workload
 
 ADAPTERS: dict[str, AdapterFactory] = {
@@ -123,6 +123,10 @@ def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
         parser.error(str(exc))
     if args.jobs < 1:
         parser.error("--jobs must be at least 1")
+    try:
+        require_sigkill()
+    except UnsupportedPlatform as exc:
+        parser.error(str(exc))
     factory = ADAPTERS[args.adapter]
     extra: tuple[str, ...] = ()
     if args.naive_tools:

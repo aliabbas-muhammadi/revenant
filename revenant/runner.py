@@ -35,6 +35,18 @@ AdapterFactory = Callable[[], Adapter]
 KILL_VARS = (KILL_ENV, KILL_MODE_ENV, KILL_WRITE_ENV)
 
 
+class UnsupportedPlatform(RuntimeError):
+    """The platform cannot deliver ``SIGKILL``, so a crash cannot be simulated honestly."""
+
+
+def require_sigkill() -> None:
+    """Raise :class:`UnsupportedPlatform` unless ``signal.SIGKILL`` exists here."""
+    if not hasattr(signal, "SIGKILL"):
+        raise UnsupportedPlatform(
+            f"revenant needs SIGKILL to crash the agent; not available on {sys.platform!r}"
+        )
+
+
 @contextmanager
 def _without_kill_env() -> Iterator[None]:
     """Hide kill variables so an inherited ``REVENANT_KILL_AT`` cannot hit a golden run."""
@@ -232,6 +244,7 @@ def sweep(
     reach the children through ``REVENANT_CHAOS``; ``corrupt`` flips a checkpoint bit
     before each resume, and a boundary then passes only if the resume refused it.
     """
+    require_sigkill()
     root = Path(root)
     damage = corrupt_checkpoint if damages_checkpoint(chaos) else None
     with _chaos_env(chaos):
