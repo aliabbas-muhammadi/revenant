@@ -31,6 +31,7 @@ TRACE_NAME = "trace.jsonl"
 LEDGER_NAME = "ledger.db"
 KILL_ENV = "REVENANT_KILL_AT"
 KILL_MODE_ENV = "REVENANT_KILL_MODE"
+KILL_WRITE_ENV = "REVENANT_KILL_AT_WRITE"
 KILL_MODES = ("boundary", "mid")
 
 
@@ -53,6 +54,7 @@ class ReferenceAdapter(Adapter):
         self._workload: Workload | None = None
         self._workdir: Path | None = None
         self._trace: list[str] = []
+        self._kill_write: int | None = None
         chaos = injections_from_env()
         self.duplicate_delivery = self.duplicate_delivery or "dup" in chaos
         self.timeout_retry = self.timeout_retry or "timeout" in chaos
@@ -78,6 +80,8 @@ class ReferenceAdapter(Adapter):
         mode = os.environ.get(KILL_MODE_ENV, "boundary")
         if mode not in KILL_MODES:
             raise ValueError(f"{KILL_MODE_ENV} must be one of {KILL_MODES}, got {mode!r}")
+        if os.environ.get(KILL_WRITE_ENV):
+            self._kill_write = int(os.environ[KILL_WRITE_ENV])
         return self._execute(kill_at=kill_at, kill_mid=mode == "mid")
 
     def _execute(
@@ -177,8 +181,9 @@ class ReferenceAdapter(Adapter):
 
     def _write_checkpoint(self, path: Path, data: dict[str, Any], dying: bool) -> None:
         """Persist one checkpoint. ``dying`` says the process is about to be killed
-        right after this write, which lets mutants die part-way through it."""
-        write_checkpoint(path, data)
+        right after this write, which lets mutants die part-way through it. With
+        ``REVENANT_KILL_AT_WRITE=p`` the process dies at point ``p`` inside the write."""
+        write_checkpoint(path, data, kill_point=self._kill_write if dying else None)
 
     @staticmethod
     def _forget_local_state(root: Path) -> None:

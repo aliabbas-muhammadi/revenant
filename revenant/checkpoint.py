@@ -10,10 +10,16 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import signal
 from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = 1
+
+#: Points inside ``write_checkpoint`` where a kill can be requested, in order:
+#: 1 temp file written, 2 temp file fsynced, 3 renamed over the target,
+#: 4 directory fsynced (the write is fully durable).
+WRITE_POINTS = (1, 2, 3, 4)
 
 
 class CheckpointError(Exception):
@@ -28,8 +34,21 @@ def _digest(body: dict[str, Any]) -> str:
     return hashlib.sha256(json.dumps(body, sort_keys=True).encode("utf-8")).hexdigest()
 
 
-def write_checkpoint(path: str | Path, data: dict[str, Any]) -> None:
-    """Atomically replace the checkpoint at ``path`` with ``data``."""
+def _die_at(kill_point: int | None, point: int) -> None:
+    if kill_point == point:
+        os.kill(os.getpid(), signal.SIGKILL)
+
+
+def write_checkpoint(
+    path: str | Path, data: dict[str, Any], kill_point: int | None = None
+) -> None:
+    """Atomically replace the checkpoint at ``path`` with ``data``.
+
+    ``kill_point`` (one of ``WRITE_POINTS``) makes the process SIGKILL itself at
+    that point of the write, to prove a crash anywhere leaves a usable checkpoint.
+    """
+    if kill_point is not None and kill_point not in WRITE_POINTS:
+        raise ValueError(f"kill_point must be one of {WRITE_POINTS}, got {kill_point!r}")
     target = Path(path)
     body = {"schema_version": SCHEMA_VERSION, **data}
     payload = {"body": body, "digest": _digest(body)}
@@ -37,13 +56,17 @@ def write_checkpoint(path: str | Path, data: dict[str, Any]) -> None:
     with open(tmp, "wb") as fh:
         fh.write(json.dumps(payload, sort_keys=True).encode("utf-8"))
         fh.flush()
+        _die_at(kill_point, 1)
         os.fsync(fh.fileno())
+        _die_at(kill_point, 2)
     os.replace(tmp, target)
+    _die_at(kill_point, 3)
     dir_fd = os.open(target.parent, os.O_RDONLY)
     try:
         os.fsync(dir_fd)
     finally:
         os.close(dir_fd)
+    _die_at(kill_point, 4)
 
 
 def load_checkpoint(path: str | Path) -> dict[str, Any] | None:

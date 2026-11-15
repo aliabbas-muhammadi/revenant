@@ -14,7 +14,7 @@ from enum import Enum
 from pathlib import Path
 
 from revenant.adapter import Adapter
-from revenant.adapters.reference import KILL_ENV, KILL_MODE_ENV
+from revenant.adapters.reference import KILL_ENV, KILL_MODE_ENV, KILL_WRITE_ENV
 from revenant.chaos import (
     CHAOS_ENV,
     corrupt_checkpoint,
@@ -29,12 +29,13 @@ from revenant.sink import EffectSink
 from revenant.workloads import Workload
 
 AdapterFactory = Callable[[], Adapter]
+KILL_VARS = (KILL_ENV, KILL_MODE_ENV, KILL_WRITE_ENV)
 
 
 @contextmanager
 def _without_kill_env() -> Iterator[None]:
     """Hide kill variables so an inherited ``REVENANT_KILL_AT`` cannot hit a golden run."""
-    saved = {k: os.environ.pop(k) for k in (KILL_ENV, KILL_MODE_ENV) if k in os.environ}
+    saved = {k: os.environ.pop(k) for k in KILL_VARS if k in os.environ}
     try:
         yield
     finally:
@@ -102,7 +103,7 @@ def spawn_child(
     Kill variables are scrubbed from the inherited environment, so only values
     passed in ``env`` can trigger a kill in the child.
     """
-    full = {k: v for k, v in os.environ.items() if k not in (KILL_ENV, KILL_MODE_ENV)}
+    full = {k: v for k, v in os.environ.items() if k not in KILL_VARS}
     full.update(env or {})
     try:
         proc = subprocess.run(
