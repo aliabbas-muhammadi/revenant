@@ -44,6 +44,24 @@ killed at 12/12 boundaries · resumes: 12/12 identical · effects: 2 once each �
 
 Killing at boundary 3 in `mid` mode lands after the email was sent and before the checkpoint. The resume repeats step 3, and with no idempotency key the email goes out twice: the run resumes identically (property 1 holds) but property 2 fails. Boundary 4 is clean because no tool call sits between that checkpoint and the kill.
 
+## Attempts versus effects
+
+A runtime that resumes after a crash will often call a tool again. That second call is an **attempt**; whether it changes the outside world is a separate question, and the harness never merges the two. Attempts are counted in the ledger (`attempt_count` per idempotency key). Effects are counted by reading the append-only sink. Re-attempting a committed key is correct behaviour: the ledger suppresses it, the attempt count goes up, and the effect count stays at one.
+
+LangGraph shows both sides on the same workload, killed at the same boundaries (`results/langgraph/`). LangGraph re-runs a node that was interrupted mid-superstep, so on `branching` both runs re-attempt tools after a kill. With the effects ledger in front of the tools (`ledgered-branching`) the repeat is suppressed:
+
+```
+killed at 10/10 boundaries · resumes: 10/10 identical · effects: 9 once each · unconfirmed: 0 · verdict: PASS
+```
+
+With the ledger bypassed (`naive-branching`, `--naive-tools`) the very same repeat performs the effect again:
+
+```
+killed at 10/10 boundaries · resumes: 10/10 identical · effects: 5 once each · duplicated: 24 · unconfirmed: 0 · verdict: FAIL
+```
+
+Both resume identically, so determinism cannot tell them apart. Only the effect count separates a runtime that tolerates retries from one that does not. An effect that ran but was never marked committed is neither counted as once nor guessed at: it is reported as `unconfirmed`.
+
 ## Development
 
 ```bash

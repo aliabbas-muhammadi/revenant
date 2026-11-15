@@ -166,7 +166,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 ## M13 · Docs, CI and release
 
 - [x] R126 README: the three properties with a worked example.
-- [ ] R127 README: attempts vs effects explained with a real committed result.
+- [x] R127 README: attempts vs effects explained with a real committed result.
 - [ ] R128 `scripts/render_tables.py` builds the README headline table from `results/`. Test that README matches the rendered output.
 - [ ] R129 `docs/writing-an-adapter.md` with a complete minimal adapter.
 - [ ] R130 `examples/custom_adapter/`: a runnable skeleton that passes on `linear`. Test it.
