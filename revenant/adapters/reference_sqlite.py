@@ -158,6 +158,12 @@ class SqliteOutboxAdapter(SqliteReferenceAdapter):
         self._queued.append((key, {"tool": tool.name, "args": args}))
         return key
 
+    def _load_saved(self, root: Path) -> dict[str, Any] | None:
+        saved = super()._load_saved(root)
+        if saved is not None:
+            self._dispatch()  # deliver whatever a kill left queued before going on
+        return saved
+
     def _write_checkpoint(self, path: Path, data: dict[str, Any], dying: bool) -> None:
         assert self._store is not None
         queued, self._queued = self._queued, []

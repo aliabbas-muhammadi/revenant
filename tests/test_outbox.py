@@ -81,3 +81,47 @@ def test_sweep_passes_with_mid_kills(tmp_path):
         mode="mid", boundaries=[2, 4, 7], argv_for=_argv,
     )  # fmt: skip
     assert res.passed, res.failing()
+
+
+def _pending(workdir):
+    with SqliteStore(workdir / "ledger.db") as store:
+        return [key for key, _ in store.pending()]
+
+
+@posix
+@pytest.mark.parametrize("point", [3, 4])
+def test_kill_after_commit_leaves_queued_effect_undelivered(tmp_path, point):
+    res = _child(tmp_path, REVENANT_KILL_AT=3, REVENANT_KILL_AT_WRITE=point)
+    assert res.returncode == -signal.SIGKILL
+    assert len(_pending(tmp_path)) == 1
+    assert _effects(tmp_path) == []
+
+
+@posix
+@pytest.mark.parametrize("point", [3, 4])
+def test_resume_dispatches_undelivered_rows_exactly_once(tmp_path, point):
+    _child(tmp_path, REVENANT_KILL_AT=3, REVENANT_KILL_AT_WRITE=point)
+    assert _child(tmp_path).returncode == 0
+    clean = tmp_path.parent / (tmp_path.name + "-clean")
+    assert _child(clean).returncode == 0
+    assert _effects(tmp_path) == _effects(clean)
+    assert _pending(tmp_path) == []
+
+
+@posix
+def test_kill_before_commit_queues_nothing(tmp_path):
+    for point in (1, 2):
+        workdir = tmp_path / str(point)
+        _child(workdir, REVENANT_KILL_AT=3, REVENANT_KILL_AT_WRITE=point)
+        assert _pending(workdir) == []
+        assert _child(workdir).returncode == 0
+        assert len(_effects(workdir)) == 3
+
+
+@posix
+def test_sweep_passes_with_boundary_kills(tmp_path):
+    res = sweep(
+        SqliteOutboxAdapter, get_workload("linear"), tmp_path,
+        boundaries=[3, 6, 9], argv_for=_argv,
+    )  # fmt: skip
+    assert res.passed, res.failing()
