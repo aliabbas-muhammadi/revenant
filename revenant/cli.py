@@ -138,6 +138,13 @@ def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
         parser.error("--chaos only applies to adapters built on the reference runtime")
     if args.verbose:
         _enable_logging()
+    if args.kill_at is not None:
+        with tempfile.TemporaryDirectory(prefix="revenant-probe-") as probe:
+            adapter = factory()
+            adapter.build(workload, probe)
+            count = adapter.boundaries()
+        if not 1 <= args.kill_at <= count:
+            parser.error(f"--kill-at {args.kill_at} is out of range; valid boundaries: 1..{count}")
     points = [args.kill_at] if args.kill_at is not None else None
     with contextlib.ExitStack() as stack:
         if args.keep_workdirs:

@@ -151,7 +151,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R115 Structured logging via stdlib `logging` with `--verbose`. Test.
 - [x] R116 Clear error when run on a platform without `SIGKILL`. Test with monkeypatching.
 - [x] R117 Guard against `REVENANT_KILL_AT` leaking into the golden run. Test.
-- [ ] R118 Validate `--kill-at` against `boundaries()`; out of range is a usage error. Test.
+- [x] R118 Validate `--kill-at` against `boundaries()`; out of range is a usage error. Test.
 - [ ] R119 Type hints across the package; add `mypy` to the dev group and a strict config for `revenant/`. Fix findings.
 - [ ] R120 Add mypy to CI.
 

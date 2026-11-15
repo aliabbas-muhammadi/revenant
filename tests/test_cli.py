@@ -199,3 +199,16 @@ def test_verbose_logs_progress_to_stderr(capsys):
 def test_quiet_by_default(capsys):
     assert main(["run", "--adapter", "reference", "--workload", "linear", "--kill-at", "2"]) == 0
     assert "golden run" not in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("bad", ["0", "13", "-1"])
+def test_kill_at_out_of_range_is_a_usage_error(bad, capsys):
+    with pytest.raises(SystemExit) as exc:
+        main(["run", "--adapter", "reference", "--workload", "linear", "--kill-at", bad])
+    assert exc.value.code == 2
+    err = capsys.readouterr().err
+    assert "out of range" in err and "1..12" in err
+
+
+def test_kill_at_last_boundary_is_accepted():
+    assert main(["run", "--adapter", "reference", "--workload", "linear", "--kill-at", "12"]) == 0
