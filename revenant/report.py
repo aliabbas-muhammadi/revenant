@@ -101,6 +101,8 @@ def report_dict(
     for entry, b in zip(boundaries, result.boundaries, strict=True):
         if b.wall_seconds is not None:
             entry["wall_seconds"] = round(b.wall_seconds, 3)
+        if b.attempt_histogram:
+            entry["attempt_histogram"] = {str(n): c for n, c in b.attempt_histogram.items()}
         if b.tools:
             # Additive key: absent when a boundary recorded no tool activity.
             entry["tools"] = {name: dict(counts) for name, counts in b.tools.items()}
@@ -166,4 +168,18 @@ def markdown_from_dict(data: dict[str, object]) -> str:
             f"| {len(steps['lost'])} | {len(steps['phantom'])} {extra}"
             f"| {'pass' if b['passed'] else 'FAIL'} |"
         )
+    histogram = _total_histogram(data["boundaries"])  # type: ignore[arg-type]
+    if histogram:
+        lines += ["", "## Attempts per effect", "", "| attempts | effects |", "|---:|---:|"]
+        lines += [f"| {n} | {histogram[n]} |" for n in sorted(histogram)]
     return "\n".join(lines) + "\n"
+
+
+def _total_histogram(boundaries: list[dict[str, object]]) -> dict[int, int]:
+    """Sum the per-boundary attempt histograms across a whole sweep."""
+    total: dict[int, int] = {}
+    for b in boundaries:
+        raw = b.get("attempt_histogram") or {}
+        for n, count in raw.items():  # type: ignore[attr-defined]
+            total[int(n)] = total.get(int(n), 0) + int(count)
+    return total

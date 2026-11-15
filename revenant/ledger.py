@@ -177,6 +177,14 @@ class Ledger:
             out[tool] = out.get(tool, 0) + count
         return out
 
+    def attempt_histogram(self) -> dict[int, int]:
+        """How many committed effects took 1, 2, 3... attempts (``{attempts: effects}``)."""
+        rows = self._conn.execute(
+            "SELECT attempt_count, COUNT(*) FROM effects WHERE status = 'committed' "
+            "GROUP BY attempt_count ORDER BY attempt_count"
+        ).fetchall()
+        return {int(n): int(c) for n, c in rows}
+
     def summary(self) -> LedgerSummary:
         """Return attempts, committed effects, suppressed attempts and unconfirmed keys."""
         row = self._conn.execute(

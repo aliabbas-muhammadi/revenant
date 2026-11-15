@@ -269,6 +269,15 @@ def tool_breakdown(workdir: Path) -> dict[str, dict[str, int | None]]:
     }
 
 
+def attempt_histogram(workdir: Path) -> dict[int, int]:
+    """Committed effects in ``workdir``'s ledger by number of attempts; empty with no ledger."""
+    path = workdir / "ledger.db"
+    if not path.exists():
+        return {}
+    with Ledger(path) as ledger:
+        return ledger.attempt_histogram()
+
+
 def _read_effects(workdir: Path) -> list[dict[str, object]]:
     path = workdir / "effects.jsonl"
     return list(EffectSink(path).effects()) if path.exists() else []
@@ -377,6 +386,7 @@ def _sweep(
             score_steps(golden.trace, run.stitched),
             wall_seconds=wall,
             tools=tool_breakdown(workdir),
+            attempt_histogram=attempt_histogram(workdir),
         )
 
     if jobs == 1:

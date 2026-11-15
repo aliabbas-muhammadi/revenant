@@ -33,6 +33,8 @@ class BoundaryResult:
     wall_seconds: float | None = field(default=None, compare=False)
     #: Per tool: ``attempts`` (None when the runtime keeps no ledger) and ``effects`` seen.
     tools: dict[str, dict[str, int | None]] = field(default_factory=dict)
+    #: Committed effects grouped by how many attempts each took (``{attempts: effects}``).
+    attempt_histogram: dict[int, int] = field(default_factory=dict)
 
     @property
     def passed(self) -> bool:

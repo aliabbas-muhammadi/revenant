@@ -183,7 +183,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R138 `revenant diff A.json B.json`: compare two reports boundary by boundary. Tests.
 - [x] R139 Report the first divergent step and field when determinism fails. Tests.
 - [x] R140 Per-tool attempts/effects breakdown in reports. Tests.
-- [ ] R141 Histogram of attempts per effect in markdown reports. Tests.
+- [x] R141 Histogram of attempts per effect in markdown reports. Tests.
 - [ ] R142 `docs/results.md`: narrative of every committed result.
 - [ ] R143 `docs/faq.md`: why SIGKILL, why scripted models, why unconfirmed is not auto-resolved.
 - [ ] R144 Property-based workload generator: random step/tool layouts from a seed, swept on reference. Tests.
