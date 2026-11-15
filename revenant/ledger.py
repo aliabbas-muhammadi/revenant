@@ -169,6 +169,14 @@ class Ledger:
         ).fetchall()
         return [r[0] for r in rows]
 
+    def attempts_by_tool(self) -> dict[str, int]:
+        """Attempts per tool, taken from the ``tool:`` prefix of each idempotency key."""
+        out: dict[str, int] = {}
+        for key, count in self._conn.execute("SELECT idempotency_key, attempt_count FROM effects"):
+            tool = key.partition(":")[0]
+            out[tool] = out.get(tool, 0) + count
+        return out
+
     def summary(self) -> LedgerSummary:
         """Return attempts, committed effects, suppressed attempts and unconfirmed keys."""
         row = self._conn.execute(

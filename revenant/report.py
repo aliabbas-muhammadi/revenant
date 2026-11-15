@@ -101,6 +101,9 @@ def report_dict(
     for entry, b in zip(boundaries, result.boundaries, strict=True):
         if b.wall_seconds is not None:
             entry["wall_seconds"] = round(b.wall_seconds, 3)
+        if b.tools:
+            # Additive key: absent when a boundary recorded no tool activity.
+            entry["tools"] = {name: dict(counts) for name, counts in b.tools.items()}
     data: dict[str, object] = {
         "schema_version": REPORT_SCHEMA_VERSION,
         "versions": versions if versions is not None else versions_header(result.adapter),

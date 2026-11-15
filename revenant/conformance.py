@@ -31,6 +31,8 @@ class BoundaryResult:
     detected: bool | None = None
     #: Wall time of this boundary's kill and resume. Volatile: excluded from equality.
     wall_seconds: float | None = field(default=None, compare=False)
+    #: Per tool: ``attempts`` (None when the runtime keeps no ledger) and ``effects`` seen.
+    tools: dict[str, dict[str, int | None]] = field(default_factory=dict)
 
     @property
     def passed(self) -> bool:

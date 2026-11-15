@@ -249,6 +249,26 @@ def _name_field(
     return replace(score, detail=f"{score.detail}; first differing field: {field}")
 
 
+def tool_breakdown(workdir: Path) -> dict[str, dict[str, int | None]]:
+    """Attempts (from the ledger) and effects (from the sink) for each tool in ``workdir``."""
+    effects: dict[str, int] = {}
+    for record in _read_effects(workdir):
+        tool = str(record.get("tool", "unknown"))
+        effects[tool] = effects.get(tool, 0) + 1
+    attempts: dict[str, int] = {}
+    path = workdir / "ledger.db"
+    if path.exists():
+        with Ledger(path) as ledger:
+            attempts = ledger.attempts_by_tool()
+    return {
+        tool: {
+            "attempts": attempts.get(tool) if attempts else None,
+            "effects": effects.get(tool, 0),
+        }
+        for tool in sorted(effects.keys() | attempts.keys())
+    }
+
+
 def _read_effects(workdir: Path) -> list[dict[str, object]]:
     path = workdir / "effects.jsonl"
     return list(EffectSink(path).effects()) if path.exists() else []
@@ -356,6 +376,7 @@ def _sweep(
             score_effects(golden_effects, _read_effects(workdir), run.residue),
             score_steps(golden.trace, run.stitched),
             wall_seconds=wall,
+            tools=tool_breakdown(workdir),
         )
 
     if jobs == 1:
