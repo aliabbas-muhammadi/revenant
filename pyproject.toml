@@ -1,6 +1,6 @@
 [project]
 name = "revenant"
-version = "0.0.1"
+version = "0.1.0"
 description = "A durability conformance harness: kill an agent at every step boundary and prove deterministic resume and exactly-once side effects."
 readme = "README.md"
 license = "MIT"

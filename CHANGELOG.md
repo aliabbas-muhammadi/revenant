@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-15
+
 ### Added
 - SIGKILL conformance runner: kills at every step boundary (and mid-step), resumes,
   and checks resume determinism, exactly-once effects and lost or phantom steps.
@@ -19,3 +21,6 @@ All notable changes to this project are documented here. The format follows
 - Docs: adapter guide, outbox comparison, custom adapter example.
 - CI: lint, type check, tests, reduced conformance and LangGraph jobs.
 - `Makefile` targets for test, lint and the full conformance matrix.
+
+[Unreleased]: https://github.com/aliabbas-muhammadi/revenant/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/aliabbas-muhammadi/revenant/releases/tag/v0.1.0
