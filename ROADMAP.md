@@ -145,7 +145,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 ## M11 · Hardening
 
 - [x] R111 Kill at each write inside the checkpoint routine (`REVENANT_KILL_AT_WRITE`). Test the reference survives every point.
-- [ ] R112 `--keep-workdirs` debug flag. Test.
+- [x] R112 `--keep-workdirs` debug flag. Test.
 - [ ] R113 Reproducibility test: two full sweeps produce byte-identical JSON reports once timing fields are removed.
 - [ ] R114 Per-boundary wall time recorded as a volatile report field. Test it is excluded from comparisons.
 - [ ] R115 Structured logging via stdlib `logging` with `--verbose`. Test.

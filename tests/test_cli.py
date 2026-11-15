@@ -154,3 +154,27 @@ def test_mutants_are_runnable_by_name(capsys):
     assert main(["run", "--adapter", "mutant_nocheckpoint", "--workload", "linear",
                  "--kill-at", "3"]) == 1  # fmt: skip
     assert "verdict: FAIL" in capsys.readouterr().out
+
+
+def test_keep_workdirs_preserves_and_reports_location(capsys, tmp_path, monkeypatch):
+    import re
+    import shutil
+
+    monkeypatch.setenv("TMPDIR", str(tmp_path))
+    import tempfile
+
+    monkeypatch.setattr(tempfile, "tempdir", None)
+    code = main(["run", "--adapter", "reference", "--workload", "linear",
+                 "--kill-at", "2", "--keep-workdirs"])  # fmt: skip
+    assert code == 0
+    err = capsys.readouterr().err
+    kept = re.search(r"workdirs kept in (\S+)", err).group(1)
+    from pathlib import Path
+
+    assert (Path(kept) / "golden").is_dir() and (Path(kept) / "k2").is_dir()
+    shutil.rmtree(kept)
+
+
+def test_workdirs_removed_by_default(capsys):
+    assert main(["run", "--adapter", "reference", "--workload", "linear", "--kill-at", "2"]) == 0
+    assert "workdirs kept" not in capsys.readouterr().err

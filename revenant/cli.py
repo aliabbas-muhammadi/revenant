@@ -7,6 +7,7 @@ Exit codes: 0 conformance passed (including pass with unconfirmed effects),
 from __future__ import annotations
 
 import argparse
+import contextlib
 import functools
 import json
 import sys
@@ -74,6 +75,8 @@ def _build_parser() -> argparse.ArgumentParser:
                      help="langgraph_sqlite only: bypass the effects ledger")  # fmt: skip
     run.add_argument("--chaos", choices=CHAOS_MODES, default="none",
                      help="inject faults (reference-based adapters only)")  # fmt: skip
+    run.add_argument("--keep-workdirs", action="store_true",
+                     help="keep workdirs and print where")  # fmt: skip
     run.add_argument("--jobs", type=int, default=1)
     run.add_argument("--out", default=None, help="write the JSON report to this path")
     sub.add_parser("list", help="show known adapters and workloads")
@@ -119,7 +122,12 @@ def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
     if args.chaos != "none" and not issubclass(factory, ReferenceAdapter):
         parser.error("--chaos only applies to adapters built on the reference runtime")
     points = [args.kill_at] if args.kill_at is not None else None
-    with tempfile.TemporaryDirectory(prefix="revenant-") as root:
+    with contextlib.ExitStack() as stack:
+        if args.keep_workdirs:
+            root = tempfile.mkdtemp(prefix="revenant-")
+            print(f"workdirs kept in {root}", file=sys.stderr)
+        else:
+            root = stack.enter_context(tempfile.TemporaryDirectory(prefix="revenant-"))
         result = sweep(
             factory, workload, root,
             mode=args.mode, boundaries=points, jobs=args.jobs, chaos=args.chaos,
