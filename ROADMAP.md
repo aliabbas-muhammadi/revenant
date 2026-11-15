@@ -160,7 +160,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R121 `adapters/reference_sqlite.py`: checkpoint state and ledger rows in one SQLite transaction.
 - [x] R122 Outbox: effects recorded in the same transaction and dispatched after commit. Tests.
 - [x] R123 Dispatcher resumes undelivered outbox rows after a kill. Tests.
-- [ ] R124 Full sweeps for all workloads. Integration tests.
+- [x] R124 Full sweeps for all workloads. Integration tests.
 - [ ] R125 Commit results and a `docs/outbox.md` comparison with the file-checkpoint reference.
 
 ## M13 · Docs, CI and release
