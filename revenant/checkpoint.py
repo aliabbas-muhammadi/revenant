@@ -39,6 +39,13 @@ def _die_at(kill_point: int | None, point: int) -> None:
         os.kill(os.getpid(), signal.SIGKILL)
 
 
+def encode_checkpoint(data: dict[str, Any]) -> bytes:
+    """Serialise ``data`` with its schema version and integrity digest."""
+    body = {"schema_version": SCHEMA_VERSION, **data}
+    payload = {"body": body, "digest": _digest(body)}
+    return json.dumps(payload, sort_keys=True).encode("utf-8")
+
+
 def write_checkpoint(
     path: str | Path, data: dict[str, Any], kill_point: int | None = None
 ) -> None:
@@ -50,11 +57,9 @@ def write_checkpoint(
     if kill_point is not None and kill_point not in WRITE_POINTS:
         raise ValueError(f"kill_point must be one of {WRITE_POINTS}, got {kill_point!r}")
     target = Path(path)
-    body = {"schema_version": SCHEMA_VERSION, **data}
-    payload = {"body": body, "digest": _digest(body)}
     tmp = target.with_name(target.name + ".tmp")
     with open(tmp, "wb") as fh:
-        fh.write(json.dumps(payload, sort_keys=True).encode("utf-8"))
+        fh.write(encode_checkpoint(data))
         fh.flush()
         _die_at(kill_point, 1)
         os.fsync(fh.fileno())
@@ -76,15 +81,20 @@ def load_checkpoint(path: str | Path) -> dict[str, Any] | None:
         raw = target.read_bytes()
     except FileNotFoundError:
         return None
+    return decode_checkpoint(raw, str(target))
+
+
+def decode_checkpoint(raw: bytes, source: str) -> dict[str, Any]:
+    """Parse and verify checkpoint bytes read from ``source``."""
     try:
         data = json.loads(raw)
     except ValueError as exc:
-        raise CheckpointCorrupt(f"checkpoint {target} is not valid JSON: {exc}") from exc
+        raise CheckpointCorrupt(f"checkpoint {source} is not valid JSON: {exc}") from exc
     if not isinstance(data, dict) or "body" not in data or "digest" not in data:
-        raise CheckpointCorrupt(f"checkpoint {target} has no body and digest")
+        raise CheckpointCorrupt(f"checkpoint {source} has no body and digest")
     body = data["body"]
     if not isinstance(body, dict) or _digest(body) != data["digest"]:
-        raise CheckpointCorrupt(f"checkpoint {target} fails its integrity digest")
+        raise CheckpointCorrupt(f"checkpoint {source} fails its integrity digest")
     data = body
     version = data.get("schema_version")
     if version != SCHEMA_VERSION:

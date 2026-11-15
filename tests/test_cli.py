@@ -82,7 +82,7 @@ def test_list_shows_adapters_and_workloads(capsys):
         extra = ""
     assert out == [
         f"adapters:  {extra}mutant_checkpoint_first, mutant_inplace, mutant_nocheckpoint, "
-        "mutant_noledger, mutant_volatile, reference",
+        "mutant_noledger, mutant_volatile, reference, reference_sqlite",
         "workloads: linear, branching, fanout",
     ]
 

@@ -100,7 +100,7 @@ class ReferenceAdapter(Adapter):
         self._trace = []
         if not self.resume_from_checkpoint:
             self._forget_local_state(root)
-        saved = load_checkpoint(root / CHECKPOINT_NAME) if self.resume_from_checkpoint else None
+        saved = self._load_saved(root) if self.resume_from_checkpoint else None
         if saved is not None:
             state = saved["state"]
             self._trace = list(saved["trace"])
@@ -111,7 +111,7 @@ class ReferenceAdapter(Adapter):
                 )
         self._rewrite_trace_file(root)
         start = state["step"]
-        with Ledger(root / LEDGER_NAME) as ledger:
+        with self._open_ledger(root) as ledger:
             for index in range(start, len(workload.steps)):
                 if stop_after is not None and index >= stop_after:
                     return RunResult(False, len(self._trace), tuple(self._trace))
@@ -143,6 +143,14 @@ class ReferenceAdapter(Adapter):
                 if not kill_mid and kill_at is not None and index + 1 == kill_at:
                     os.kill(os.getpid(), signal.SIGKILL)
         return RunResult(True, len(self._trace), tuple(self._trace))
+
+    def _load_saved(self, root: Path) -> dict[str, Any] | None:
+        """Load the last durable checkpoint, or ``None`` on a fresh start."""
+        return load_checkpoint(root / CHECKPOINT_NAME)
+
+    def _open_ledger(self, root: Path) -> Ledger:
+        """Open the effects ledger for this run."""
+        return Ledger(root / LEDGER_NAME)
 
     @staticmethod
     def _hung_attempt(
