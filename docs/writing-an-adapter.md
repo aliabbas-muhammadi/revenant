@@ -39,7 +39,9 @@ in the adapter:
 ## A complete minimal adapter
 
 This adapter is a 12-step loop with an atomic checkpoint and ledgered tools. It passes
-`linear` at every boundary in both kill modes.
+`linear` at every boundary in both kill modes. It also lives in
+[examples/custom_adapter/](../examples/custom_adapter/), where `tests/test_custom_adapter_example.py`
+keeps it passing.
 
 ```python
 """A complete minimal adapter: a step loop with an atomic checkpoint and ledgered tools."""
