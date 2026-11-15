@@ -1,0 +1,21 @@
+# Changelog
+
+All notable changes to this project are documented here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
+[Semantic Versioning](https://semver.org/).
+
+## [Unreleased]
+
+### Added
+- SIGKILL conformance runner: kills at every step boundary (and mid-step), resumes,
+  and checks resume determinism, exactly-once effects and lost or phantom steps.
+- Reference adapter with atomic file checkpoints and an idempotency ledger, plus
+  SQLite and outbox variants.
+- Five mutant adapters, each breaking one property, all failed by the harness.
+- Chaos injectors: duplicate delivery, timeouts, checkpoint corruption.
+- LangGraph adapter with a SQLite checkpointer; ledgered and naive tool modes.
+- `revenant run`, `list` and `report` commands; text, markdown and JSON reports.
+- Committed sweep results under `results/`, README table rendered from them.
+- Docs: adapter guide, outbox comparison, custom adapter example.
+- CI: lint, type check, tests, reduced conformance and LangGraph jobs.
+- `Makefile` targets for test, lint and the full conformance matrix.
