@@ -1,4 +1,4 @@
-.PHONY: test lint conformance table
+.PHONY: test lint conformance table ci-conformance
 
 WORKLOADS := linear branching fanout
 BOUNDARY_MUTANTS := mutant_nocheckpoint mutant_inplace mutant_volatile
@@ -46,3 +46,7 @@ conformance:
 
 table:
 	uv run python scripts/render_tables.py
+
+# Reduced matrix used by CI: reference passes, every mutant fails.
+ci-conformance:
+	scripts/ci_conformance.sh ci-results
