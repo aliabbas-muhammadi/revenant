@@ -43,6 +43,36 @@ def score_determinism(
     return DeterminismScore(True)
 
 
+def _leaves(value: object, prefix: str = "") -> dict[str, object]:
+    """Flatten nested dicts to ``{"a.b": leaf}``; lists and scalars are leaves."""
+    if isinstance(value, dict):
+        out: dict[str, object] = {}
+        for key, item in value.items():
+            out.update(_leaves(item, f"{prefix}.{key}" if prefix else str(key)))
+        return out
+    return {prefix: value}
+
+
+def first_divergent_field(
+    golden: object, got: object, volatile_fields: Sequence[str] = ()
+) -> str | None:
+    """Dotted path of the first field (in sorted order) where two states differ.
+
+    Fields listed in ``volatile_fields`` (or beneath one) are ignored, matching how
+    the state hash is computed. Returns ``None`` when no field differs.
+    """
+    left, right = _leaves(golden), _leaves(got)
+    for path in sorted(left.keys() | right.keys()):
+        if any(path == v or path.startswith(v + ".") for v in volatile_fields):
+            continue
+        if left.get(path, _MISSING) != right.get(path, _MISSING):
+            return path
+    return None
+
+
+_MISSING = object()
+
+
 def _final(golden: Sequence[str], stitched: Sequence[str | None]) -> bool:
     return bool(stitched) and bool(golden) and stitched[-1] == golden[-1]
 

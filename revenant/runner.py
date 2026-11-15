@@ -11,9 +11,10 @@ import time
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 from revenant.adapter import Adapter
 from revenant.adapters.reference import KILL_ENV, KILL_MODE_ENV, KILL_WRITE_ENV
@@ -26,7 +27,13 @@ from revenant.chaos import (
 from revenant.conformance import BoundaryResult, ConformanceResult, aggregate
 from revenant.ledger import Ledger
 from revenant.result import RunResult
-from revenant.scoring import score_determinism, score_effects, score_steps
+from revenant.scoring import (
+    DeterminismScore,
+    first_divergent_field,
+    score_determinism,
+    score_effects,
+    score_steps,
+)
 from revenant.sink import EffectSink
 from revenant.workloads import Workload
 
@@ -160,6 +167,8 @@ class KillResume:
     resumed: ChildOutcome
     stitched: tuple[str | None, ...]
     residue: tuple[str, ...] = ()
+    #: Per-step states recorded after the resume, when the adapter keeps them.
+    snapshots: tuple[dict[str, Any] | None, ...] = ()
     #: Whether chaos damaged the durable state between the kill and the resume.
     damaged: bool = False
 
@@ -216,8 +225,28 @@ def kill_and_resume(
     pre = adapter.state_trace()
     resumed = spawn_child(cmd, timeout=timeout)
     post = adapter.state_trace()
+    snapshots = adapter.state_snapshots()
     # The reference trace is cumulative, so the post-resume trace starts at step 1.
-    return KillResume(boundary, killed, resumed, stitch(pre, post), residue, damaged)
+    return KillResume(boundary, killed, resumed, stitch(pre, post), residue, snapshots, damaged)
+
+
+def _name_field(
+    score: DeterminismScore,
+    golden: Sequence[dict[str, Any] | None],
+    resumed: Sequence[dict[str, Any] | None],
+    volatile: Sequence[str],
+) -> DeterminismScore:
+    """Add the first differing state field to a failed score, when states are available."""
+    step = score.first_divergent_step
+    if score.passed or step is None or not 0 < step <= min(len(golden), len(resumed)):
+        return score
+    want, got = golden[step - 1], resumed[step - 1]
+    if want is None or got is None:
+        return score
+    field = first_divergent_field(want, got, volatile)
+    if field is None:
+        return score
+    return replace(score, detail=f"{score.detail}; first differing field: {field}")
 
 
 def _read_effects(workdir: Path) -> list[dict[str, object]]:
@@ -283,6 +312,9 @@ def _sweep(
     golden = golden_run(factory, workload, root / "golden")
     log.info("golden run of %s finished: %d steps", workload.name, len(golden.trace))
     golden_effects = _read_effects(root / "golden")
+    golden_probe = factory()
+    golden_probe.build(workload, root / "golden")
+    golden_states = golden_probe.state_snapshots()
     adapter_name = factory().name
     points = list(boundaries) if boundaries is not None else range(1, len(golden.trace) + 1)
     if jobs < 1:
@@ -317,7 +349,10 @@ def _sweep(
         return BoundaryResult(
             k,
             mode,
-            score_determinism(golden.trace, run.stitched, k),
+            _name_field(
+                score_determinism(golden.trace, run.stitched, k),
+                golden_states, run.snapshots, workload.volatile_fields,
+            ),
             score_effects(golden_effects, _read_effects(workdir), run.residue),
             score_steps(golden.trace, run.stitched),
             wall_seconds=wall,

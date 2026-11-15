@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Any
 
 from revenant.result import RunResult
 from revenant.workloads import Workload
@@ -32,6 +33,13 @@ class Adapter(ABC):
     @abstractmethod
     def state_trace(self) -> tuple[str, ...]:
         """Per-step state hashes recorded in the workdir so far."""
+
+    def state_snapshots(self) -> tuple[dict[str, Any] | None, ...]:
+        """Per-step states recorded so far, or ``()`` when the runtime keeps none.
+
+        Optional: when present, a determinism failure names the first differing field.
+        """
+        return ()
 
     @abstractmethod
     def boundaries(self) -> int:

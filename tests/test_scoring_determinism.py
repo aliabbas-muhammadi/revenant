@@ -33,3 +33,23 @@ def test_missing_steps_count_as_divergence():
 
 def test_empty_stitched_fails():
     assert not score_determinism(G, [], 0).passed
+
+
+def test_first_divergent_field_names_dotted_path() -> None:
+    from revenant.scoring import first_divergent_field
+
+    a = {"step": 2, "results": {"a": 1, "b": 2}}
+    b = {"step": 2, "results": {"a": 1, "b": 3}}
+    assert first_divergent_field(a, b) == "results.b"
+    assert first_divergent_field(a, a) is None
+    assert first_divergent_field({"x": 1}, {"x": 1, "y": 2}) == "y"
+
+
+def test_first_divergent_field_skips_volatile() -> None:
+    from revenant.scoring import first_divergent_field
+
+    a = {"meta": {"ts": 1}, "n": 1}
+    b = {"meta": {"ts": 2}, "n": 1}
+    assert first_divergent_field(a, b, ["meta.ts"]) is None
+    assert first_divergent_field(a, b, ["meta"]) is None
+    assert first_divergent_field(a, b) == "meta.ts"

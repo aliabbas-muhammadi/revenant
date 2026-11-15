@@ -7,6 +7,7 @@ from the last checkpoint in the workdir and skips completed steps.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import signal
@@ -193,7 +194,7 @@ class ReferenceAdapter(Adapter):
         self._write_checkpoint(
             root / CHECKPOINT_NAME, {"state": state, "trace": self._trace}, dying=dying
         )
-        self._append_trace_line(root, state["step"], self._trace[-1])
+        self._append_trace_line(root, state["step"], self._trace[-1], state)
 
     def _stamp(self, state: dict[str, Any]) -> None:
         """Hook for mutants that smuggle extra fields into hashed state."""
@@ -213,13 +214,24 @@ class ReferenceAdapter(Adapter):
     def _rewrite_trace_file(self, root: Path) -> None:
         """Make the trace file match the checkpoint (a kill can leave it one line short)."""
         path = root / TRACE_NAME
+        kept: dict[int, Any] = {}
+        if path.exists():
+            for line in path.read_text().splitlines():
+                with contextlib.suppress(ValueError):
+                    row = json.loads(line)
+                    kept[row["step"]] = row.get("state")
         path.write_text("")
         for step, digest in enumerate(self._trace, 1):
-            self._append_trace_line(root, step, digest)
+            self._append_trace_line(root, step, digest, kept.get(step))
 
     @staticmethod
-    def _append_trace_line(root: Path, step: int, digest: str) -> None:
-        line = json.dumps({"step": step, "hash": digest}, sort_keys=True) + "\n"
+    def _append_trace_line(
+        root: Path, step: int, digest: str, state: dict[str, Any] | None = None
+    ) -> None:
+        row: dict[str, Any] = {"step": step, "hash": digest}
+        if state is not None:
+            row["state"] = state
+        line = json.dumps(row, sort_keys=True) + "\n"
         with open(root / TRACE_NAME, "ab") as fh:
             fh.write(line.encode("utf-8"))
             fh.flush()
@@ -233,6 +245,15 @@ class ReferenceAdapter(Adapter):
             return ()
         rows = [json.loads(line) for line in path.read_text().splitlines() if line]
         return tuple(row["hash"] for row in rows)
+
+    def state_snapshots(self) -> tuple[dict[str, Any] | None, ...]:
+        """States recorded in the trace file, in step order (``None`` where absent)."""
+        _, root = self._built()
+        path = root / TRACE_NAME
+        if not path.exists():
+            return ()
+        rows = [json.loads(line) for line in path.read_text().splitlines() if line]
+        return tuple(row.get("state") for row in rows)
 
     def boundaries(self) -> int:
         workload, _ = self._built()

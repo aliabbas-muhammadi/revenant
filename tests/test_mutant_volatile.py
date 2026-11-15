@@ -26,6 +26,7 @@ def test_undeclared_timestamp_breaks_determinism_only(tmp_path):
     for b in res.boundaries:
         assert not b.determinism.passed
         assert b.determinism.first_divergent_step == b.boundary + 1
+        assert b.determinism.detail.endswith(f"first differing field: {FIELD}")
         assert b.effects.passed and b.steps.passed
 
 
