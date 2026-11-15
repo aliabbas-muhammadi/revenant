@@ -24,6 +24,53 @@ killed at 12/12 boundaries · resumes: 12/12 identical · effects: 3 once each �
 
 Exit codes: `0` pass (including pass with unconfirmed effects), `1` conformance failure, `2` usage error. Committed sweeps live in [results/](results/); the SQLite and outbox variants are compared in [docs/outbox.md](docs/outbox.md).
 
+## Results
+
+Every committed sweep, generated from `results/` by `scripts/render_tables.py`:
+
+<!-- results-table:start -->
+| result | adapter | workload | kill mode | chaos | boundaries passed | duplicated | unconfirmed | verdict |
+|---|---|---|---|---|---:|---:|---:|---|
+| [chaos/reference-branching-all](results/chaos/reference-branching-all.json) | reference | branching | boundary | all | 10/10 | 0 | 0 | PASS |
+| [chaos/reference-branching-corrupt](results/chaos/reference-branching-corrupt.json) | reference | branching | boundary | corrupt | 10/10 | 0 | 0 | PASS |
+| [chaos/reference-branching-dup](results/chaos/reference-branching-dup.json) | reference | branching | boundary | dup | 10/10 | 0 | 0 | PASS |
+| [chaos/reference-branching-timeout](results/chaos/reference-branching-timeout.json) | reference | branching | boundary | timeout | 10/10 | 0 | 0 | PASS |
+| [chaos/reference-fanout-all](results/chaos/reference-fanout-all.json) | reference | fanout | boundary | all | 5/5 | 0 | 0 | PASS |
+| [chaos/reference-fanout-corrupt](results/chaos/reference-fanout-corrupt.json) | reference | fanout | boundary | corrupt | 5/5 | 0 | 0 | PASS |
+| [chaos/reference-fanout-dup](results/chaos/reference-fanout-dup.json) | reference | fanout | boundary | dup | 5/5 | 0 | 0 | PASS |
+| [chaos/reference-fanout-timeout](results/chaos/reference-fanout-timeout.json) | reference | fanout | boundary | timeout | 5/5 | 0 | 0 | PASS |
+| [chaos/reference-linear-all](results/chaos/reference-linear-all.json) | reference | linear | boundary | all | 12/12 | 0 | 0 | PASS |
+| [chaos/reference-linear-corrupt](results/chaos/reference-linear-corrupt.json) | reference | linear | boundary | corrupt | 12/12 | 0 | 0 | PASS |
+| [chaos/reference-linear-dup](results/chaos/reference-linear-dup.json) | reference | linear | boundary | dup | 12/12 | 0 | 0 | PASS |
+| [chaos/reference-linear-timeout](results/chaos/reference-linear-timeout.json) | reference | linear | boundary | timeout | 12/12 | 0 | 0 | PASS |
+| [langgraph/ledgered-branching](results/langgraph/ledgered-branching.json) | langgraph_sqlite | branching | mid | none | 10/10 | 0 | 0 | PASS |
+| [langgraph/ledgered-fanout](results/langgraph/ledgered-fanout.json) | langgraph_sqlite | fanout | mid | none | 2/3 | 2 | 2 | FAIL |
+| [langgraph/ledgered-linear](results/langgraph/ledgered-linear.json) | langgraph_sqlite | linear | mid | none | 12/12 | 0 | 0 | PASS |
+| [langgraph/naive-branching](results/langgraph/naive-branching.json) | langgraph_sqlite | branching | mid | none | 0/10 | 24 | 0 | FAIL |
+| [langgraph/naive-fanout](results/langgraph/naive-fanout.json) | langgraph_sqlite | fanout | mid | none | 1/3 | 5 | 0 | FAIL |
+| [langgraph/naive-linear](results/langgraph/naive-linear.json) | langgraph_sqlite | linear | mid | none | 2/12 | 13 | 0 | FAIL |
+| [mutants/mutant_checkpoint_first-linear](results/mutants/mutant_checkpoint_first-linear.json) | mutant_checkpoint_first | linear | mid | none | 9/12 | 0 | 0 | FAIL |
+| [mutants/mutant_inplace-linear](results/mutants/mutant_inplace-linear.json) | mutant_inplace | linear | boundary | none | 0/12 | 0 | 0 | FAIL |
+| [mutants/mutant_nocheckpoint-linear](results/mutants/mutant_nocheckpoint-linear.json) | mutant_nocheckpoint | linear | boundary | none | 2/12 | 21 | 0 | FAIL |
+| [mutants/mutant_noledger-linear](results/mutants/mutant_noledger-linear.json) | mutant_noledger | linear | mid | none | 9/12 | 3 | 0 | FAIL |
+| [mutants/mutant_volatile-linear](results/mutants/mutant_volatile-linear.json) | mutant_volatile | linear | boundary | none | 0/12 | 0 | 0 | FAIL |
+| [outbox/reference_outbox-branching-mid](results/outbox/reference_outbox-branching-mid.json) | reference_outbox | branching | mid | none | 10/10 | 0 | 0 | PASS |
+| [outbox/reference_outbox-branching](results/outbox/reference_outbox-branching.json) | reference_outbox | branching | boundary | none | 10/10 | 0 | 0 | PASS |
+| [outbox/reference_outbox-fanout-mid](results/outbox/reference_outbox-fanout-mid.json) | reference_outbox | fanout | mid | none | 5/5 | 0 | 0 | PASS |
+| [outbox/reference_outbox-fanout](results/outbox/reference_outbox-fanout.json) | reference_outbox | fanout | boundary | none | 5/5 | 0 | 0 | PASS |
+| [outbox/reference_outbox-linear-mid](results/outbox/reference_outbox-linear-mid.json) | reference_outbox | linear | mid | none | 12/12 | 0 | 0 | PASS |
+| [outbox/reference_outbox-linear](results/outbox/reference_outbox-linear.json) | reference_outbox | linear | boundary | none | 12/12 | 0 | 0 | PASS |
+| [outbox/reference_sqlite-branching-mid](results/outbox/reference_sqlite-branching-mid.json) | reference_sqlite | branching | mid | none | 10/10 | 0 | 0 | PASS |
+| [outbox/reference_sqlite-branching](results/outbox/reference_sqlite-branching.json) | reference_sqlite | branching | boundary | none | 10/10 | 0 | 0 | PASS |
+| [outbox/reference_sqlite-fanout-mid](results/outbox/reference_sqlite-fanout-mid.json) | reference_sqlite | fanout | mid | none | 5/5 | 0 | 0 | PASS |
+| [outbox/reference_sqlite-fanout](results/outbox/reference_sqlite-fanout.json) | reference_sqlite | fanout | boundary | none | 5/5 | 0 | 0 | PASS |
+| [outbox/reference_sqlite-linear-mid](results/outbox/reference_sqlite-linear-mid.json) | reference_sqlite | linear | mid | none | 12/12 | 0 | 0 | PASS |
+| [outbox/reference_sqlite-linear](results/outbox/reference_sqlite-linear.json) | reference_sqlite | linear | boundary | none | 12/12 | 0 | 0 | PASS |
+| [reference-branching](results/reference-branching.json) | reference | branching | boundary | none | 10/10 | 0 | 0 | PASS |
+| [reference-fanout](results/reference-fanout.json) | reference | fanout | boundary | none | 5/5 | 0 | 0 | PASS |
+| [reference-linear](results/reference-linear.json) | reference | linear | boundary | none | 12/12 | 0 | 0 | PASS |
+<!-- results-table:end -->
+
 ## The three properties, with an example
 
 Take the `linear` workload: twelve steps, with a tool call at steps 3 (`send_email`), 6 (`charge_card`) and 9 (`write_file`). The harness first runs it uninterrupted to get a golden trace of twelve state hashes and the three effects it should produce. Then, for each boundary `k`, it starts the runtime in a fresh directory, `SIGKILL`s it at `k`, resumes it, and compares what it finds against the golden run:
