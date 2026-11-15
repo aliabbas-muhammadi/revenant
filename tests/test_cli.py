@@ -178,3 +178,24 @@ def test_keep_workdirs_preserves_and_reports_location(capsys, tmp_path, monkeypa
 def test_workdirs_removed_by_default(capsys):
     assert main(["run", "--adapter", "reference", "--workload", "linear", "--kill-at", "2"]) == 0
     assert "workdirs kept" not in capsys.readouterr().err
+
+
+def test_verbose_logs_progress_to_stderr(capsys):
+    import logging
+
+    package = logging.getLogger("revenant")
+    before = list(package.handlers)
+    try:
+        assert main(["run", "--adapter", "reference", "--workload", "linear",
+                     "--kill-at", "2", "--verbose"]) == 0  # fmt: skip
+        err = capsys.readouterr().err
+    finally:
+        package.handlers[:] = before
+        package.setLevel(logging.NOTSET)
+    assert "golden run of linear finished" in err
+    assert "boundary 2 (boundary)" in err
+
+
+def test_quiet_by_default(capsys):
+    assert main(["run", "--adapter", "reference", "--workload", "linear", "--kill-at", "2"]) == 0
+    assert "golden run" not in capsys.readouterr().err

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import signal
 import subprocess
@@ -29,6 +30,7 @@ from revenant.scoring import score_determinism, score_effects, score_steps
 from revenant.sink import EffectSink
 from revenant.workloads import Workload
 
+log = logging.getLogger(__name__)
 AdapterFactory = Callable[[], Adapter]
 KILL_VARS = (KILL_ENV, KILL_MODE_ENV, KILL_WRITE_ENV)
 
@@ -266,6 +268,7 @@ def _sweep(
     damage: Callable[[Path], bool] | None,
 ) -> ConformanceResult:
     golden = golden_run(factory, workload, root / "golden")
+    log.info("golden run of %s finished: %d steps", workload.name, len(golden.trace))
     golden_effects = _read_effects(root / "golden")
     adapter_name = factory().name
     points = list(boundaries) if boundaries is not None else range(1, len(golden.trace) + 1)
@@ -282,6 +285,10 @@ def _sweep(
             factory, workload, workdir, k, mode=mode, argv=argv, damage=damage
         )
         wall = time.perf_counter() - started
+        log.info(
+            "boundary %d (%s): killed=%s resumed=%s in %.2fs",
+            k, mode, run.killed.status.value, run.resumed.status.value, wall,
+        )  # fmt: skip
         if run.damaged:
             # The golden scores stand in for the properties: a refused resume has no
             # trace to compare, and what is being judged is only whether it refused.

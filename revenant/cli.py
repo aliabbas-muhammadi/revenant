@@ -10,6 +10,7 @@ import argparse
 import contextlib
 import functools
 import json
+import logging
 import sys
 import tempfile
 from collections.abc import Callable
@@ -77,6 +78,7 @@ def _build_parser() -> argparse.ArgumentParser:
                      help="inject faults (reference-based adapters only)")  # fmt: skip
     run.add_argument("--keep-workdirs", action="store_true",
                      help="keep workdirs and print where")  # fmt: skip
+    run.add_argument("--verbose", action="store_true", help="log progress to stderr")
     run.add_argument("--jobs", type=int, default=1)
     run.add_argument("--out", default=None, help="write the JSON report to this path")
     sub.add_parser("list", help="show known adapters and workloads")
@@ -103,6 +105,15 @@ def _report(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
     return 0 if data.get("verdict") != "FAIL" else 1
 
 
+def _enable_logging() -> None:
+    """Send the package's progress logs to stderr."""
+    handler = logging.StreamHandler(sys.stderr)
+    handler.setFormatter(logging.Formatter("%(levelname)s %(name)s: %(message)s"))
+    package = logging.getLogger("revenant")
+    package.addHandler(handler)
+    package.setLevel(logging.INFO)
+
+
 def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
     if args.adapter not in ADAPTERS:
         parser.error(f"unknown adapter {args.adapter!r}; known: {', '.join(sorted(ADAPTERS))}")
@@ -121,6 +132,8 @@ def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
         extra = ("--naive-tools",)
     if args.chaos != "none" and not issubclass(factory, ReferenceAdapter):
         parser.error("--chaos only applies to adapters built on the reference runtime")
+    if args.verbose:
+        _enable_logging()
     points = [args.kill_at] if args.kill_at is not None else None
     with contextlib.ExitStack() as stack:
         if args.keep_workdirs:

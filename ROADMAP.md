@@ -148,7 +148,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R112 `--keep-workdirs` debug flag. Test.
 - [x] R113 Reproducibility test: two full sweeps produce byte-identical JSON reports once timing fields are removed.
 - [x] R114 Per-boundary wall time recorded as a volatile report field. Test it is excluded from comparisons.
-- [ ] R115 Structured logging via stdlib `logging` with `--verbose`. Test.
+- [x] R115 Structured logging via stdlib `logging` with `--verbose`. Test.
 - [ ] R116 Clear error when run on a platform without `SIGKILL`. Test with monkeypatching.
 - [ ] R117 Guard against `REVENANT_KILL_AT` leaking into the golden run. Test.
 - [ ] R118 Validate `--kill-at` against `boundaries()`; out of range is a usage error. Test.
