@@ -36,3 +36,14 @@ def test_two_full_sweeps_are_byte_identical(tmp_path, workload):
     second = _report(tmp_path / "b")
     assert json.dumps(first, sort_keys=True) == json.dumps(second, sort_keys=True)
     assert first["verdict"] == "PASS"
+
+
+def test_sweep_records_wall_time_per_boundary():
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as root:
+        result = sweep(ReferenceAdapter, get_workload("linear"), root, boundaries=[2, 3])
+    assert all(b.wall_seconds is not None and b.wall_seconds >= 0 for b in result.boundaries)
+    raw = json.loads(json_report(result))
+    assert all("wall_seconds" in b for b in raw["boundaries"])
+    assert all("wall_seconds" not in b for b in strip_volatile(raw)["boundaries"])

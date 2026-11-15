@@ -59,3 +59,20 @@ def test_verdict_fail_wins_over_unconfirmed():
 
     r = aggregate("a", "w", [_b(1, unconf=["k"]), _b(2, ok=False)])
     assert r.verdict is Verdict.FAIL
+
+
+def test_wall_seconds_is_volatile_and_excluded_from_equality():
+    from revenant.conformance import BoundaryResult
+    from revenant.scoring import DeterminismScore, EffectsScore, StepsScore
+
+    def make(wall):
+        return BoundaryResult(
+            1, "boundary",
+            DeterminismScore(True, None, True, ""),
+            EffectsScore(1, (), (), (), ()),
+            StepsScore((), ()),
+            wall_seconds=wall,
+        )  # fmt: skip
+
+    assert make(0.1) == make(9.9)
+    assert make(None) == make(1.0)

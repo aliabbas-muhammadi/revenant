@@ -112,6 +112,9 @@ def report_dict(
         for entry, b in zip(data["boundaries"], result.boundaries, strict=True):  # type: ignore[arg-type]
             if b.detected is not None:
                 entry["detected"] = b.detected  # type: ignore[index]
+    for entry, b in zip(data["boundaries"], result.boundaries, strict=True):  # type: ignore[arg-type]
+        if b.wall_seconds is not None:
+            entry["wall_seconds"] = round(b.wall_seconds, 3)  # type: ignore[index]
     return data
 
 

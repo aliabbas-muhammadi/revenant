@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 from revenant.scoring import DeterminismScore, EffectsScore, StepsScore
@@ -29,6 +29,8 @@ class BoundaryResult:
     #: Chaos damage injected before the resume: ``None`` none, ``True`` the runtime
     #: refused the damaged state with a named error, ``False`` it carried on regardless.
     detected: bool | None = None
+    #: Wall time of this boundary's kill and resume. Volatile: excluded from equality.
+    wall_seconds: float | None = field(default=None, compare=False)
 
     @property
     def passed(self) -> bool:

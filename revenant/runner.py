@@ -6,6 +6,7 @@ import os
 import signal
 import subprocess
 import sys
+import time
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
@@ -276,9 +277,11 @@ def _sweep(
         if workdir.exists() and any(workdir.iterdir()):
             raise ValueError(f"boundary workdir must start empty, got {workdir}")
         argv = argv_for(workdir) if argv_for is not None else None
+        started = time.perf_counter()
         run = kill_and_resume(
             factory, workload, workdir, k, mode=mode, argv=argv, damage=damage
         )
+        wall = time.perf_counter() - started
         if run.damaged:
             # The golden scores stand in for the properties: a refused resume has no
             # trace to compare, and what is being judged is only whether it refused.
@@ -289,6 +292,7 @@ def _sweep(
                 score_effects(golden_effects, golden_effects),
                 score_steps(golden.trace, golden.trace),
                 detected=run.refused,
+                wall_seconds=wall,
             )
         return BoundaryResult(
             k,
@@ -296,6 +300,7 @@ def _sweep(
             score_determinism(golden.trace, run.stitched, k),
             score_effects(golden_effects, _read_effects(workdir), run.residue),
             score_steps(golden.trace, run.stitched),
+            wall_seconds=wall,
         )
 
     if jobs == 1:
