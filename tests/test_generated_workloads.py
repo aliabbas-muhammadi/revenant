@@ -74,3 +74,14 @@ def test_sqlite_variants_pass_generated_workload_mid(tmp_path, factory, module, 
     assert res.passed, res.failing()
     assert res.duplicated == 0
     assert res.unconfirmed == 0
+
+
+@pytest.mark.skipif(os.name != "posix", reason="needs POSIX signals")
+@pytest.mark.parametrize("mode", ["dup", "timeout", "corrupt"])
+def test_reference_passes_chaos_on_generated_workload(mode, capsys):
+    from revenant.cli import main
+
+    code = main(["run", "--adapter", "reference", "--workload", "gen-2",
+                 "--chaos", mode, "--jobs", "4"])  # fmt: skip
+    assert code == 0
+    assert "verdict: PASS" in capsys.readouterr().out
