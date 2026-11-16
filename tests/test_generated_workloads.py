@@ -85,3 +85,34 @@ def test_reference_passes_chaos_on_generated_workload(mode, capsys):
                  "--chaos", mode, "--jobs", "4"])  # fmt: skip
     assert code == 0
     assert "verdict: PASS" in capsys.readouterr().out
+
+
+def test_loop_workload_is_deterministic_and_ends_with_stop():
+    from revenant.workloads import generate_loop
+
+    wl = generate_loop(9)
+    assert wl == generate_loop(9)
+    assert get_workload("genloop-9") == wl
+    assert wl.script[-1] == {"action": "stop"}
+    assert all(s.tool for s in wl.steps[:-1])
+    assert 3 <= len(wl.steps) <= 11
+
+
+def test_loop_stop_points_vary_with_seed():
+    from revenant.workloads import generate_loop
+
+    assert len({len(generate_loop(s).steps) for s in range(20)}) > 1
+
+
+@pytest.mark.skipif(os.name != "posix", reason="needs POSIX signals")
+@pytest.mark.parametrize("seed", SEEDS)
+def test_reference_passes_generated_loop(tmp_path, seed):
+    name = f"genloop-{seed}"
+
+    def argv_for(workdir):
+        return [sys.executable, "-m", "revenant.adapters.reference",
+                "--workload", name, "--workdir", str(workdir)]  # fmt: skip
+
+    res = sweep(ReferenceAdapter, get_workload(name), tmp_path, argv_for=argv_for, jobs=4)
+    assert res.passed, res.failing()
+    assert res.unconfirmed == 0

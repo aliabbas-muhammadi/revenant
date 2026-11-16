@@ -130,6 +130,7 @@ def fanout() -> Workload:
 
 
 GENERATED_PREFIX = "gen-"
+LOOP_PREFIX = "genloop-"
 
 
 def generate(seed: int) -> Workload:
@@ -147,20 +148,39 @@ def generate(seed: int) -> Workload:
         if rng.random() >= 1 / 3:
             steps.append(StepSpec(f"step{n}"))
             continue
-        tool = rng.choice(("send_email", "charge_card", "write_file"))
-        if tool == "send_email":
-            args: dict[str, Any] = {
-                "to": f"user{n}@example.com",
-                "subject": f"update {n}",
-                "body": f"body {n}",
-            }
-        elif tool == "charge_card":
-            args = {"customer": f"cus_{n}", "amount_cents": 100 * n + rng.randint(0, 99)}
-        else:
-            args = {"relpath": f"out/gen{n}.txt", "content": f"content {n}"}
-        steps.append(StepSpec(f"{tool}{n}", tool, args))
+        steps.append(_tool_spec(rng, n))
     script = tuple({"thought": f"thought {i}"} for i in range(1, count + 1))
     return Workload(f"{GENERATED_PREFIX}{seed}", tuple(steps), script)
+
+
+def _tool_spec(rng: random.Random, n: int) -> StepSpec:
+    tool = rng.choice(("send_email", "charge_card", "write_file"))
+    if tool == "send_email":
+        args: dict[str, Any] = {
+            "to": f"user{n}@example.com",
+            "subject": f"update {n}",
+            "body": f"body {n}",
+        }
+    elif tool == "charge_card":
+        args = {"customer": f"cus_{n}", "amount_cents": 100 * n + rng.randint(0, 99)}
+    else:
+        args = {"relpath": f"out/gen{n}.txt", "content": f"content {n}"}
+    return StepSpec(f"{tool}{n}", tool, args)
+
+
+def generate_loop(seed: int) -> Workload:
+    """A branching-style tool loop whose stop point is drawn from ``seed``.
+
+    Between 2 and 10 tool calls, then a stop step. Named ``genloop-<seed>``.
+    """
+    rng = random.Random(seed)
+    calls = [_tool_spec(rng, n) for n in range(1, rng.randint(2, 10) + 1)]
+    steps = (*calls, StepSpec("stop"))
+    script = (
+        *({"action": "call", "tool": c.tool, "args": c.args} for c in calls),
+        {"action": "stop"},
+    )
+    return Workload(f"{LOOP_PREFIX}{seed}", steps, script)
 
 
 _FACTORIES = {"linear": linear, "branching": branching, "fanout": fanout}
@@ -169,11 +189,14 @@ WORKLOAD_NAMES = tuple(_FACTORIES)
 
 def get_workload(name: str) -> Workload:
     """Build a workload by name; unknown names list the known ones."""
-    if name.startswith(GENERATED_PREFIX):
-        try:
-            return generate(int(name[len(GENERATED_PREFIX) :]))
-        except ValueError:
-            raise KeyError(f"bad generated workload {name!r}; use gen-<integer seed>") from None
+    for prefix, build in ((GENERATED_PREFIX, generate), (LOOP_PREFIX, generate_loop)):
+        if name.startswith(prefix):
+            try:
+                return build(int(name[len(prefix) :]))
+            except ValueError:
+                raise KeyError(
+                    f"bad generated workload {name!r}; use {prefix}<integer seed>"
+                ) from None
     try:
         return _FACTORIES[name]()
     except KeyError:
