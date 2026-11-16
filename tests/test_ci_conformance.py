@@ -21,6 +21,10 @@ def test_script_runs_green(tmp_path: Path) -> None:
     assert (tmp_path / "reference-linear.json").exists()
     for m in MUTANTS:
         assert json.loads((tmp_path / f"{m}-linear.json").read_text())
+    for seed in (1, 2, 3):
+        report = json.loads((tmp_path / f"reference-gen-{seed}.json").read_text())
+        assert report["verdict"] == "PASS"
+        assert report["workload"] == f"gen-{seed}"
 
 
 def test_ci_workflow_runs_conformance() -> None:

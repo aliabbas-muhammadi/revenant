@@ -19,4 +19,10 @@ for m in mutant_checkpoint_first mutant_noledger; do
     echo "$m unexpectedly passed" >&2; status=1
   fi
 done
+
+# Generated workloads: three fixed seeds must pass on the reference adapter.
+for seed in 1 2 3; do
+  uv run revenant run --adapter reference --workload "gen-$seed" --jobs 2 \
+    --out "$OUT/reference-gen-$seed.json" || { echo "reference failed on gen-$seed" >&2; status=1; }
+done
 exit $status

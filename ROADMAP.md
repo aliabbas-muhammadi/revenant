@@ -187,7 +187,7 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 - [x] R142 `docs/results.md`: narrative of every committed result.
 - [x] R143 `docs/faq.md`: why SIGKILL, why scripted models, why unconfirmed is not auto-resolved.
 - [x] R144 Property-based workload generator: random step/tool layouts from a seed, swept on reference. Tests.
-- [ ] R145 Generated-workload sweep in CI with three fixed seeds.
+- [x] R145 Generated-workload sweep in CI with three fixed seeds.
 
 ## Added during development
 
