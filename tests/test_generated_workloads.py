@@ -6,6 +6,7 @@ import sys
 import pytest
 
 from revenant.adapters.reference import ReferenceAdapter
+from revenant.adapters.reference_sqlite import SqliteOutboxAdapter, SqliteReferenceAdapter
 from revenant.runner import sweep
 from revenant.workloads import generate, get_workload
 
@@ -50,4 +51,26 @@ def test_reference_passes_generated_workload(tmp_path, seed):
 
     res = sweep(ReferenceAdapter, get_workload(name), tmp_path, argv_for=argv_for, jobs=4)
     assert res.passed, res.failing()
+    assert res.unconfirmed == 0
+
+
+VARIANTS = [
+    (SqliteReferenceAdapter, "reference_sqlite"),
+    (SqliteOutboxAdapter, "reference_outbox"),
+]
+
+
+@pytest.mark.skipif(os.name != "posix", reason="needs POSIX signals")
+@pytest.mark.parametrize("seed", SEEDS)
+@pytest.mark.parametrize(("factory", "module"), VARIANTS)
+def test_sqlite_variants_pass_generated_workload_mid(tmp_path, factory, module, seed):
+    name = f"gen-{seed}"
+
+    def argv_for(workdir):
+        return [sys.executable, "-m", f"revenant.adapters.{module}",
+                "--workload", name, "--workdir", str(workdir)]  # fmt: skip
+
+    res = sweep(factory, get_workload(name), tmp_path, mode="mid", argv_for=argv_for, jobs=4)
+    assert res.passed, res.failing()
+    assert res.duplicated == 0
     assert res.unconfirmed == 0
