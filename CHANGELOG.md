@@ -9,7 +9,7 @@ All notable changes to this project are documented here. The format follows
 ### Added
 - `revenant diff`, first-divergence reporting, per-tool breakdown and an
   attempts-per-effect histogram in reports.
-- Seeded random workloads, selected as `--workload gen-<seed>`; CI sweeps three
+- Seeded random workloads (`--workload gen-<seed>` and `genloop-<seed>`); CI sweeps three
   fixed seeds on the reference adapter.
 - `docs/results.md` and `docs/faq.md`.
 

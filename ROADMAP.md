@@ -199,5 +199,5 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R149 Every mutant fails on at least one of three generated workloads. Tests.
 - [x] R150 Chaos modes on generated workloads: the reference passes `dup`, `timeout`, `corrupt`. Tests.
 - [x] R151 Generated workloads include a branching-style loop variant (seeded stop point). Tests.
-- [ ] R152 `docs/generated-workloads.md`: how layouts are drawn and how to reproduce a failing seed.
+- [x] R152 `docs/generated-workloads.md`: how layouts are drawn and how to reproduce a failing seed.
 - [ ] R153 Generated workloads on `langgraph_sqlite` with ledgered tools, `linear`-style seeds. Tests.
