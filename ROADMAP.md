@@ -196,3 +196,8 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R146 Mention `gen-<seed>` workloads in the README usage section and `revenant list` output. Test.
 - [x] R147 Sweep generated workloads in `mid` mode on `reference_sqlite` and `reference_outbox`. Tests.
 - [x] R148 `revenant run --workload gen-<seed>` end to end CLI test with a JSON report check.
+- [ ] R149 Every mutant fails on at least one of three generated workloads. Tests.
+- [ ] R150 Chaos modes on generated workloads: the reference passes `dup`, `timeout`, `corrupt`. Tests.
+- [ ] R151 Generated workloads include a branching-style loop variant (seeded stop point). Tests.
+- [ ] R152 `docs/generated-workloads.md`: how layouts are drawn and how to reproduce a failing seed.
+- [ ] R153 Generated workloads on `langgraph_sqlite` with ledgered tools, `linear`-style seeds. Tests.
