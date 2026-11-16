@@ -195,4 +195,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 
 - [x] R146 Mention `gen-<seed>` workloads in the README usage section and `revenant list` output. Test.
 - [x] R147 Sweep generated workloads in `mid` mode on `reference_sqlite` and `reference_outbox`. Tests.
-- [ ] R148 `revenant run --workload gen-<seed>` end to end CLI test with a JSON report check.
+- [x] R148 `revenant run --workload gen-<seed>` end to end CLI test with a JSON report check.

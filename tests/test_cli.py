@@ -218,3 +218,21 @@ def test_kill_at_last_boundary_is_accepted():
 def test_list_mentions_generated_workloads(capsys):
     assert main(["list"]) == 0
     assert "gen-<seed>" in capsys.readouterr().out
+
+
+def test_run_generated_workload_writes_passing_report(tmp_path, capsys):
+    import json
+
+    out = tmp_path / "gen.json"
+    code = main(["run", "--adapter", "reference", "--workload", "gen-4", "--out", str(out)])
+    assert code == 0
+    report = json.loads(out.read_text())
+    assert report["workload"] == "gen-4"
+    assert report["verdict"] == "PASS"
+    assert "verdict: PASS" in capsys.readouterr().out
+
+
+def test_run_rejects_bad_generated_seed(capsys):
+    with pytest.raises(SystemExit):
+        main(["run", "--adapter", "reference", "--workload", "gen-abc"])
+    assert "gen-<integer seed>" in capsys.readouterr().err
