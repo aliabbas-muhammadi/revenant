@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -128,12 +129,51 @@ def fanout() -> Workload:
     return Workload("fanout", steps, script)
 
 
+GENERATED_PREFIX = "gen-"
+
+
+def generate(seed: int) -> Workload:
+    """A linear-style workload whose layout is drawn from ``seed``.
+
+    Between 4 and 14 steps; each step calls a tool with probability 1/3, the
+    tool chosen at random. Arguments are derived from the step number so file
+    paths never collide. The same seed always yields the same workload, and it
+    is named ``gen-<seed>`` so a child process can rebuild it from the name.
+    """
+    rng = random.Random(seed)
+    count = rng.randint(4, 14)
+    steps: list[StepSpec] = []
+    for n in range(1, count + 1):
+        if rng.random() >= 1 / 3:
+            steps.append(StepSpec(f"step{n}"))
+            continue
+        tool = rng.choice(("send_email", "charge_card", "write_file"))
+        if tool == "send_email":
+            args: dict[str, Any] = {
+                "to": f"user{n}@example.com",
+                "subject": f"update {n}",
+                "body": f"body {n}",
+            }
+        elif tool == "charge_card":
+            args = {"customer": f"cus_{n}", "amount_cents": 100 * n + rng.randint(0, 99)}
+        else:
+            args = {"relpath": f"out/gen{n}.txt", "content": f"content {n}"}
+        steps.append(StepSpec(f"{tool}{n}", tool, args))
+    script = tuple({"thought": f"thought {i}"} for i in range(1, count + 1))
+    return Workload(f"{GENERATED_PREFIX}{seed}", tuple(steps), script)
+
+
 _FACTORIES = {"linear": linear, "branching": branching, "fanout": fanout}
 WORKLOAD_NAMES = tuple(_FACTORIES)
 
 
 def get_workload(name: str) -> Workload:
     """Build a workload by name; unknown names list the known ones."""
+    if name.startswith(GENERATED_PREFIX):
+        try:
+            return generate(int(name[len(GENERATED_PREFIX) :]))
+        except ValueError:
+            raise KeyError(f"bad generated workload {name!r}; use gen-<integer seed>") from None
     try:
         return _FACTORIES[name]()
     except KeyError:
