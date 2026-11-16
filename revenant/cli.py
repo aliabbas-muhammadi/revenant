@@ -205,6 +205,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "list":
         print("adapters:  " + ", ".join(sorted(ADAPTERS)))
         print("workloads: " + ", ".join(WORKLOAD_NAMES))
+        print("generated: gen-<seed> (random layout from an integer seed, e.g. gen-1)")
         return 0
     if args.command == "diff":
         return _diff(args, parser)

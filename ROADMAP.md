@@ -193,6 +193,6 @@ Ordered task list. Work top to bottom. Each task ends green (`uv run pytest` and
 
 Append new tasks here (continuing the R numbering) only when everything above is done. They must stay inside DESIGN.md's scope and be as specific as the tasks above.
 
-- [ ] R146 Mention `gen-<seed>` workloads in the README usage section and `revenant list` output. Test.
+- [x] R146 Mention `gen-<seed>` workloads in the README usage section and `revenant list` output. Test.
 - [ ] R147 Sweep generated workloads in `mid` mode on `reference_sqlite` and `reference_outbox`. Tests.
 - [ ] R148 `revenant run --workload gen-<seed>` end to end CLI test with a JSON report check.

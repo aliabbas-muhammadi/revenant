@@ -84,6 +84,7 @@ def test_list_shows_adapters_and_workloads(capsys):
         f"adapters:  {extra}mutant_checkpoint_first, mutant_inplace, mutant_nocheckpoint, "
         "mutant_noledger, mutant_volatile, reference, reference_outbox, reference_sqlite",
         "workloads: linear, branching, fanout",
+        "generated: gen-<seed> (random layout from an integer seed, e.g. gen-1)",
     ]
 
 
@@ -212,3 +213,8 @@ def test_kill_at_out_of_range_is_a_usage_error(bad, capsys):
 
 def test_kill_at_last_boundary_is_accepted():
     assert main(["run", "--adapter", "reference", "--workload", "linear", "--kill-at", "12"]) == 0
+
+
+def test_list_mentions_generated_workloads(capsys):
+    assert main(["list"]) == 0
+    assert "gen-<seed>" in capsys.readouterr().out

@@ -16,6 +16,7 @@ Status: early development. See [DESIGN.md](DESIGN.md) for the protocol and [ROAD
 uv sync
 uv run revenant list
 uv run revenant run --adapter reference --workload linear --out report.json
+uv run revenant run --adapter reference --workload gen-7   # random layout from seed 7
 ```
 
 ```
