@@ -166,6 +166,11 @@ class Ledger:
         state = self.status(key)
         return 0 if state is None else state[1]
 
+    def is_committed(self, key: str) -> bool:
+        """True once ``key`` has been committed; unknown and intent keys are False."""
+        state = self.status(key)
+        return state is not None and state[0] == "committed"
+
     def entries(self) -> list[tuple[str, str, int]]:
         """Every row as ``(key, status, attempt_count)``, sorted by key."""
         rows = self._conn.execute(

@@ -221,3 +221,12 @@ def test_attempts_counts_and_defaults_to_zero(tmp_path):
         led.begin("k", {})
         led.begin("k", {})
         assert led.attempts("k") == 2
+
+
+def test_is_committed_follows_the_lifecycle(tmp_path):
+    with Ledger(tmp_path / "l.db") as led:
+        assert not led.is_committed("k")
+        led.begin("k", {})
+        assert not led.is_committed("k")
+        led.commit("k")
+        assert led.is_committed("k")
