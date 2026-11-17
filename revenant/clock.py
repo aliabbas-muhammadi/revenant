@@ -38,3 +38,15 @@ class InjectedClock:
             raise ValueError("clock cannot move backwards")
         self._now += seconds
         return self._now
+
+    def advance_to(self, when: float) -> float:
+        """Move to the absolute time ``when`` and return it.
+
+        ``when`` must be finite and not earlier than the current time.
+        """
+        if not math.isfinite(when):
+            raise ValueError("clock time must be finite")
+        if when < self._now:
+            raise ValueError("clock cannot move backwards")
+        self._now = float(when)
+        return self._now

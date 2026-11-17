@@ -43,3 +43,18 @@ def test_repr_shows_current_time():
     clock = InjectedClock(3)
     clock.tick()
     assert repr(clock) == "InjectedClock(now=4.0)"
+
+
+def test_advance_to_moves_to_absolute_time():
+    clock = InjectedClock(10)
+    assert clock.advance_to(12.5) == 12.5
+    assert clock.now() == 12.5
+    assert clock.advance_to(12.5) == 12.5
+
+
+@pytest.mark.parametrize("bad", [9, float("nan"), float("inf")])
+def test_advance_to_rejects_past_and_non_finite(bad):
+    clock = InjectedClock(10)
+    with pytest.raises(ValueError):
+        clock.advance_to(bad)
+    assert clock.now() == 10.0
