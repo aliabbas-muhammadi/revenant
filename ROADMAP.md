@@ -229,4 +229,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R179 `Ledger.tools()` lists distinct tool prefixes sorted. Tests.
 - [x] R180 `Ledger.count(status=None)` counts rows, optionally by status. Tests.
 - [x] R181 `ScriptedModel.is_exhausted(step)`. Tests.
-- [ ] R182 Note R175-R181 in `CHANGELOG.md` and `docs/ledger.md`.
+- [x] R182 Note R175-R181 in `CHANGELOG.md` and `docs/ledger.md`.

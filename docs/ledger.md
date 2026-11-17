@@ -47,3 +47,7 @@ For quick checks there are three narrower accessors: `attempts(key)` returns the
 attempt count (`0` for an unknown key), `is_committed(key)` is true only once a
 key has been committed, and `keys(status=None)` lists keys sorted, optionally
 limited to `"intent"` or `"committed"`.
+
+`tools()` lists the distinct tool names (the `tool:` prefix of each key) sorted,
+and `count(status=None)` counts rows, optionally limited to `"intent"` or
+`"committed"`.

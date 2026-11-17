@@ -15,6 +15,8 @@ All notable changes to this project are documented here. The format follows
 - `Ledger.entries()`, `len(Ledger)`, `attempts()`, `is_committed()` and `keys()` accessors.
 - `key in ledger`, `iter(ledger)`, iterable `EffectSink`, `EffectSink.last()` and `canon.short_hash()`.
 - `InjectedClock.elapsed()`, `len(EffectSink)`, `EffectSink.by_tool()` and `ScriptedModel.remaining()`.
+- `InjectedClock.advance_to()` and `reset()`, `EffectSink.first()` and `count()`,
+  `Ledger.tools()` and `count()`, and `ScriptedModel.is_exhausted()`.
 
 ### Fixed
 - `InjectedClock` rejects NaN and infinite values.
