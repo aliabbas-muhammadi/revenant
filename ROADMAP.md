@@ -223,7 +223,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R173 Note R167-R171 in `CHANGELOG.md` and `docs/canon.md`.
 - [x] R174 `ScriptedModel` has a `repr` showing script length and whether prompts are pinned. Test.
 - [x] R175 `InjectedClock.advance_to(t)` moves to an absolute time, rejecting earlier or non-finite values. Tests.
-- [ ] R176 `InjectedClock.reset()` returns to the start value. Tests.
+- [x] R176 `InjectedClock.reset()` returns to the start value. Tests.
 - [ ] R177 `EffectSink.first()` returns the earliest record or `None`. Tests.
 - [ ] R178 `EffectSink.count(tool)` counts records for one tool. Tests.
 - [ ] R179 `Ledger.tools()` lists distinct tool prefixes sorted. Tests.

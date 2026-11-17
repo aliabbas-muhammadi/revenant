@@ -58,3 +58,11 @@ def test_advance_to_rejects_past_and_non_finite(bad):
     with pytest.raises(ValueError):
         clock.advance_to(bad)
     assert clock.now() == 10.0
+
+
+def test_reset_returns_to_start():
+    clock = InjectedClock(5)
+    clock.tick(7)
+    clock.reset()
+    assert clock.now() == 5.0
+    assert clock.elapsed() == 0.0

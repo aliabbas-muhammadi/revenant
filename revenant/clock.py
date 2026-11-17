@@ -50,3 +50,7 @@ class InjectedClock:
             raise ValueError("clock cannot move backwards")
         self._now = float(when)
         return self._now
+
+    def reset(self) -> None:
+        """Return to the start value."""
+        self._now = self._start
