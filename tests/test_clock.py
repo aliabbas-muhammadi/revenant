@@ -30,3 +30,16 @@ def test_tick_rejects_non_finite(bad):
 def test_start_rejects_non_finite(bad):
     with pytest.raises(ValueError):
         InjectedClock(bad)
+
+
+def test_elapsed_counts_from_start():
+    clock = InjectedClock(100)
+    assert clock.elapsed() == 0.0
+    clock.tick(2.5)
+    assert clock.elapsed() == 2.5
+
+
+def test_repr_shows_current_time():
+    clock = InjectedClock(3)
+    clock.tick()
+    assert repr(clock) == "InjectedClock(now=4.0)"
