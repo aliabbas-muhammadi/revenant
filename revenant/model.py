@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Any
 
-from revenant.canon import state_hash
+from revenant.canon import short_hash, state_hash
 
 
 class ScriptExhausted(RuntimeError):
@@ -60,6 +60,6 @@ class ScriptedModel:
             actual = state_hash(prompt)
             if actual != expected:
                 raise PromptDivergence(
-                    f"step {step}: prompt hash {actual[:12]} != expected {expected[:12]}"
+                    f"step {step}: prompt hash {short_hash(prompt)} != expected {expected[:12]}"
                 )
         return self._script[step]

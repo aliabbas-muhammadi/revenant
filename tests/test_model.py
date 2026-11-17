@@ -51,3 +51,12 @@ def test_remaining_counts_responses_left():
     assert model.remaining(2) == 1
     assert model.remaining(3) == 0
     assert model.remaining(99) == 0
+
+
+def test_divergence_message_shows_short_hashes():
+    model = ScriptedModel(["a"], prompt_hashes=[state_hash("expected")])
+    with pytest.raises(PromptDivergence) as err:
+        model.respond(0, "other")
+    assert str(err.value) == (
+        f"step 0: prompt hash {state_hash('other')[:12]} != expected {state_hash('expected')[:12]}"
+    )
