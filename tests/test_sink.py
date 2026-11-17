@@ -71,3 +71,13 @@ def test_last_returns_most_recent_or_none(tmp_path):
     sink.append({"n": 1})
     sink.append({"n": 2})
     assert sink.last() == {"n": 2}
+
+
+def test_first_returns_earliest_or_none(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert sink.first() is None
+    sink.append({"tool": "a", "n": 1})
+    sink.append({"tool": "b", "n": 2})
+    assert sink.first() == {"tool": "a", "n": 1}
+    assert sink.last() == {"tool": "b", "n": 2}
+

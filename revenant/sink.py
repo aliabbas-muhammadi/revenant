@@ -103,3 +103,8 @@ class EffectSink:
         """Return the most recent whole record, or None when the sink is empty."""
         effects = self.read().effects
         return effects[-1] if effects else None
+
+    def first(self) -> dict[str, Any] | None:
+        """Return the earliest whole record, or None when the sink is empty."""
+        effects = self.read().effects
+        return effects[0] if effects else None
