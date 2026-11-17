@@ -230,3 +230,19 @@ def test_is_committed_follows_the_lifecycle(tmp_path):
         assert not led.is_committed("k")
         led.commit("k")
         assert led.is_committed("k")
+
+
+def test_keys_sorted_and_filtered_by_status(tmp_path):
+    with Ledger(tmp_path / "l.db") as led:
+        for key in ("b", "a", "c"):
+            led.begin(key, {})
+        led.commit("c")
+        assert led.keys() == ["a", "b", "c"]
+        assert led.keys("intent") == ["a", "b"]
+        assert led.keys("committed") == ["c"]
+
+
+def test_keys_rejects_unknown_status(tmp_path):
+    with Ledger(tmp_path / "l.db") as led:
+        with pytest.raises(ValueError):
+            led.keys("pending")

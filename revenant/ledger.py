@@ -171,6 +171,12 @@ class Ledger:
         state = self.status(key)
         return state is not None and state[0] == "committed"
 
+    def keys(self, status: str | None = None) -> list[str]:
+        """Keys sorted ascending, optionally only those in ``status``."""
+        if status is not None and status not in ("intent", "committed"):
+            raise ValueError(f"unknown status {status!r}")
+        return [key for key, state, _ in self.entries() if status in (None, state)]
+
     def entries(self) -> list[tuple[str, str, int]]:
         """Every row as ``(key, status, attempt_count)``, sorted by key."""
         rows = self._conn.execute(
