@@ -13,6 +13,7 @@ All notable changes to this project are documented here. The format follows
   fixed seeds on the reference adapter.
 - `docs/results.md` and `docs/faq.md`.
 - `Ledger.entries()`, `len(Ledger)`, `attempts()`, `is_committed()` and `keys()` accessors.
+- `key in ledger`, `iter(ledger)`, iterable `EffectSink`, `EffectSink.last()` and `canon.short_hash()`.
 - `InjectedClock.elapsed()`, `len(EffectSink)`, `EffectSink.by_tool()` and `ScriptedModel.remaining()`.
 
 ### Fixed

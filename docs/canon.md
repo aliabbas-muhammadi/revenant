@@ -38,3 +38,9 @@ runtime cannot hide a real divergence by naming it volatile implicitly.
 
 `tests/test_canon.py` pins one golden digest. If it changes, the encoding
 changed and every committed result in `results/` is invalidated.
+
+## Display hashes
+
+`short_hash(obj, length=12)` returns the first `length` hex characters of
+`state_hash(obj)` (1 to 64) for messages and logs. Compare full digests, never
+the shortened form.
