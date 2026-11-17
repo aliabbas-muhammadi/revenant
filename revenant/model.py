@@ -41,6 +41,10 @@ class ScriptedModel:
     def __len__(self) -> int:
         return len(self._script)
 
+    def remaining(self, step: int) -> int:
+        """Return how many responses are left from ``step`` onward (0 past the end)."""
+        return max(0, len(self._script) - max(0, step))
+
     def respond(self, step: int, prompt: Any = None) -> Any:
         """Return the response for ``step`` (0-based).
 

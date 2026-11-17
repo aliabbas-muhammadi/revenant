@@ -43,3 +43,11 @@ def test_unpinned_step_and_missing_prompt_are_not_checked():
 def test_prompt_hashes_length_validated():
     with pytest.raises(ValueError):
         ScriptedModel(["a", "b"], [None])
+
+
+def test_remaining_counts_responses_left():
+    model = ScriptedModel(["a", "b", "c"])
+    assert model.remaining(0) == 3
+    assert model.remaining(2) == 1
+    assert model.remaining(3) == 0
+    assert model.remaining(99) == 0
