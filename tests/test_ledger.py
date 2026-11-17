@@ -213,3 +213,11 @@ def test_len_counts_keys_not_attempts(tmp_path):
 def test_status_of_unknown_key_is_none(tmp_path):
     with Ledger(tmp_path / "l.db") as led:
         assert led.status("nope") is None
+
+
+def test_attempts_counts_and_defaults_to_zero(tmp_path):
+    with Ledger(tmp_path / "l.db") as led:
+        assert led.attempts("k") == 0
+        led.begin("k", {})
+        led.begin("k", {})
+        assert led.attempts("k") == 2

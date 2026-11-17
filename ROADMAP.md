@@ -210,7 +210,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R160 `len(EffectSink)` counts whole records. Tests.
 - [x] R161 `EffectSink.by_tool()` counts records per `tool` field. Tests.
 - [x] R162 `ScriptedModel.remaining(step)` returns the responses left from a step. Tests.
-- [ ] R163 `Ledger.attempts(key)` returns the attempt count, `0` for an unknown key. Tests.
+- [x] R163 `Ledger.attempts(key)` returns the attempt count, `0` for an unknown key. Tests.
 - [ ] R164 `Ledger.is_committed(key)`. Tests.
 - [ ] R165 `Ledger.keys(status=None)` lists keys sorted, optionally filtered by status. Tests.
 - [ ] R166 Note the new accessors in `CHANGELOG.md` and `docs/ledger.md`.

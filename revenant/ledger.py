@@ -161,6 +161,11 @@ class Ledger:
         ).fetchone()
         return None if row is None else (row[0], row[1])
 
+    def attempts(self, key: str) -> int:
+        """Attempt count for ``key``; ``0`` for a key the ledger has never seen."""
+        state = self.status(key)
+        return 0 if state is None else state[1]
+
     def entries(self) -> list[tuple[str, str, int]]:
         """Every row as ``(key, status, attempt_count)``, sorted by key."""
         rows = self._conn.execute(
