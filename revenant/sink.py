@@ -98,3 +98,8 @@ class EffectSink:
     def __iter__(self) -> Iterator[dict[str, Any]]:
         """Iterate over whole records in append order (a torn final line is skipped)."""
         return iter(self.read().effects)
+
+    def last(self) -> dict[str, Any] | None:
+        """Return the most recent whole record, or None when the sink is empty."""
+        effects = self.read().effects
+        return effects[-1] if effects else None

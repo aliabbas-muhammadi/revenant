@@ -63,3 +63,11 @@ def test_iter_yields_records_in_order(tmp_path):
     sink.append({"n": 2})
     assert [r["n"] for r in sink] == [1, 2]
     assert list(EffectSink(tmp_path / "missing.jsonl")) == []
+
+
+def test_last_returns_most_recent_or_none(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert sink.last() is None
+    sink.append({"n": 1})
+    sink.append({"n": 2})
+    assert sink.last() == {"n": 2}

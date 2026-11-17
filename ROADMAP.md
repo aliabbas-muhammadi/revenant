@@ -217,7 +217,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R167 `key in ledger` reports whether the ledger has seen a key. Tests.
 - [x] R168 `iter(ledger)` yields keys sorted. Tests.
 - [x] R169 `iter(EffectSink)` yields whole records in append order. Tests.
-- [ ] R170 `EffectSink.last()` returns the most recent record or `None`. Tests.
+- [x] R170 `EffectSink.last()` returns the most recent record or `None`. Tests.
 - [ ] R171 `canon.short_hash(obj, length=12)` returns a prefix of `state_hash`; rejects lengths outside 1..64. Tests.
 - [ ] R172 Use `short_hash` for the prompt-divergence message in `ScriptedModel`. Test the message.
 - [ ] R173 Note R167-R171 in `CHANGELOG.md` and `docs/canon.md`.
