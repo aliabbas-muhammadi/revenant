@@ -177,6 +177,14 @@ class Ledger:
             raise ValueError(f"unknown status {status!r}")
         return [key for key, state, _ in self.entries() if status in (None, state)]
 
+    def __contains__(self, key: object) -> bool:
+        """True when the ledger has any row for ``key``."""
+        return isinstance(key, str) and self.status(key) is not None
+
+    def __iter__(self) -> Iterator[str]:
+        """Iterate over every key, sorted ascending."""
+        return iter(self.keys())
+
     def entries(self) -> list[tuple[str, str, int]]:
         """Every row as ``(key, status, attempt_count)``, sorted by key."""
         rows = self._conn.execute(

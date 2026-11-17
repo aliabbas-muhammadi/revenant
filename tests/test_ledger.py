@@ -246,3 +246,18 @@ def test_keys_rejects_unknown_status(tmp_path):
     with Ledger(tmp_path / "l.db") as led:
         with pytest.raises(ValueError):
             led.keys("pending")
+
+
+def test_contains_reports_seen_keys(tmp_path):
+    with Ledger(tmp_path / "l.db") as led:
+        assert "k" not in led
+        led.begin("k", {})
+        assert "k" in led
+        assert 5 not in led
+
+
+def test_iter_yields_sorted_keys(tmp_path):
+    with Ledger(tmp_path / "l.db") as led:
+        for key in ("b", "a"):
+            led.begin(key, {})
+        assert list(led) == ["a", "b"]
