@@ -269,3 +269,15 @@ def test_tools_lists_distinct_prefixes_sorted(ledger):
     ledger.begin("charge_card:1", {})
     ledger.begin("send_email:1", {})
     assert ledger.tools() == ["charge_card", "send_email"]
+
+
+def test_count_by_status(ledger):
+    assert ledger.count() == 0
+    ledger.begin("a:1", {})
+    ledger.begin("b:1", {})
+    ledger.commit("a:1")
+    assert ledger.count() == 2
+    assert ledger.count("committed") == 1
+    assert ledger.count("intent") == 1
+    with pytest.raises(ValueError):
+        ledger.count("bogus")

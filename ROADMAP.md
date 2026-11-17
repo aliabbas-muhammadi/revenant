@@ -227,6 +227,6 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R177 `EffectSink.first()` returns the earliest record or `None`. Tests.
 - [x] R178 `EffectSink.count(tool)` counts records for one tool. Tests.
 - [x] R179 `Ledger.tools()` lists distinct tool prefixes sorted. Tests.
-- [ ] R180 `Ledger.count(status=None)` counts rows, optionally by status. Tests.
+- [x] R180 `Ledger.count(status=None)` counts rows, optionally by status. Tests.
 - [ ] R181 `ScriptedModel.is_exhausted(step)`. Tests.
 - [ ] R182 Note R175-R181 in `CHANGELOG.md` and `docs/ledger.md`.
