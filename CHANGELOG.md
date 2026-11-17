@@ -12,6 +12,10 @@ All notable changes to this project are documented here. The format follows
 - Seeded random workloads (`--workload gen-<seed>` and `genloop-<seed>`); CI sweeps three
   fixed seeds on the reference adapter.
 - `docs/results.md` and `docs/faq.md`.
+- `Ledger.entries()` and `len(Ledger)` accessors.
+
+### Fixed
+- `InjectedClock` rejects NaN and infinite values.
 
 ## [0.1.0] - 2026-11-15
 

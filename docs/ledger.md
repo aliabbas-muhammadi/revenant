@@ -36,3 +36,9 @@ whether the effect happened needs domain knowledge the harness does not have.
 rows), suppressed attempts and unconfirmed keys as separate numbers. A correct
 runtime may show attempts greater than effects; it must never show effects
 greater than one per key.
+
+## Inspecting a ledger
+
+`status(key)` returns `(status, attempt_count)`, or `None` for a key the ledger
+has never seen. `entries()` lists every row as `(key, status, attempt_count)`
+sorted by key, and `len(ledger)` counts distinct keys (not attempts).
