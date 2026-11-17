@@ -18,3 +18,15 @@ def test_tick_advances():
 def test_tick_rejects_negative():
     with pytest.raises(ValueError):
         InjectedClock().tick(-1)
+
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), float("-inf")])
+def test_tick_rejects_non_finite(bad):
+    with pytest.raises(ValueError):
+        InjectedClock().tick(bad)
+
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf")])
+def test_start_rejects_non_finite(bad):
+    with pytest.raises(ValueError):
+        InjectedClock(bad)
