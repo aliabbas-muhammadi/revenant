@@ -60,3 +60,9 @@ def test_divergence_message_shows_short_hashes():
     assert str(err.value) == (
         f"step 0: prompt hash {state_hash('other')[:12]} != expected {state_hash('expected')[:12]}"
     )
+
+
+def test_repr_shows_length_and_pinning():
+    assert repr(ScriptedModel(["a", "b"])) == "ScriptedModel(responses=2, prompts_pinned=False)"
+    pinned = ScriptedModel(["a"], prompt_hashes=[None])
+    assert repr(pinned) == "ScriptedModel(responses=1, prompts_pinned=True)"

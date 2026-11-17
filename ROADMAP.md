@@ -221,3 +221,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R171 `canon.short_hash(obj, length=12)` returns a prefix of `state_hash`; rejects lengths outside 1..64. Tests.
 - [x] R172 Use `short_hash` for the prompt-divergence message in `ScriptedModel`. Test the message.
 - [x] R173 Note R167-R171 in `CHANGELOG.md` and `docs/canon.md`.
+- [x] R174 `ScriptedModel` has a `repr` showing script length and whether prompts are pinned. Test.
