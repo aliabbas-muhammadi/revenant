@@ -49,6 +49,10 @@ class ScriptedModel:
         """Return how many responses are left from ``step`` onward (0 past the end)."""
         return max(0, len(self._script) - max(0, step))
 
+    def is_exhausted(self, step: int) -> bool:
+        """True when ``step`` is past the end of the script."""
+        return self.remaining(step) == 0
+
     def respond(self, step: int, prompt: Any = None) -> Any:
         """Return the response for ``step`` (0-based).
 

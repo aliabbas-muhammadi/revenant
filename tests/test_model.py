@@ -66,3 +66,12 @@ def test_repr_shows_length_and_pinning():
     assert repr(ScriptedModel(["a", "b"])) == "ScriptedModel(responses=2, prompts_pinned=False)"
     pinned = ScriptedModel(["a"], prompt_hashes=[None])
     assert repr(pinned) == "ScriptedModel(responses=1, prompts_pinned=True)"
+
+
+def test_is_exhausted_past_the_end():
+    model = ScriptedModel(["a", "b"])
+    assert not model.is_exhausted(0)
+    assert not model.is_exhausted(1)
+    assert model.is_exhausted(2)
+    assert model.is_exhausted(10)
+    assert ScriptedModel([]).is_exhausted(0)
