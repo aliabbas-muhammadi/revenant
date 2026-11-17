@@ -108,3 +108,7 @@ class EffectSink:
         """Return the earliest whole record, or None when the sink is empty."""
         effects = self.read().effects
         return effects[0] if effects else None
+
+    def count(self, tool: str) -> int:
+        """Count whole records whose ``tool`` field equals ``tool``."""
+        return self.by_tool().get(tool, 0)

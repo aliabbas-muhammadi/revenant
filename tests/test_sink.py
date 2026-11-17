@@ -81,3 +81,15 @@ def test_first_returns_earliest_or_none(tmp_path):
     assert sink.first() == {"tool": "a", "n": 1}
     assert sink.last() == {"tool": "b", "n": 2}
 
+
+
+def test_count_by_tool(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert sink.count("a") == 0
+    sink.append({"tool": "a"})
+    sink.append({"tool": "a"})
+    sink.append({"tool": "b"})
+    sink.append({"no_tool": 1})
+    assert sink.count("a") == 2
+    assert sink.count("b") == 1
+    assert sink.count("c") == 0
