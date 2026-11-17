@@ -190,3 +190,26 @@ def test_close_is_idempotent(tmp_path):
     ledger = Ledger(tmp_path / "c.db")
     ledger.close()
     ledger.close()
+
+
+def test_entries_sorted_with_status_and_attempts(tmp_path):
+    with Ledger(tmp_path / "l.db") as led:
+        led.begin("b:1", {"x": 1})
+        led.begin("a:1", {"x": 2})
+        led.commit("a:1")
+        led.begin("a:1", {"x": 2})
+        assert led.entries() == [("a:1", "committed", 2), ("b:1", "intent", 1)]
+
+
+def test_len_counts_keys_not_attempts(tmp_path):
+    with Ledger(tmp_path / "l.db") as led:
+        assert len(led) == 0
+        led.begin("k", {})
+        led.begin("k", {})
+        led.begin("j", {})
+        assert len(led) == 2
+
+
+def test_status_of_unknown_key_is_none(tmp_path):
+    with Ledger(tmp_path / "l.db") as led:
+        assert led.status("nope") is None

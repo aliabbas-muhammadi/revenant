@@ -202,6 +202,6 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R152 `docs/generated-workloads.md`: how layouts are drawn and how to reproduce a failing seed.
 - [x] R153 Generated workloads on `langgraph_sqlite` with ledgered tools, `linear`-style seeds. Tests.
 - [x] R154 `InjectedClock` rejects NaN and infinite start or tick values with `ValueError`. Tests.
-- [ ] R155 `Ledger.entries()` returns every row as `(key, status, attempt_count)` sorted by key. Tests.
-- [ ] R156 `Ledger.status` documents and tests the unknown-key case; `Ledger.__len__` counts rows. Tests.
+- [x] R155 `Ledger.entries()` returns every row as `(key, status, attempt_count)` sorted by key. Tests.
+- [x] R156 `Ledger.status` documents and tests the unknown-key case; `Ledger.__len__` counts rows. Tests.
 - [ ] R157 Note the clock and ledger accessors in `CHANGELOG.md` and `docs/ledger.md`.

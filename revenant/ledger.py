@@ -161,6 +161,18 @@ class Ledger:
         ).fetchone()
         return None if row is None else (row[0], row[1])
 
+    def entries(self) -> list[tuple[str, str, int]]:
+        """Every row as ``(key, status, attempt_count)``, sorted by key."""
+        rows = self._conn.execute(
+            "SELECT idempotency_key, status, attempt_count FROM effects "
+            "ORDER BY idempotency_key"
+        ).fetchall()
+        return [(r[0], r[1], r[2]) for r in rows]
+
+    def __len__(self) -> int:
+        """Number of distinct idempotency keys recorded."""
+        return int(self._conn.execute("SELECT COUNT(*) FROM effects").fetchone()[0])
+
     def unconfirmed(self) -> list[str]:
         """Keys still in ``intent``: executed-or-not is unknown. Never auto-resolved."""
         rows = self._conn.execute(
