@@ -261,3 +261,11 @@ def test_iter_yields_sorted_keys(tmp_path):
         for key in ("b", "a"):
             led.begin(key, {})
         assert list(led) == ["a", "b"]
+
+
+def test_tools_lists_distinct_prefixes_sorted(ledger):
+    assert ledger.tools() == []
+    ledger.begin("send_email:2", {})
+    ledger.begin("charge_card:1", {})
+    ledger.begin("send_email:1", {})
+    assert ledger.tools() == ["charge_card", "send_email"]
