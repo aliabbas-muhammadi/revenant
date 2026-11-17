@@ -2,7 +2,7 @@ import hashlib
 
 import pytest
 
-from revenant.canon import CanonError, canonical_json, state_hash
+from revenant.canon import CanonError, canonical_json, short_hash, state_hash
 
 
 def test_key_order_independence():
@@ -194,3 +194,16 @@ def test_hash_invariant_under_insertion_order_permutations():
     expected = state_hash(state)
     for _ in range(200):
         assert state_hash(_shuffled(state, rng)) == expected
+
+
+def test_short_hash_is_a_prefix_of_state_hash():
+    obj = {"a": [1, 2], "b": "é"}
+    assert short_hash(obj) == state_hash(obj)[:12]
+    assert short_hash(obj, 64) == state_hash(obj)
+    assert short_hash({"a": 1, "ts": 5}, 8, ["ts"]) == state_hash({"a": 1}, [])[:8]
+
+
+@pytest.mark.parametrize("length", [0, -1, 65])
+def test_short_hash_rejects_bad_lengths(length):
+    with pytest.raises(ValueError):
+        short_hash({}, length)

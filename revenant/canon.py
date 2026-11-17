@@ -106,3 +106,13 @@ def state_hash(obj: Any, volatile_fields: Iterable[str] = ()) -> str:
     if patterns:
         obj = _strip_volatile(obj, patterns, ())
     return hashlib.sha256(canonical_json(obj)).hexdigest()
+
+
+def short_hash(obj: Any, length: int = 12, volatile_fields: Iterable[str] = ()) -> str:
+    """Return the first ``length`` hex characters of :func:`state_hash` for display.
+
+    ``length`` must be between 1 and 64.
+    """
+    if not 1 <= length <= 64:
+        raise ValueError("length must be between 1 and 64")
+    return state_hash(obj, volatile_fields)[:length]
