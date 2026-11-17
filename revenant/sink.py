@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -93,3 +94,7 @@ class EffectSink:
             if isinstance(tool, str):
                 counts[tool] = counts.get(tool, 0) + 1
         return dict(sorted(counts.items()))
+
+    def __iter__(self) -> Iterator[dict[str, Any]]:
+        """Iterate over whole records in append order (a torn final line is skipped)."""
+        return iter(self.read().effects)

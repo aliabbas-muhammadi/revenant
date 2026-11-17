@@ -55,3 +55,11 @@ def test_by_tool_counts_sorted(tmp_path):
     sink.append({"other": 1})
     assert sink.by_tool() == {"send_email": 2, "write_file": 1}
     assert list(sink.by_tool()) == ["send_email", "write_file"]
+
+
+def test_iter_yields_records_in_order(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    sink.append({"n": 1})
+    sink.append({"n": 2})
+    assert [r["n"] for r in sink] == [1, 2]
+    assert list(EffectSink(tmp_path / "missing.jsonl")) == []
