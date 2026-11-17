@@ -30,3 +30,28 @@ def test_one_record_per_line(tmp_path):
     sink = EffectSink(tmp_path / "s.jsonl")
     sink.append({"text": "a\nb"})
     assert len(sink.path.read_text().splitlines()) == 1
+
+
+def test_len_counts_whole_records(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert len(sink) == 0
+    sink.append({"k": 1})
+    sink.append({"k": 1})
+    assert len(sink) == 2
+
+
+def test_len_ignores_torn_final_line(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    sink.append({"k": 1})
+    with open(sink.path, "ab") as fh:
+        fh.write(b'{"k": ')
+    assert len(sink) == 1
+
+
+def test_by_tool_counts_sorted(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    for tool in ["write_file", "send_email", "send_email"]:
+        sink.append({"tool": tool})
+    sink.append({"other": 1})
+    assert sink.by_tool() == {"send_email": 2, "write_file": 1}
+    assert list(sink.by_tool()) == ["send_email", "write_file"]

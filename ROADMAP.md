@@ -207,8 +207,8 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R157 Note the clock and ledger accessors in `CHANGELOG.md` and `docs/ledger.md`.
 - [x] R158 `InjectedClock.elapsed()` returns time since the start value. Tests.
 - [x] R159 `InjectedClock` has a readable `repr` showing the current time. Test.
-- [ ] R160 `len(EffectSink)` counts whole records. Tests.
-- [ ] R161 `EffectSink.by_tool()` counts records per `tool` field. Tests.
+- [x] R160 `len(EffectSink)` counts whole records. Tests.
+- [x] R161 `EffectSink.by_tool()` counts records per `tool` field. Tests.
 - [ ] R162 `ScriptedModel.remaining(step)` returns the responses left from a step. Tests.
 - [ ] R163 `Ledger.attempts(key)` returns the attempt count, `0` for an unknown key. Tests.
 - [ ] R164 `Ledger.is_committed(key)`. Tests.

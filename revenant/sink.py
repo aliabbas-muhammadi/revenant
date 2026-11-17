@@ -77,3 +77,19 @@ class EffectSink:
         if result.partial is not None:
             raise SinkCorrupt(f"{self.path} ends in a partial record: {result.partial!r}")
         return result.effects
+
+    def __len__(self) -> int:
+        """Count whole records; a torn final line is not counted."""
+        return len(self.read().effects)
+
+    def by_tool(self) -> dict[str, int]:
+        """Count records per ``tool`` field, sorted by tool name.
+
+        Records without a ``tool`` field are not counted.
+        """
+        counts: dict[str, int] = {}
+        for record in self.read().effects:
+            tool = record.get("tool")
+            if isinstance(tool, str):
+                counts[tool] = counts.get(tool, 0) + 1
+        return dict(sorted(counts.items()))
