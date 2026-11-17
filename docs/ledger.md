@@ -42,3 +42,8 @@ greater than one per key.
 `status(key)` returns `(status, attempt_count)`, or `None` for a key the ledger
 has never seen. `entries()` lists every row as `(key, status, attempt_count)`
 sorted by key, and `len(ledger)` counts distinct keys (not attempts).
+
+For quick checks there are three narrower accessors: `attempts(key)` returns the
+attempt count (`0` for an unknown key), `is_committed(key)` is true only once a
+key has been committed, and `keys(status=None)` lists keys sorted, optionally
+limited to `"intent"` or `"committed"`.

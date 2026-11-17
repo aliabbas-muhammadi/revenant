@@ -213,4 +213,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R163 `Ledger.attempts(key)` returns the attempt count, `0` for an unknown key. Tests.
 - [x] R164 `Ledger.is_committed(key)`. Tests.
 - [x] R165 `Ledger.keys(status=None)` lists keys sorted, optionally filtered by status. Tests.
-- [ ] R166 Note the new accessors in `CHANGELOG.md` and `docs/ledger.md`.
+- [x] R166 Note the new accessors in `CHANGELOG.md` and `docs/ledger.md`.
