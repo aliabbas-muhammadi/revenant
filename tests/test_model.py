@@ -103,3 +103,21 @@ def test_peek_returns_response_without_prompt_check():
 def test_peek_out_of_range_raises(step):
     with pytest.raises(ScriptExhausted):
         ScriptedModel(["a", "b"]).peek(step)
+
+
+def test_window_returns_clamped_slice():
+    model = ScriptedModel(["a", "b", "c", "d"])
+    assert model.window(1, 3) == ["b", "c"]
+    assert model.window(2, 99) == ["c", "d"]
+    assert model.window(3, 1) == []
+    assert model.window(0, 0) == []
+
+
+def test_window_is_a_copy_and_rejects_negatives():
+    model = ScriptedModel(["a", "b"])
+    model.window(0, 2).append("x")
+    assert model.responses() == ["a", "b"]
+    with pytest.raises(ValueError):
+        model.window(-1, 2)
+    with pytest.raises(ValueError):
+        model.window(0, -1)

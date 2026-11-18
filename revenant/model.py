@@ -61,6 +61,15 @@ class ScriptedModel:
         """True when ``step`` is past the end of the script."""
         return self.remaining(step) == 0
 
+    def window(self, start: int, stop: int) -> list[Any]:
+        """Return the scripted responses for steps ``start`` up to (not including) ``stop``.
+
+        Both bounds are clamped to the script, like slicing; negatives raise ``ValueError``.
+        """
+        if start < 0 or stop < 0:
+            raise ValueError("window bounds must not be negative")
+        return self._script[start:stop]
+
     def peek(self, step: int) -> Any:
         """Return the scripted response for ``step`` without any prompt check."""
         return self.respond(step)
