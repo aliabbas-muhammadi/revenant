@@ -77,3 +77,13 @@ def test_is_at_start_tracks_movement():
     assert not clock.is_at_start()
     clock.reset()
     assert clock.is_at_start()
+
+
+def test_start_is_read_only_and_survives_movement():
+    clock = InjectedClock(4)
+    clock.tick(3)
+    assert clock.start == 4.0
+    with pytest.raises(AttributeError):
+        clock.start = 0.0  # type: ignore[misc]
+    clock.reset()
+    assert clock.start == 4.0

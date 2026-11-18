@@ -19,6 +19,11 @@ class InjectedClock:
         self._start = start
         self._now = start
 
+    @property
+    def start(self) -> float:
+        """The value the clock started from (and ``reset()`` returns to)."""
+        return self._start
+
     def now(self) -> float:
         """Return the current injected time."""
         return self._now
