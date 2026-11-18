@@ -61,3 +61,10 @@ The effect sink has matching helpers: `tools()` lists the distinct tool names,
 `filter(tool)` returns one tool's whole records in append order, and `since(n)`
 returns whole records from index `n` onward (negative `n` raises `ValueError`).
 A torn final line is never included in any of them; use `read()` to see it.
+
+`has(tool)` reports whether any whole record names a tool, `tail(n)` returns the
+last `n` whole records (negative `n` raises `ValueError`), and `is_empty()` is true
+when there are no whole records. On the ledger, `payload_hash_of(key)` returns the
+stored payload hash (`None` for an unknown key) and `has_unconfirmed()` is true while
+any key is still in `intent`. `ScriptedModel.peek(step)` fetches a response without a
+prompt check, and `InjectedClock.start` exposes the value `reset()` returns to.

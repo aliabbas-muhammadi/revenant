@@ -245,4 +245,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R195 `InjectedClock.start` read-only property. Tests.
 - [x] R196 `Ledger.has_unconfirmed()` is True while any key is still in `intent`. Tests.
 - [x] R197 `EffectSink.is_empty()` is True when there are no whole records. Tests.
-- [ ] R198 Note R191-R197 in `CHANGELOG.md` and `docs/ledger.md`.
+- [x] R198 Note R191-R197 in `CHANGELOG.md` and `docs/ledger.md`.

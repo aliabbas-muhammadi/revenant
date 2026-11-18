@@ -19,6 +19,8 @@ All notable changes to this project are documented here. The format follows
   `Ledger.tools()` and `count()`, and `ScriptedModel.is_exhausted()`.
 - `EffectSink.tools()`, `filter()` and `since()`, `Ledger.reattempted()`,
   `ScriptedModel.responses()` and iteration, and `InjectedClock.is_at_start()`.
+- `EffectSink.has()`, `tail()` and `is_empty()`, `Ledger.payload_hash_of()` and
+  `has_unconfirmed()`, `ScriptedModel.peek()` and `InjectedClock.start`.
 
 ### Fixed
 - `InjectedClock` rejects NaN and infinite values.
