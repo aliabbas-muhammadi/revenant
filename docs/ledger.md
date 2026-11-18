@@ -51,3 +51,13 @@ limited to `"intent"` or `"committed"`.
 `tools()` lists the distinct tool names (the `tool:` prefix of each key) sorted,
 and `count(status=None)` counts rows, optionally limited to `"intent"` or
 `"committed"`.
+
+`reattempted()` lists keys attempted more than once, whether the retry was
+suppressed (committed key) or re-executed (crash residue), sorted by key.
+
+## Inspecting the sink
+
+The effect sink has matching helpers: `tools()` lists the distinct tool names,
+`filter(tool)` returns one tool's whole records in append order, and `since(n)`
+returns whole records from index `n` onward (negative `n` raises `ValueError`).
+A torn final line is never included in any of them; use `read()` to see it.

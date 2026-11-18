@@ -237,4 +237,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R187 `ScriptedModel.responses()` returns a copy of the script as a list. Tests.
 - [x] R188 `iter(ScriptedModel)` yields the scripted responses in step order. Tests.
 - [x] R189 `InjectedClock.is_at_start()`. Tests.
-- [ ] R190 Note R183-R189 in `CHANGELOG.md`, `docs/ledger.md` and a short sink section in the README or docs.
+- [x] R190 Note R183-R189 in `CHANGELOG.md`, `docs/ledger.md` and a short sink section in the README or docs.

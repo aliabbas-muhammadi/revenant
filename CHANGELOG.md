@@ -17,6 +17,8 @@ All notable changes to this project are documented here. The format follows
 - `InjectedClock.elapsed()`, `len(EffectSink)`, `EffectSink.by_tool()` and `ScriptedModel.remaining()`.
 - `InjectedClock.advance_to()` and `reset()`, `EffectSink.first()` and `count()`,
   `Ledger.tools()` and `count()`, and `ScriptedModel.is_exhausted()`.
+- `EffectSink.tools()`, `filter()` and `since()`, `Ledger.reattempted()`,
+  `ScriptedModel.responses()` and iteration, and `InjectedClock.is_at_start()`.
 
 ### Fixed
 - `InjectedClock` rejects NaN and infinite values.
