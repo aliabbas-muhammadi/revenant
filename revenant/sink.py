@@ -116,3 +116,7 @@ class EffectSink:
     def tools(self) -> list[str]:
         """Distinct ``tool`` values among whole records, sorted."""
         return list(self.by_tool())
+
+    def filter(self, tool: str) -> list[dict[str, Any]]:
+        """Return whole records whose ``tool`` field equals ``tool``, in append order."""
+        return [r for r in self.read().effects if r.get("tool") == tool]

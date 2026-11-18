@@ -103,3 +103,13 @@ def test_tools_lists_distinct_sorted(tmp_path):
     sink.append({"tool": "write_file"})
     sink.append({"other": 1})
     assert sink.tools() == ["charge_card", "write_file"]
+
+
+def test_filter_keeps_append_order(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert sink.filter("a") == []
+    sink.append({"tool": "a", "n": 1})
+    sink.append({"tool": "b", "n": 2})
+    sink.append({"tool": "a", "n": 3})
+    assert sink.filter("a") == [{"tool": "a", "n": 1}, {"tool": "a", "n": 3}]
+    assert sink.filter("c") == []
