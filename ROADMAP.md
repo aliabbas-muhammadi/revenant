@@ -246,3 +246,5 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R196 `Ledger.has_unconfirmed()` is True while any key is still in `intent`. Tests.
 - [x] R197 `EffectSink.is_empty()` is True when there are no whole records. Tests.
 - [x] R198 Note R191-R197 in `CHANGELOG.md` and `docs/ledger.md`.
+
+- [x] R199 `InjectedClock.until(when)` returns the seconds left until an absolute time, floored at zero; rejects non-finite values. Tests.

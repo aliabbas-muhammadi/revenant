@@ -36,6 +36,12 @@ class InjectedClock:
         """True when no time has passed since the start value."""
         return self._now == self._start
 
+    def until(self, when: float) -> float:
+        """Return the seconds from now until ``when``, or ``0.0`` if it has passed."""
+        if not math.isfinite(when):
+            raise ValueError("clock time must be finite")
+        return max(0.0, float(when) - self._now)
+
     def __repr__(self) -> str:
         return f"InjectedClock(now={self._now!r})"
 

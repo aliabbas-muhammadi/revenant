@@ -87,3 +87,19 @@ def test_start_is_read_only_and_survives_movement():
         clock.start = 0.0  # type: ignore[misc]
     clock.reset()
     assert clock.start == 4.0
+
+
+def test_until_counts_down_and_floors_at_zero():
+    clock = InjectedClock(10)
+    assert clock.until(15) == 5.0
+    clock.tick(3)
+    assert clock.until(15) == 2.0
+    clock.tick(10)
+    assert clock.until(15) == 0.0
+
+
+def test_until_rejects_non_finite():
+    clock = InjectedClock()
+    for bad in (float("nan"), float("inf")):
+        with pytest.raises(ValueError):
+            clock.until(bad)
