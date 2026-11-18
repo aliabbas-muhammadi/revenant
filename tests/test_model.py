@@ -91,3 +91,15 @@ def test_iteration_yields_responses_in_order():
     assert list(model) == ["a", "b", "c"]
     assert list(model) == ["a", "b", "c"]
     assert list(ScriptedModel([])) == []
+
+
+def test_peek_returns_response_without_prompt_check():
+    model = ScriptedModel(["a", "b"], prompt_hashes=[state_hash("x"), None])
+    assert model.peek(0) == "a"
+    assert model.peek(1) == "b"
+
+
+@pytest.mark.parametrize("step", [-1, 2])
+def test_peek_out_of_range_raises(step):
+    with pytest.raises(ScriptExhausted):
+        ScriptedModel(["a", "b"]).peek(step)

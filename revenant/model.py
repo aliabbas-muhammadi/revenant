@@ -61,6 +61,10 @@ class ScriptedModel:
         """True when ``step`` is past the end of the script."""
         return self.remaining(step) == 0
 
+    def peek(self, step: int) -> Any:
+        """Return the scripted response for ``step`` without any prompt check."""
+        return self.respond(step)
+
     def respond(self, step: int, prompt: Any = None) -> Any:
         """Return the response for ``step`` (0-based).
 
