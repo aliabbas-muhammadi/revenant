@@ -281,3 +281,14 @@ def test_count_by_status(ledger):
     assert ledger.count("intent") == 1
     with pytest.raises(ValueError):
         ledger.count("bogus")
+
+
+def test_reattempted_lists_keys_with_retries(ledger):
+    assert ledger.reattempted() == []
+    ledger.begin("b:1", {})
+    ledger.begin("a:1", {})
+    ledger.commit("a:1")
+    assert ledger.reattempted() == []
+    ledger.begin("a:1", {})
+    ledger.begin("b:1", {})
+    assert ledger.reattempted() == ["a:1", "b:1"]

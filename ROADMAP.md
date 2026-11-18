@@ -233,7 +233,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R183 `EffectSink.tools()` lists the distinct `tool` values, sorted. Tests.
 - [x] R184 `EffectSink.filter(tool)` returns the whole records for one tool in append order. Tests.
 - [x] R185 `EffectSink.since(n)` returns whole records from index `n` onward; negative `n` raises `ValueError`. Tests.
-- [ ] R186 `Ledger.reattempted()` lists keys with more than one attempt, sorted. Tests.
+- [x] R186 `Ledger.reattempted()` lists keys with more than one attempt, sorted. Tests.
 - [ ] R187 `ScriptedModel.responses()` returns a copy of the script as a list. Tests.
 - [ ] R188 `iter(ScriptedModel)` yields the scripted responses in step order. Tests.
 - [ ] R189 `InjectedClock.is_at_start()`. Tests.

@@ -207,6 +207,10 @@ class Ledger:
             return len(self)
         return len(self.keys(status))
 
+    def reattempted(self) -> list[str]:
+        """Keys attempted more than once (retries, suppressed or not), sorted."""
+        return [key for key, _, attempts in self.entries() if attempts > 1]
+
     def unconfirmed(self) -> list[str]:
         """Keys still in ``intent``: executed-or-not is unknown. Never auto-resolved."""
         rows = self._conn.execute(
