@@ -252,3 +252,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R201 `Ledger.max_attempts()` returns the highest attempt count on any key, `0` when empty. Tests.
 - [x] R202 `EffectSink.values(field)` collects one field across whole records in append order. Tests.
 - [x] R203 `canon.same_state(a, b, volatile_fields=())` compares two states by hash. Tests.
+- [x] R204 `ScriptedModel.is_pinned(step)` reports whether a prompt hash is pinned for a step; out-of-range steps are False. Tests.

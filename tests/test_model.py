@@ -121,3 +121,16 @@ def test_window_is_a_copy_and_rejects_negatives():
         model.window(-1, 2)
     with pytest.raises(ValueError):
         model.window(0, -1)
+
+
+def test_is_pinned_reports_per_step_prompt_pins():
+    pin = state_hash("p")
+    model = ScriptedModel(["a", "b", "c"], prompt_hashes=[pin, None, pin])
+    assert [model.is_pinned(i) for i in range(3)] == [True, False, True]
+
+
+def test_is_pinned_is_false_without_pins_or_out_of_range():
+    assert not ScriptedModel(["a"]).is_pinned(0)
+    model = ScriptedModel(["a"], prompt_hashes=[state_hash("p")])
+    assert not model.is_pinned(1)
+    assert not model.is_pinned(-1)

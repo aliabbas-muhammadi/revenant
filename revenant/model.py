@@ -61,6 +61,12 @@ class ScriptedModel:
         """True when ``step`` is past the end of the script."""
         return self.remaining(step) == 0
 
+    def is_pinned(self, step: int) -> bool:
+        """True when the script pins an expected prompt hash for ``step``."""
+        if self._prompt_hashes is None or not 0 <= step < len(self._script):
+            return False
+        return self._prompt_hashes[step] is not None
+
     def window(self, start: int, stop: int) -> list[Any]:
         """Return the scripted responses for steps ``start`` up to (not including) ``stop``.
 
