@@ -161,6 +161,13 @@ class Ledger:
         ).fetchone()
         return None if row is None else (row[0], row[1])
 
+    def payload_hash_of(self, key: str) -> str | None:
+        """Stored payload hash for ``key``, or None if the ledger has never seen it."""
+        row = self._conn.execute(
+            "SELECT payload_hash FROM effects WHERE idempotency_key = ?", (key,)
+        ).fetchone()
+        return None if row is None else str(row[0])
+
     def attempts(self, key: str) -> int:
         """Attempt count for ``key``; ``0`` for a key the ledger has never seen."""
         state = self.status(key)

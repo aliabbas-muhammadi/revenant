@@ -240,7 +240,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R190 Note R183-R189 in `CHANGELOG.md`, `docs/ledger.md` and a short sink section in the README or docs.
 - [x] R191 `EffectSink.has(tool)` reports whether any whole record names the tool. Tests.
 - [x] R192 `EffectSink.tail(n)` returns the last `n` whole records; negative `n` raises `ValueError`. Tests.
-- [ ] R193 `Ledger.payload_hash_of(key)` returns the stored payload hash, `None` for an unknown key. Tests.
+- [x] R193 `Ledger.payload_hash_of(key)` returns the stored payload hash, `None` for an unknown key. Tests.
 - [ ] R194 `ScriptedModel.peek(step)` returns the scripted response without a prompt check, raising `ScriptExhausted` out of range. Tests.
 - [ ] R195 `InjectedClock.start` read-only property. Tests.
 - [ ] R196 `Ledger.has_unconfirmed()` is True while any key is still in `intent`. Tests.

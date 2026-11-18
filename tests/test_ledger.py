@@ -292,3 +292,12 @@ def test_reattempted_lists_keys_with_retries(ledger):
     ledger.begin("a:1", {})
     ledger.begin("b:1", {})
     assert ledger.reattempted() == ["a:1", "b:1"]
+
+
+def test_payload_hash_of_returns_stored_hash_or_none(tmp_path):
+    with Ledger(tmp_path / "l.db") as ledger:
+        assert ledger.payload_hash_of("a:1") is None
+        ledger.begin("a:1", {"x": 1})
+        assert ledger.payload_hash_of("a:1") == state_hash({"x": 1})
+        ledger.begin("a:1", {"x": 1})
+        assert ledger.payload_hash_of("a:1") == state_hash({"x": 1})
