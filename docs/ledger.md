@@ -68,3 +68,11 @@ when there are no whole records. On the ledger, `payload_hash_of(key)` returns t
 stored payload hash (`None` for an unknown key) and `has_unconfirmed()` is true while
 any key is still in `intent`. `ScriptedModel.peek(step)` fetches a response without a
 prompt check, and `InjectedClock.start` exposes the value `reset()` returns to.
+
+`max_attempts()` returns the highest attempt count on any key (`0` when empty),
+`suppressed_keys()` lists committed keys that were attempted again (an upper bound,
+like `LedgerSummary.suppressed`), and `is_empty()` is true before any key is recorded.
+On the sink, `values(field)` collects one field across whole records in append order.
+`ScriptedModel.window(start, stop)` returns a clamped slice of the script and
+`is_pinned(step)` says whether a prompt hash is pinned; `InjectedClock.until(when)`
+gives the seconds left until an absolute time.

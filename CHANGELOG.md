@@ -21,6 +21,9 @@ All notable changes to this project are documented here. The format follows
   `ScriptedModel.responses()` and iteration, and `InjectedClock.is_at_start()`.
 - `EffectSink.has()`, `tail()` and `is_empty()`, `Ledger.payload_hash_of()` and
   `has_unconfirmed()`, `ScriptedModel.peek()` and `InjectedClock.start`.
+- `InjectedClock.until()`, `ScriptedModel.window()` and `is_pinned()`,
+  `Ledger.max_attempts()`, `suppressed_keys()` and `is_empty()`,
+  `EffectSink.values()` and `canon.same_state()`.
 
 ### Fixed
 - `InjectedClock` rejects NaN and infinite values.

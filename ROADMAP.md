@@ -255,3 +255,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R204 `ScriptedModel.is_pinned(step)` reports whether a prompt hash is pinned for a step; out-of-range steps are False. Tests.
 - [x] R205 `Ledger.suppressed_keys()` lists committed keys attempted again, sorted. Tests.
 - [x] R206 `Ledger.is_empty()` is True before any key is recorded. Tests.
+- [x] R207 Note R199-R206 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.

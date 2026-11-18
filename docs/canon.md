@@ -44,3 +44,6 @@ changed and every committed result in `results/` is invalidated.
 `short_hash(obj, length=12)` returns the first `length` hex characters of
 `state_hash(obj)` (1 to 64) for messages and logs. Compare full digests, never
 the shortened form.
+
+`same_state(a, b, volatile_fields=())` reports whether two states have the same
+`state_hash` once the volatile fields are excluded.
