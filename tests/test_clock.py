@@ -66,3 +66,14 @@ def test_reset_returns_to_start():
     clock.reset()
     assert clock.now() == 5.0
     assert clock.elapsed() == 0.0
+
+
+def test_is_at_start_tracks_movement():
+    clock = InjectedClock(3)
+    assert clock.is_at_start()
+    clock.tick(0)
+    assert clock.is_at_start()
+    clock.tick(1)
+    assert not clock.is_at_start()
+    clock.reset()
+    assert clock.is_at_start()

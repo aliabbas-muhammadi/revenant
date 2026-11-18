@@ -236,5 +236,5 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R186 `Ledger.reattempted()` lists keys with more than one attempt, sorted. Tests.
 - [x] R187 `ScriptedModel.responses()` returns a copy of the script as a list. Tests.
 - [x] R188 `iter(ScriptedModel)` yields the scripted responses in step order. Tests.
-- [ ] R189 `InjectedClock.is_at_start()`. Tests.
+- [x] R189 `InjectedClock.is_at_start()`. Tests.
 - [ ] R190 Note R183-R189 in `CHANGELOG.md`, `docs/ledger.md` and a short sink section in the README or docs.

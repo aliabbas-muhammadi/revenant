@@ -27,6 +27,10 @@ class InjectedClock:
         """Return the injected time that has passed since the start value."""
         return self._now - self._start
 
+    def is_at_start(self) -> bool:
+        """True when no time has passed since the start value."""
+        return self._now == self._start
+
     def __repr__(self) -> str:
         return f"InjectedClock(now={self._now!r})"
 
