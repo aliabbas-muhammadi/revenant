@@ -208,6 +208,10 @@ class Ledger:
         """Number of distinct idempotency keys recorded."""
         return int(self._conn.execute("SELECT COUNT(*) FROM effects").fetchone()[0])
 
+    def is_empty(self) -> bool:
+        """True when the ledger has recorded no keys."""
+        return len(self) == 0
+
     def count(self, status: str | None = None) -> int:
         """Number of rows, optionally only those in ``status``."""
         if status is None:

@@ -254,3 +254,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R203 `canon.same_state(a, b, volatile_fields=())` compares two states by hash. Tests.
 - [x] R204 `ScriptedModel.is_pinned(step)` reports whether a prompt hash is pinned for a step; out-of-range steps are False. Tests.
 - [x] R205 `Ledger.suppressed_keys()` lists committed keys attempted again, sorted. Tests.
+- [x] R206 `Ledger.is_empty()` is True before any key is recorded. Tests.
