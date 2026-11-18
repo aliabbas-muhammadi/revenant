@@ -321,3 +321,16 @@ def test_max_attempts_tracks_the_busiest_key(tmp_path):
         ledger.begin("a:1", {"x": 1})
         ledger.begin("b:1", {"x": 2})
         assert ledger.max_attempts() == 3
+
+
+def test_suppressed_keys_lists_retried_committed_keys(tmp_path):
+    with Ledger(tmp_path / "l.db") as ledger:
+        assert ledger.suppressed_keys() == []
+        ledger.begin("a:1", {"x": 1})
+        ledger.commit("a:1")
+        ledger.begin("b:1", {"x": 2})
+        ledger.commit("b:1")
+        ledger.begin("b:1", {"x": 2})
+        ledger.begin("c:1", {"x": 3})
+        ledger.begin("c:1", {"x": 3})
+        assert ledger.suppressed_keys() == ["b:1"]

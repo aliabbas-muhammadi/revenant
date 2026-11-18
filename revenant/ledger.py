@@ -219,6 +219,14 @@ class Ledger:
         row = self._conn.execute("SELECT COALESCE(MAX(attempt_count), 0) FROM effects").fetchone()
         return int(row[0])
 
+    def suppressed_keys(self) -> list[str]:
+        """Committed keys that were attempted again after committing, sorted.
+
+        Like ``LedgerSummary.suppressed`` this is an upper bound: a retry that
+        re-executed crash residue before the commit is counted too.
+        """
+        return [k for k, status, n in self.entries() if status == "committed" and n > 1]
+
     def reattempted(self) -> list[str]:
         """Keys attempted more than once (retries, suppressed or not), sorted."""
         return [key for key, _, attempts in self.entries() if attempts > 1]
