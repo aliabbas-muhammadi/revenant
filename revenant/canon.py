@@ -116,3 +116,9 @@ def short_hash(obj: Any, length: int = 12, volatile_fields: Iterable[str] = ()) 
     if not 1 <= length <= 64:
         raise ValueError("length must be between 1 and 64")
     return state_hash(obj, volatile_fields)[:length]
+
+
+def same_state(a: Any, b: Any, volatile_fields: Iterable[str] = ()) -> bool:
+    """True when ``a`` and ``b`` have the same :func:`state_hash` under ``volatile_fields``."""
+    fields = tuple(volatile_fields)
+    return state_hash(a, fields) == state_hash(b, fields)

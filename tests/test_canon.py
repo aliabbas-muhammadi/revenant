@@ -2,7 +2,7 @@ import hashlib
 
 import pytest
 
-from revenant.canon import CanonError, canonical_json, short_hash, state_hash
+from revenant.canon import CanonError, canonical_json, same_state, short_hash, state_hash
 
 
 def test_key_order_independence():
@@ -207,3 +207,16 @@ def test_short_hash_is_a_prefix_of_state_hash():
 def test_short_hash_rejects_bad_lengths(length):
     with pytest.raises(ValueError):
         short_hash({}, length)
+
+
+def test_same_state_ignores_key_order_and_unicode_form():
+    assert same_state({"a": 1, "b": "\u00e9"}, {"b": "e\u0301", "a": 1})
+    assert not same_state({"a": 1}, {"a": 2})
+
+
+def test_same_state_honours_volatile_fields():
+    a = {"step": 1, "meta": {"ts": 10}}
+    b = {"step": 1, "meta": {"ts": 99}}
+    assert not same_state(a, b)
+    assert same_state(a, b, volatile_fields=["meta.ts"])
+    assert not same_state(a, {"step": 2, "meta": {"ts": 10}}, volatile_fields=["meta.ts"])

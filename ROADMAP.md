@@ -251,3 +251,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R200 `ScriptedModel.window(start, stop)` returns a clamped copy of the responses in a step range; negative bounds raise `ValueError`. Tests.
 - [x] R201 `Ledger.max_attempts()` returns the highest attempt count on any key, `0` when empty. Tests.
 - [x] R202 `EffectSink.values(field)` collects one field across whole records in append order. Tests.
+- [x] R203 `canon.same_state(a, b, volatile_fields=())` compares two states by hash. Tests.
