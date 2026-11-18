@@ -214,6 +214,11 @@ class Ledger:
             return len(self)
         return len(self.keys(status))
 
+    def max_attempts(self) -> int:
+        """The highest attempt count on any key; ``0`` for an empty ledger."""
+        row = self._conn.execute("SELECT COALESCE(MAX(attempt_count), 0) FROM effects").fetchone()
+        return int(row[0])
+
     def reattempted(self) -> list[str]:
         """Keys attempted more than once (retries, suppressed or not), sorted."""
         return [key for key, _, attempts in self.entries() if attempts > 1]

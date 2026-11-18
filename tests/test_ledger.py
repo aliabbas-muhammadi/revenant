@@ -310,3 +310,14 @@ def test_has_unconfirmed_follows_intent_rows(tmp_path):
         assert led.has_unconfirmed()
         led.commit("a:1")
         assert not led.has_unconfirmed()
+
+
+def test_max_attempts_tracks_the_busiest_key(tmp_path):
+    with Ledger(tmp_path / "l.db") as ledger:
+        assert ledger.max_attempts() == 0
+        ledger.begin("a:1", {"x": 1})
+        assert ledger.max_attempts() == 1
+        ledger.begin("a:1", {"x": 1})
+        ledger.begin("a:1", {"x": 1})
+        ledger.begin("b:1", {"x": 2})
+        assert ledger.max_attempts() == 3
