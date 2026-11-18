@@ -243,6 +243,6 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R193 `Ledger.payload_hash_of(key)` returns the stored payload hash, `None` for an unknown key. Tests.
 - [x] R194 `ScriptedModel.peek(step)` returns the scripted response without a prompt check, raising `ScriptExhausted` out of range. Tests.
 - [x] R195 `InjectedClock.start` read-only property. Tests.
-- [ ] R196 `Ledger.has_unconfirmed()` is True while any key is still in `intent`. Tests.
+- [x] R196 `Ledger.has_unconfirmed()` is True while any key is still in `intent`. Tests.
 - [ ] R197 `EffectSink.is_empty()` is True when there are no whole records. Tests.
 - [ ] R198 Note R191-R197 in `CHANGELOG.md` and `docs/ledger.md`.

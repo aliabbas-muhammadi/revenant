@@ -301,3 +301,12 @@ def test_payload_hash_of_returns_stored_hash_or_none(tmp_path):
         assert ledger.payload_hash_of("a:1") == state_hash({"x": 1})
         ledger.begin("a:1", {"x": 1})
         assert ledger.payload_hash_of("a:1") == state_hash({"x": 1})
+
+
+def test_has_unconfirmed_follows_intent_rows(tmp_path):
+    with Ledger(tmp_path / "l.db") as led:
+        assert not led.has_unconfirmed()
+        led.begin("a:1", {"x": 1})
+        assert led.has_unconfirmed()
+        led.commit("a:1")
+        assert not led.has_unconfirmed()

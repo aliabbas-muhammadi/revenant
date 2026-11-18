@@ -226,6 +226,10 @@ class Ledger:
         ).fetchall()
         return [r[0] for r in rows]
 
+    def has_unconfirmed(self) -> bool:
+        """True while any key is still in ``intent``."""
+        return self.count("intent") > 0
+
     def attempts_by_tool(self) -> dict[str, int]:
         """Attempts per tool, taken from the ``tool:`` prefix of each idempotency key."""
         out: dict[str, int] = {}
