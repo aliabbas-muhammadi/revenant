@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from typing import Any
 
 from revenant.canon import short_hash, state_hash
@@ -44,6 +44,10 @@ class ScriptedModel:
     def __repr__(self) -> str:
         pinned = self._prompt_hashes is not None
         return f"ScriptedModel(responses={len(self._script)}, prompts_pinned={pinned})"
+
+    def __iter__(self) -> Iterator[Any]:
+        """Iterate over the scripted responses in step order."""
+        return iter(self._script)
 
     def responses(self) -> list[Any]:
         """Return a copy of the script as a list, in step order."""

@@ -84,3 +84,10 @@ def test_responses_returns_a_copy():
     out.append("c")
     assert model.responses() == ["a", "b"]
     assert ScriptedModel([]).responses() == []
+
+
+def test_iteration_yields_responses_in_order():
+    model = ScriptedModel(["a", "b", "c"])
+    assert list(model) == ["a", "b", "c"]
+    assert list(model) == ["a", "b", "c"]
+    assert list(ScriptedModel([])) == []
