@@ -238,7 +238,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R188 `iter(ScriptedModel)` yields the scripted responses in step order. Tests.
 - [x] R189 `InjectedClock.is_at_start()`. Tests.
 - [x] R190 Note R183-R189 in `CHANGELOG.md`, `docs/ledger.md` and a short sink section in the README or docs.
-- [ ] R191 `EffectSink.has(tool)` reports whether any whole record names the tool. Tests.
+- [x] R191 `EffectSink.has(tool)` reports whether any whole record names the tool. Tests.
 - [ ] R192 `EffectSink.tail(n)` returns the last `n` whole records; negative `n` raises `ValueError`. Tests.
 - [ ] R193 `Ledger.payload_hash_of(key)` returns the stored payload hash, `None` for an unknown key. Tests.
 - [ ] R194 `ScriptedModel.peek(step)` returns the scripted response without a prompt check, raising `ScriptExhausted` out of range. Tests.

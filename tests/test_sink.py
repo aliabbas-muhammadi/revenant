@@ -126,3 +126,18 @@ def test_since_returns_tail_and_rejects_negative(tmp_path):
     assert sink.since(9) == []
     with pytest.raises(ValueError):
         sink.since(-1)
+
+
+def test_has_reports_tool_presence(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert not sink.has("send_email")
+    sink.append({"tool": "send_email"})
+    assert sink.has("send_email")
+    assert not sink.has("charge_card")
+
+
+def test_has_ignores_torn_final_line(tmp_path):
+    path = tmp_path / "s.jsonl"
+    path.write_text('{"tool": "send_email"}\n{"tool": "charge_ca')
+    assert EffectSink(path).has("send_email")
+    assert not EffectSink(path).has("charge_card")
