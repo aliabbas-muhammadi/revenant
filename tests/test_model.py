@@ -75,3 +75,12 @@ def test_is_exhausted_past_the_end():
     assert model.is_exhausted(2)
     assert model.is_exhausted(10)
     assert ScriptedModel([]).is_exhausted(0)
+
+
+def test_responses_returns_a_copy():
+    model = ScriptedModel(["a", "b"])
+    out = model.responses()
+    assert out == ["a", "b"]
+    out.append("c")
+    assert model.responses() == ["a", "b"]
+    assert ScriptedModel([]).responses() == []

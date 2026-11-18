@@ -45,6 +45,10 @@ class ScriptedModel:
         pinned = self._prompt_hashes is not None
         return f"ScriptedModel(responses={len(self._script)}, prompts_pinned={pinned})"
 
+    def responses(self) -> list[Any]:
+        """Return a copy of the script as a list, in step order."""
+        return list(self._script)
+
     def remaining(self, step: int) -> int:
         """Return how many responses are left from ``step`` onward (0 past the end)."""
         return max(0, len(self._script) - max(0, step))
