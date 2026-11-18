@@ -138,3 +138,7 @@ class EffectSink:
         if n == 0:
             return []
         return self.read().effects[-n:]
+
+    def is_empty(self) -> bool:
+        """True when the sink holds no whole records."""
+        return len(self) == 0

@@ -157,3 +157,13 @@ def test_tail_rejects_negative(tmp_path):
 
     with pytest.raises(ValueError):
         EffectSink(tmp_path / "s.jsonl").tail(-1)
+
+
+def test_is_empty_tracks_whole_records(tmp_path):
+    path = tmp_path / "s.jsonl"
+    sink = EffectSink(path)
+    assert sink.is_empty()
+    path.write_text('{"a": 1')
+    assert sink.is_empty()
+    path.write_text('{"a": 2}\n')
+    assert not sink.is_empty()
