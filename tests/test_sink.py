@@ -141,3 +141,19 @@ def test_has_ignores_torn_final_line(tmp_path):
     path.write_text('{"tool": "send_email"}\n{"tool": "charge_ca')
     assert EffectSink(path).has("send_email")
     assert not EffectSink(path).has("charge_card")
+
+
+def test_tail_returns_last_records(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    for i in range(4):
+        sink.append({"i": i})
+    assert sink.tail(2) == [{"i": 2}, {"i": 3}]
+    assert sink.tail(10) == [{"i": i} for i in range(4)]
+    assert sink.tail(0) == []
+
+
+def test_tail_rejects_negative(tmp_path):
+    import pytest
+
+    with pytest.raises(ValueError):
+        EffectSink(tmp_path / "s.jsonl").tail(-1)
