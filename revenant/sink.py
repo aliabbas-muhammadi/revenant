@@ -112,3 +112,7 @@ class EffectSink:
     def count(self, tool: str) -> int:
         """Count whole records whose ``tool`` field equals ``tool``."""
         return self.by_tool().get(tool, 0)
+
+    def tools(self) -> list[str]:
+        """Distinct ``tool`` values among whole records, sorted."""
+        return list(self.by_tool())

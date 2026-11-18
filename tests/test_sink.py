@@ -93,3 +93,13 @@ def test_count_by_tool(tmp_path):
     assert sink.count("a") == 2
     assert sink.count("b") == 1
     assert sink.count("c") == 0
+
+
+def test_tools_lists_distinct_sorted(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert sink.tools() == []
+    sink.append({"tool": "write_file"})
+    sink.append({"tool": "charge_card"})
+    sink.append({"tool": "write_file"})
+    sink.append({"other": 1})
+    assert sink.tools() == ["charge_card", "write_file"]

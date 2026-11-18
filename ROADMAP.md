@@ -230,7 +230,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R180 `Ledger.count(status=None)` counts rows, optionally by status. Tests.
 - [x] R181 `ScriptedModel.is_exhausted(step)`. Tests.
 - [x] R182 Note R175-R181 in `CHANGELOG.md` and `docs/ledger.md`.
-- [ ] R183 `EffectSink.tools()` lists the distinct `tool` values, sorted. Tests.
+- [x] R183 `EffectSink.tools()` lists the distinct `tool` values, sorted. Tests.
 - [ ] R184 `EffectSink.filter(tool)` returns the whole records for one tool in append order. Tests.
 - [ ] R185 `EffectSink.since(n)` returns whole records from index `n` onward; negative `n` raises `ValueError`. Tests.
 - [ ] R186 `Ledger.reattempted()` lists keys with more than one attempt, sorted. Tests.
