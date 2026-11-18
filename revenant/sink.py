@@ -121,6 +121,10 @@ class EffectSink:
         """True when at least one whole record names ``tool``."""
         return self.count(tool) > 0
 
+    def values(self, field: str) -> list[Any]:
+        """Return the ``field`` value of every whole record that has it, in append order."""
+        return [r[field] for r in self.read().effects if field in r]
+
     def filter(self, tool: str) -> list[dict[str, Any]]:
         """Return whole records whose ``tool`` field equals ``tool``, in append order."""
         return [r for r in self.read().effects if r.get("tool") == tool]

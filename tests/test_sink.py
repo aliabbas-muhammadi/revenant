@@ -167,3 +167,23 @@ def test_is_empty_tracks_whole_records(tmp_path):
     assert sink.is_empty()
     path.write_text('{"a": 2}\n')
     assert not sink.is_empty()
+
+
+def test_values_collects_a_field_in_append_order(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert sink.values("to") == []
+    sink.append({"tool": "send_email", "to": "a@example.com"})
+    sink.append({"tool": "charge_card", "amount_cents": 5})
+    sink.append({"tool": "send_email", "to": "b@example.com"})
+    assert sink.values("to") == ["a@example.com", "b@example.com"]
+    assert sink.values("amount_cents") == [5]
+    assert sink.values("missing") == []
+
+
+def test_values_ignores_a_torn_final_line(tmp_path):
+    path = tmp_path / "s.jsonl"
+    sink = EffectSink(path)
+    sink.append({"tool": "t", "n": 1})
+    with open(path, "a", encoding="utf-8") as fh:
+        fh.write('{"tool": "t", "n": 2')
+    assert sink.values("n") == [1]
