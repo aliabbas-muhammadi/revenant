@@ -232,7 +232,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R182 Note R175-R181 in `CHANGELOG.md` and `docs/ledger.md`.
 - [x] R183 `EffectSink.tools()` lists the distinct `tool` values, sorted. Tests.
 - [x] R184 `EffectSink.filter(tool)` returns the whole records for one tool in append order. Tests.
-- [ ] R185 `EffectSink.since(n)` returns whole records from index `n` onward; negative `n` raises `ValueError`. Tests.
+- [x] R185 `EffectSink.since(n)` returns whole records from index `n` onward; negative `n` raises `ValueError`. Tests.
 - [ ] R186 `Ledger.reattempted()` lists keys with more than one attempt, sorted. Tests.
 - [ ] R187 `ScriptedModel.responses()` returns a copy of the script as a list. Tests.
 - [ ] R188 `iter(ScriptedModel)` yields the scripted responses in step order. Tests.

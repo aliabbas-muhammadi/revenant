@@ -120,3 +120,9 @@ class EffectSink:
     def filter(self, tool: str) -> list[dict[str, Any]]:
         """Return whole records whose ``tool`` field equals ``tool``, in append order."""
         return [r for r in self.read().effects if r.get("tool") == tool]
+
+    def since(self, n: int) -> list[dict[str, Any]]:
+        """Return whole records from index ``n`` onward; ``n`` must not be negative."""
+        if n < 0:
+            raise ValueError("since() index must not be negative")
+        return self.read().effects[n:]

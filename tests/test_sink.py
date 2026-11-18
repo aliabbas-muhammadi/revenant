@@ -113,3 +113,16 @@ def test_filter_keeps_append_order(tmp_path):
     sink.append({"tool": "a", "n": 3})
     assert sink.filter("a") == [{"tool": "a", "n": 1}, {"tool": "a", "n": 3}]
     assert sink.filter("c") == []
+
+
+def test_since_returns_tail_and_rejects_negative(tmp_path):
+    import pytest
+
+    sink = EffectSink(tmp_path / "s.jsonl")
+    for n in range(4):
+        sink.append({"n": n})
+    assert sink.since(0) == sink.effects()
+    assert sink.since(2) == [{"n": 2}, {"n": 3}]
+    assert sink.since(9) == []
+    with pytest.raises(ValueError):
+        sink.since(-1)
