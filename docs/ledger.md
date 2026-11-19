@@ -84,3 +84,9 @@ returns `(record, count)` pairs for records that appear more than once, which is
 quickest way to see a repeated effect. `ScriptedModel.find(response)` returns the first
 step with an equal response, `InjectedClock.has_reached(when)` tests an absolute
 deadline and `fork()` copies a clock that then moves independently.
+
+`total_attempts()` sums attempts over every key and `tool_counts(status=None)` counts keys
+per tool prefix, optionally restricted to `intent` or `committed`. On the sink, `unique()`
+returns the records with repeats removed (the complement of `duplicates()`),
+`ScriptedModel.last_step()` gives the final step index and `InjectedClock.ticks` counts how
+many times the clock has been advanced.

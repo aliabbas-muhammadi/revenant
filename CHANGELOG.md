@@ -27,6 +27,8 @@ All notable changes to this project are documented here. The format follows
 - `InjectedClock.has_reached()` and `fork()`, `Ledger.status_counts()` and
   `first_unconfirmed()`, `EffectSink.group_by()` and `duplicates()`,
   `ScriptedModel.find()` and `canon.canonical_size()`.
+- `InjectedClock.ticks`, `ScriptedModel.last_step()`, `canon.diff_paths()`,
+  `Ledger.total_attempts()` and `tool_counts()`, `EffectSink.unique()`.
 
 ### Fixed
 - `InjectedClock` rejects NaN and infinite values.

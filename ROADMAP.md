@@ -273,4 +273,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R220 `Ledger.total_attempts()` sums the attempt counts over every key, `0` when empty. Tests.
 - [x] R221 `EffectSink.unique()` returns whole records with repeats removed, in first-seen order. Tests.
 - [x] R222 `Ledger.tool_counts(status=None)` counts keys per tool prefix, optionally by status. Tests.
-- [ ] R223 Note R217-R222 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
+- [x] R223 Note R217-R222 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
+
+- [ ] R224 `Ledger.committed_keys()` and `Ledger.intent_keys()` as named shortcuts over `keys(status)`. Tests.
+- [ ] R225 `EffectSink.count_unique(tool=None)` counts distinct whole records, optionally for one tool. Tests.
