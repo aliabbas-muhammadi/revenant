@@ -208,3 +208,15 @@ def test_group_by_rejects_unhashable_values(tmp_path):
     sink.append({"tool": ["x"]})
     with pytest.raises(TypeError):
         sink.group_by("tool")
+
+
+def test_duplicates_reports_repeated_records_in_first_seen_order(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert sink.duplicates() == []
+    sink.append({"tool": "a", "n": 1})
+    sink.append({"tool": "b", "n": 2})
+    sink.append({"n": 1, "tool": "a"})
+    sink.append({"tool": "b", "n": 2})
+    sink.append({"tool": "b", "n": 2})
+    sink.append({"tool": "c"})
+    assert sink.duplicates() == [({"tool": "a", "n": 1}, 2), ({"tool": "b", "n": 2}, 3)]
