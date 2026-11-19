@@ -220,3 +220,10 @@ def test_same_state_honours_volatile_fields():
     assert not same_state(a, b)
     assert same_state(a, b, volatile_fields=["meta.ts"])
     assert not same_state(a, {"step": 2, "meta": {"ts": 10}}, volatile_fields=["meta.ts"])
+
+
+def test_canonical_size_matches_encoding_length():
+    from revenant.canon import canonical_json, canonical_size
+
+    assert canonical_size({"b": 1, "a": [1, 2]}) == len(b'{"a":[1,2],"b":1}')
+    assert canonical_size("é") == len(canonical_json("é")) == 4
