@@ -238,3 +238,20 @@ def test_unique_matches_duplicates(tmp_path):
     for n in (1, 1, 2):
         sink.append({"n": n})
     assert len(sink.unique()) == len(sink) - sum(c - 1 for _, c in sink.duplicates())
+
+
+def test_count_unique_overall_and_per_tool(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert sink.count_unique() == 0
+    for record in (
+        {"tool": "a", "n": 1},
+        {"tool": "a", "n": 1},
+        {"tool": "a", "n": 2},
+        {"tool": "b", "n": 1},
+        {"n": 9},
+    ):
+        sink.append(record)
+    assert sink.count_unique() == 4
+    assert sink.count_unique("a") == 2
+    assert sink.count_unique("b") == 1
+    assert sink.count_unique("missing") == 0

@@ -184,6 +184,13 @@ class EffectSink:
                 out.append(record)
         return out
 
+    def count_unique(self, tool: str | None = None) -> int:
+        """Number of distinct whole records, optionally only those naming ``tool``."""
+        records = self.unique()
+        if tool is not None:
+            records = [r for r in records if r.get("tool") == tool]
+        return len(records)
+
     def is_empty(self) -> bool:
         """True when the sink holds no whole records."""
         return len(self) == 0
