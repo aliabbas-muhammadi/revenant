@@ -255,3 +255,28 @@ def test_count_unique_overall_and_per_tool(tmp_path):
     assert sink.count_unique("a") == 2
     assert sink.count_unique("b") == 1
     assert sink.count_unique("missing") == 0
+
+
+def test_last_for_returns_latest_record_of_a_tool(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    sink.append({"tool": "send_email", "n": 1})
+    sink.append({"tool": "charge_card", "n": 2})
+    sink.append({"tool": "send_email", "n": 3})
+    assert sink.last_for("send_email") == {"tool": "send_email", "n": 3}
+    assert sink.last_for("charge_card") == {"tool": "charge_card", "n": 2}
+
+
+def test_last_for_unknown_tool_or_empty_sink_is_none(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert sink.last_for("send_email") is None
+    sink.append({"tool": "charge_card"})
+    assert sink.last_for("send_email") is None
+
+
+def test_last_for_ignores_torn_final_line(tmp_path):
+    path = tmp_path / "s.jsonl"
+    sink = EffectSink(path)
+    sink.append({"tool": "send_email", "n": 1})
+    with open(path, "a", encoding="utf-8") as fh:
+        fh.write('{"tool": "send_email", "n": ')
+    assert sink.last_for("send_email") == {"tool": "send_email", "n": 1}

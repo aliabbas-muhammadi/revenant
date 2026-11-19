@@ -109,6 +109,13 @@ class EffectSink:
         effects = self.read().effects
         return effects[0] if effects else None
 
+    def last_for(self, tool: str) -> dict[str, Any] | None:
+        """Return the most recent whole record naming ``tool``, or None if there is none."""
+        for record in reversed(self.read().effects):
+            if record.get("tool") == tool:
+                return record
+        return None
+
     def count(self, tool: str) -> int:
         """Count whole records whose ``tool`` field equals ``tool``."""
         return self.by_tool().get(tool, 0)
