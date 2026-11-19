@@ -232,6 +232,19 @@ class Ledger:
         row = self._conn.execute("SELECT COALESCE(MAX(attempt_count), 0) FROM effects").fetchone()
         return int(row[0])
 
+    def total_attempts(self) -> int:
+        """The sum of attempt counts over every key; ``0`` for an empty ledger."""
+        row = self._conn.execute("SELECT COALESCE(SUM(attempt_count), 0) FROM effects").fetchone()
+        return int(row[0])
+
+    def tool_counts(self, status: str | None = None) -> dict[str, int]:
+        """Keys per tool prefix, sorted by tool, optionally only those in ``status``."""
+        out: dict[str, int] = {}
+        for key in self.keys(status):
+            tool = key.partition(":")[0]
+            out[tool] = out.get(tool, 0) + 1
+        return dict(sorted(out.items()))
+
     def suppressed_keys(self) -> list[str]:
         """Committed keys that were attempted again after committing, sorted.
 

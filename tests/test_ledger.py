@@ -360,3 +360,30 @@ def test_first_unconfirmed_is_smallest_intent_key(ledger):
     assert ledger.first_unconfirmed() == "z:1"
     ledger.commit("z:1")
     assert ledger.first_unconfirmed() is None
+
+
+def test_total_attempts_sums_every_key(ledger):
+    assert ledger.total_attempts() == 0
+    ledger.begin("a:1", {"n": 1})
+    ledger.begin("b:1", {"n": 2})
+    ledger.commit("a:1")
+    ledger.begin("a:1", {"n": 1})  # suppressed re-attempt
+    ledger.begin("b:1", {"n": 2})  # crash-residue re-attempt
+    assert ledger.total_attempts() == 4
+    assert ledger.total_attempts() == sum(n for _, _, n in ledger.entries())
+
+
+def test_tool_counts_by_prefix_and_status(ledger):
+    assert ledger.tool_counts() == {}
+    ledger.begin("send_email:1", {"n": 1})
+    ledger.begin("send_email:2", {"n": 2})
+    ledger.begin("charge_card:1", {"n": 3})
+    ledger.commit("send_email:1")
+    assert ledger.tool_counts() == {"charge_card": 1, "send_email": 2}
+    assert ledger.tool_counts("committed") == {"send_email": 1}
+    assert ledger.tool_counts("intent") == {"charge_card": 1, "send_email": 1}
+
+
+def test_tool_counts_rejects_unknown_status(ledger):
+    with pytest.raises(ValueError):
+        ledger.tool_counts("done")
