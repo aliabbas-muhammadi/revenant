@@ -187,3 +187,24 @@ def test_values_ignores_a_torn_final_line(tmp_path):
     with open(path, "a", encoding="utf-8") as fh:
         fh.write('{"tool": "t", "n": 2')
     assert sink.values("n") == [1]
+
+
+def test_group_by_maps_values_to_records(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    sink.append({"tool": "a", "n": 1})
+    sink.append({"tool": "b", "n": 2})
+    sink.append({"tool": "a", "n": 3})
+    sink.append({"n": 4})
+    groups = sink.group_by("tool")
+    assert list(groups) == ["a", "b"]
+    assert [r["n"] for r in groups["a"]] == [1, 3]
+    assert EffectSink(tmp_path / "missing.jsonl").group_by("tool") == {}
+
+
+def test_group_by_rejects_unhashable_values(tmp_path):
+    import pytest
+
+    sink = EffectSink(tmp_path / "s.jsonl")
+    sink.append({"tool": ["x"]})
+    with pytest.raises(TypeError):
+        sink.group_by("tool")

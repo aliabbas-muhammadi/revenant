@@ -63,6 +63,11 @@ def canonical_json(obj: Any) -> bytes:
     ).encode("utf-8")
 
 
+def canonical_size(obj: Any) -> int:
+    """Return the byte length of the canonical encoding of ``obj``."""
+    return len(canonical_json(obj))
+
+
 def _matches(trail: tuple[str, ...], pattern: list[str]) -> bool:
     """Match a key path against a volatile pattern.
 

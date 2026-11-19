@@ -48,6 +48,12 @@ class InjectedClock:
             raise ValueError("clock time must be finite")
         return self._now >= when
 
+    def fork(self) -> InjectedClock:
+        """Return an independent clock with the same start and current time."""
+        twin = InjectedClock(self._start)
+        twin._now = self._now
+        return twin
+
     def __repr__(self) -> str:
         return f"InjectedClock(now={self._now!r})"
 

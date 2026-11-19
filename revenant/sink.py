@@ -143,6 +143,32 @@ class EffectSink:
             return []
         return self.read().effects[-n:]
 
+    def group_by(self, field: str) -> dict[Any, list[dict[str, Any]]]:
+        """Map each value of ``field`` to its whole records, in append order.
+
+        Records without the field are skipped. A value that cannot be a dict key
+        (a list or dict) raises ``TypeError``.
+        """
+        groups: dict[Any, list[dict[str, Any]]] = {}
+        for record in self.read().effects:
+            if field in record:
+                groups.setdefault(record[field], []).append(record)
+        return groups
+
+    def duplicates(self) -> list[tuple[dict[str, Any], int]]:
+        """Whole records that appear more than once, as ``(record, count)`` pairs.
+
+        Pairs come in first-seen order. Two records are the same when they are equal
+        as JSON, regardless of key order.
+        """
+        counts: dict[str, int] = {}
+        first: dict[str, dict[str, Any]] = {}
+        for record in self.read().effects:
+            marker = json.dumps(record, sort_keys=True, ensure_ascii=False)
+            counts[marker] = counts.get(marker, 0) + 1
+            first.setdefault(marker, record)
+        return [(first[m], n) for m, n in counts.items() if n > 1]
+
     def is_empty(self) -> bool:
         """True when the sink holds no whole records."""
         return len(self) == 0

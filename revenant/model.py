@@ -76,6 +76,13 @@ class ScriptedModel:
             raise ValueError("window bounds must not be negative")
         return self._script[start:stop]
 
+    def find(self, response: Any) -> int | None:
+        """Return the first step whose scripted response equals ``response``, or None."""
+        for step, scripted in enumerate(self._script):
+            if scripted == response:
+                return step
+        return None
+
     def peek(self, step: int) -> Any:
         """Return the scripted response for ``step`` without any prompt check."""
         return self.respond(step)
