@@ -90,3 +90,8 @@ per tool prefix, optionally restricted to `intent` or `committed`. On the sink, 
 returns the records with repeats removed (the complement of `duplicates()`),
 `ScriptedModel.last_step()` gives the final step index and `InjectedClock.ticks` counts how
 many times the clock has been advanced.
+
+`committed_keys()` and `intent_keys()` are named shortcuts for `keys("committed")` and
+`keys("intent")`; the latter is the same set as `unconfirmed()`. On the sink,
+`count_unique(tool=None)` counts distinct whole records, so comparing it with `len()`
+shows at a glance whether anything was delivered twice.

@@ -29,6 +29,7 @@ All notable changes to this project are documented here. The format follows
   `ScriptedModel.find()` and `canon.canonical_size()`.
 - `InjectedClock.ticks`, `ScriptedModel.last_step()`, `canon.diff_paths()`,
   `Ledger.total_attempts()` and `tool_counts()`, `EffectSink.unique()`.
+- `Ledger.committed_keys()` and `intent_keys()`, `EffectSink.count_unique()`.
 
 ### Fixed
 - `InjectedClock` rejects NaN and infinite values.
