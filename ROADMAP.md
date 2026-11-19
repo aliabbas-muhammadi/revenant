@@ -271,6 +271,6 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R218 `ScriptedModel.last_step()` returns the final step index, or `None` for an empty script. Tests.
 - [x] R219 `canon.diff_paths(a, b, volatile_fields=())` lists the sorted JSON paths where two states differ. Tests.
 - [x] R220 `Ledger.total_attempts()` sums the attempt counts over every key, `0` when empty. Tests.
-- [ ] R221 `EffectSink.unique()` returns whole records with repeats removed, in first-seen order. Tests.
+- [x] R221 `EffectSink.unique()` returns whole records with repeats removed, in first-seen order. Tests.
 - [x] R222 `Ledger.tool_counts(status=None)` counts keys per tool prefix, optionally by status. Tests.
 - [ ] R223 Note R217-R222 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.

@@ -169,6 +169,21 @@ class EffectSink:
             first.setdefault(marker, record)
         return [(first[m], n) for m, n in counts.items() if n > 1]
 
+    def unique(self) -> list[dict[str, Any]]:
+        """Whole records with repeats removed, keeping the first of each in append order.
+
+        Records are the same when equal as JSON, regardless of key order, as in
+        :meth:`duplicates`.
+        """
+        seen: set[str] = set()
+        out: list[dict[str, Any]] = []
+        for record in self.read().effects:
+            marker = json.dumps(record, sort_keys=True, ensure_ascii=False)
+            if marker not in seen:
+                seen.add(marker)
+                out.append(record)
+        return out
+
     def is_empty(self) -> bool:
         """True when the sink holds no whole records."""
         return len(self) == 0

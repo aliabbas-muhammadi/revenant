@@ -220,3 +220,21 @@ def test_duplicates_reports_repeated_records_in_first_seen_order(tmp_path):
     sink.append({"tool": "b", "n": 2})
     sink.append({"tool": "c"})
     assert sink.duplicates() == [({"tool": "a", "n": 1}, 2), ({"tool": "b", "n": 2}, 3)]
+
+
+def test_unique_drops_repeats_keeping_first_seen_order(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert sink.unique() == []
+    sink.append({"tool": "b", "n": 2})
+    sink.append({"tool": "a", "n": 1})
+    sink.append({"n": 2, "tool": "b"})
+    sink.append({"tool": "c"})
+    sink.append({"tool": "a", "n": 1})
+    assert sink.unique() == [{"tool": "b", "n": 2}, {"tool": "a", "n": 1}, {"tool": "c"}]
+
+
+def test_unique_matches_duplicates(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    for n in (1, 1, 2):
+        sink.append({"n": n})
+    assert len(sink.unique()) == len(sink) - sum(c - 1 for _, c in sink.duplicates())
