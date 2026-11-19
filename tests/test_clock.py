@@ -129,3 +129,30 @@ def test_fork_is_independent():
     assert clock.now() == 8.0
     clock.reset()
     assert twin.now() == 18.0
+
+
+def test_ticks_count_advances_and_reset_clears():
+    clock = InjectedClock()
+    assert clock.ticks == 0
+    clock.tick(2)
+    clock.advance_to(10)
+    assert clock.ticks == 2
+    clock.reset()
+    assert clock.ticks == 0
+
+
+def test_failed_advance_is_not_counted():
+    clock = InjectedClock(5)
+    with pytest.raises(ValueError):
+        clock.tick(-1)
+    with pytest.raises(ValueError):
+        clock.advance_to(1)
+    assert clock.ticks == 0
+
+
+def test_fork_copies_ticks_independently():
+    clock = InjectedClock()
+    clock.tick()
+    twin = clock.fork()
+    twin.tick()
+    assert (clock.ticks, twin.ticks) == (1, 2)

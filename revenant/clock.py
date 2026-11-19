@@ -18,11 +18,17 @@ class InjectedClock:
             raise ValueError("clock start must be finite")
         self._start = start
         self._now = start
+        self._ticks = 0
 
     @property
     def start(self) -> float:
         """The value the clock started from (and ``reset()`` returns to)."""
         return self._start
+
+    @property
+    def ticks(self) -> int:
+        """How many times the clock has been advanced since the start or last reset."""
+        return self._ticks
 
     def now(self) -> float:
         """Return the current injected time."""
@@ -52,6 +58,7 @@ class InjectedClock:
         """Return an independent clock with the same start and current time."""
         twin = InjectedClock(self._start)
         twin._now = self._now
+        twin._ticks = self._ticks
         return twin
 
     def __repr__(self) -> str:
@@ -64,6 +71,7 @@ class InjectedClock:
         if seconds < 0:
             raise ValueError("clock cannot move backwards")
         self._now += seconds
+        self._ticks += 1
         return self._now
 
     def advance_to(self, when: float) -> float:
@@ -76,8 +84,10 @@ class InjectedClock:
         if when < self._now:
             raise ValueError("clock cannot move backwards")
         self._now = float(when)
+        self._ticks += 1
         return self._now
 
     def reset(self) -> None:
         """Return to the start value."""
         self._now = self._start
+        self._ticks = 0
