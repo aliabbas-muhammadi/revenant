@@ -83,6 +83,10 @@ class ScriptedModel:
                 return step
         return None
 
+    def count(self, response: Any) -> int:
+        """Return how many scripted steps have a response equal to ``response``."""
+        return sum(1 for scripted in self._script if scripted == response)
+
     def last_step(self) -> int | None:
         """Return the index of the final scripted step, or None for an empty script."""
         return len(self._script) - 1 if self._script else None

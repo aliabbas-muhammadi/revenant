@@ -152,3 +152,14 @@ def test_last_step_is_final_index():
 
 def test_last_step_none_when_empty():
     assert ScriptedModel([]).last_step() is None
+
+
+def test_count_matches_equal_responses():
+    model = ScriptedModel(["a", "b", "a", {"x": 1}, {"x": 1}])
+    assert model.count("a") == 2
+    assert model.count({"x": 1}) == 2
+    assert model.count("missing") == 0
+
+
+def test_count_empty_script():
+    assert ScriptedModel([]).count("a") == 0

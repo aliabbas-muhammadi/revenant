@@ -278,7 +278,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R224 `Ledger.committed_keys()` and `Ledger.intent_keys()` as named shortcuts over `keys(status)`. Tests.
 - [x] R225 `EffectSink.count_unique(tool=None)` counts distinct whole records, optionally for one tool. Tests.
 
-- [ ] R226 `ScriptedModel.count(response)` counts scripted steps equal to a response. Tests.
+- [x] R226 `ScriptedModel.count(response)` counts scripted steps equal to a response. Tests.
 - [ ] R227 `EffectSink.last_for(tool)` returns the most recent whole record naming a tool, or `None`. Tests.
 - [ ] R228 `Ledger.keys_for(tool, status=None)` lists keys with a tool prefix, sorted, optionally by status. Tests.
 - [ ] R229 `canon.leaf_paths(obj, volatile_fields=())` lists the sorted JSON paths of every scalar or empty-container leaf. Tests.
