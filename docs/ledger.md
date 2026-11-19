@@ -76,3 +76,11 @@ On the sink, `values(field)` collects one field across whole records in append o
 `ScriptedModel.window(start, stop)` returns a clamped slice of the script and
 `is_pinned(step)` says whether a prompt hash is pinned; `InjectedClock.until(when)`
 gives the seconds left until an absolute time.
+
+`status_counts()` returns the number of `intent` and `committed` rows (both keys are
+always present) and `first_unconfirmed()` gives the smallest key still in `intent`.
+On the sink, `group_by(field)` buckets whole records by a field value and `duplicates()`
+returns `(record, count)` pairs for records that appear more than once, which is the
+quickest way to see a repeated effect. `ScriptedModel.find(response)` returns the first
+step with an equal response, `InjectedClock.has_reached(when)` tests an absolute
+deadline and `fork()` copies a clock that then moves independently.

@@ -24,6 +24,9 @@ All notable changes to this project are documented here. The format follows
 - `InjectedClock.until()`, `ScriptedModel.window()` and `is_pinned()`,
   `Ledger.max_attempts()`, `suppressed_keys()` and `is_empty()`,
   `EffectSink.values()` and `canon.same_state()`.
+- `InjectedClock.has_reached()` and `fork()`, `Ledger.status_counts()` and
+  `first_unconfirmed()`, `EffectSink.group_by()` and `duplicates()`,
+  `ScriptedModel.find()` and `canon.canonical_size()`.
 
 ### Fixed
 - `InjectedClock` rejects NaN and infinite values.

@@ -265,4 +265,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R213 `Ledger.first_unconfirmed()` returns the smallest key still in `intent`, or `None`. Tests.
 - [x] R214 `InjectedClock.fork()` returns an independent clock with the same start and current time. Tests.
 - [x] R215 `EffectSink.duplicates()` returns whole records that appear more than once as `(record, count)` pairs in first-seen order. Tests.
-- [ ] R216 Note R208-R215 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
+- [x] R216 Note R208-R215 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.

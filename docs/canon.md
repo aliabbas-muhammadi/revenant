@@ -47,3 +47,6 @@ the shortened form.
 
 `same_state(a, b, volatile_fields=())` reports whether two states have the same
 `state_hash` once the volatile fields are excluded.
+
+`canonical_size(obj)` returns the byte length of the canonical encoding, which is what
+`state_hash` digests.
