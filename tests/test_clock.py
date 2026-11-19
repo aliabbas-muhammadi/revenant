@@ -118,3 +118,14 @@ def test_has_reached_rejects_non_finite():
     for bad in (float("nan"), float("inf"), float("-inf")):
         with pytest.raises(ValueError):
             clock.has_reached(bad)
+
+
+def test_fork_is_independent():
+    clock = InjectedClock(5)
+    clock.tick(3)
+    twin = clock.fork()
+    assert twin.now() == 8.0 and twin.start == 5.0
+    twin.tick(10)
+    assert clock.now() == 8.0
+    clock.reset()
+    assert twin.now() == 18.0

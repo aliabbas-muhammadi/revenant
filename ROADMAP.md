@@ -263,6 +263,6 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R211 `ScriptedModel.find(response)` returns the first step whose scripted response equals the argument, or `None`. Tests.
 - [x] R212 `canon.canonical_size(obj)` returns the byte length of the canonical encoding. Tests.
 - [x] R213 `Ledger.first_unconfirmed()` returns the smallest key still in `intent`, or `None`. Tests.
-- [ ] R214 `InjectedClock.fork()` returns an independent clock with the same start and current time. Tests.
+- [x] R214 `InjectedClock.fork()` returns an independent clock with the same start and current time. Tests.
 - [ ] R215 `EffectSink.duplicates()` returns whole records that appear more than once as `(record, count)` pairs in first-seen order. Tests.
 - [ ] R216 Note R208-R215 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
