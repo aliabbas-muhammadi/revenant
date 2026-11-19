@@ -398,3 +398,25 @@ def test_committed_and_intent_keys(ledger):
     ledger.commit("b:1")
     assert ledger.committed_keys() == ["b:1", "c:1"]
     assert ledger.intent_keys() == ["a:1"] == ledger.unconfirmed()
+
+
+def test_keys_for_filters_by_tool_prefix(ledger):
+    ledger.begin("send_email:2", {"n": 1})
+    ledger.begin("send_email:1", {"n": 2})
+    ledger.begin("charge_card:1", {"n": 3})
+    ledger.commit("send_email:1")
+    assert ledger.keys_for("send_email") == ["send_email:1", "send_email:2"]
+    assert ledger.keys_for("send_email", "committed") == ["send_email:1"]
+    assert ledger.keys_for("send_email", "intent") == ["send_email:2"]
+    assert ledger.keys_for("write_file") == []
+
+
+def test_keys_for_does_not_match_prefix_substrings(ledger):
+    ledger.begin("send:1", {"n": 1})
+    ledger.begin("send_email:1", {"n": 2})
+    assert ledger.keys_for("send") == ["send:1"]
+
+
+def test_keys_for_rejects_unknown_status(ledger):
+    with pytest.raises(ValueError):
+        ledger.keys_for("send_email", "done")

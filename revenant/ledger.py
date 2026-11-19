@@ -192,6 +192,10 @@ class Ledger:
         """Keys still in ``intent`` (the same set as :meth:`unconfirmed`), sorted."""
         return self.keys("intent")
 
+    def keys_for(self, tool: str, status: str | None = None) -> list[str]:
+        """Keys with the ``tool:`` prefix, sorted, optionally only those in ``status``."""
+        return [key for key in self.keys(status) if key.partition(":")[0] == tool]
+
     def tools(self) -> list[str]:
         """Distinct tool names, taken from the ``tool:`` prefix of each key, sorted."""
         return sorted({key.partition(":")[0] for key in self.keys()})
