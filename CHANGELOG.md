@@ -30,6 +30,8 @@ All notable changes to this project are documented here. The format follows
 - `InjectedClock.ticks`, `ScriptedModel.last_step()`, `canon.diff_paths()`,
   `Ledger.total_attempts()` and `tool_counts()`, `EffectSink.unique()`.
 - `Ledger.committed_keys()` and `intent_keys()`, `EffectSink.count_unique()`.
+- `ScriptedModel.count()`, `EffectSink.last_for()`, `Ledger.keys_for()` and `most_attempted()`,
+  and `canon.leaf_paths()`.
 
 ### Fixed
 - `InjectedClock` rejects NaN and infinite values.

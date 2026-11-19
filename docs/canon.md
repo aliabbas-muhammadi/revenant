@@ -55,3 +55,7 @@ the shortened form.
 states differ after canonicalisation, so a failing hash comparison can be turned into the
 field that moved. A key or index present on one side only is reported at its own path, and
 `1` versus `1.0` or `True` is a difference, as it is for `state_hash`.
+
+`leaf_paths(obj, volatile_fields=())` lists the sorted JSON paths of every leaf (a scalar,
+`None` or an empty container) that feeds `state_hash`, which makes it easy to see what a
+volatile-field pattern actually excludes.

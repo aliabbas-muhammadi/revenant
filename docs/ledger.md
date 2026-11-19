@@ -95,3 +95,9 @@ many times the clock has been advanced.
 `keys("intent")`; the latter is the same set as `unconfirmed()`. On the sink,
 `count_unique(tool=None)` counts distinct whole records, so comparing it with `len()`
 shows at a glance whether anything was delivered twice.
+
+`keys_for(tool, status=None)` lists the keys of one tool (matched on the exact `tool:`
+prefix) and `most_attempted()` names the key that was tried most often, smallest key on a
+tie, which points straight at the effect a crash loop kept retrying. On the sink,
+`last_for(tool)` returns the most recent record naming a tool, and
+`ScriptedModel.count(response)` counts how often a response is scripted.

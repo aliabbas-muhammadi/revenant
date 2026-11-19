@@ -283,4 +283,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R228 `Ledger.keys_for(tool, status=None)` lists keys with a tool prefix, sorted, optionally by status. Tests.
 - [x] R229 `canon.leaf_paths(obj, volatile_fields=())` lists the sorted JSON paths of every scalar or empty-container leaf. Tests.
 - [x] R230 `Ledger.most_attempted()` returns the key with the highest attempt count (smallest key on ties), or `None` when empty. Tests.
-- [ ] R231 Note R226-R230 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
+- [x] R231 Note R226-R230 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
