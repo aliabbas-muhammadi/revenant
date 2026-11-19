@@ -349,3 +349,14 @@ def test_status_counts_always_has_both_keys(ledger):
     ledger.begin("b:1", {"x": 2})
     ledger.commit("a:1")
     assert ledger.status_counts() == {"intent": 1, "committed": 1}
+
+
+def test_first_unconfirmed_is_smallest_intent_key(ledger):
+    assert ledger.first_unconfirmed() is None
+    ledger.begin("z:1", {"x": 1})
+    ledger.begin("a:1", {"x": 2})
+    assert ledger.first_unconfirmed() == "a:1"
+    ledger.commit("a:1")
+    assert ledger.first_unconfirmed() == "z:1"
+    ledger.commit("z:1")
+    assert ledger.first_unconfirmed() is None
