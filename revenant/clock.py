@@ -42,6 +42,12 @@ class InjectedClock:
             raise ValueError("clock time must be finite")
         return max(0.0, float(when) - self._now)
 
+    def has_reached(self, when: float) -> bool:
+        """True once the current time is at or past the absolute time ``when``."""
+        if not math.isfinite(when):
+            raise ValueError("clock time must be finite")
+        return self._now >= when
+
     def __repr__(self) -> str:
         return f"InjectedClock(now={self._now!r})"
 

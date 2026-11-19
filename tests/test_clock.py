@@ -103,3 +103,18 @@ def test_until_rejects_non_finite():
     for bad in (float("nan"), float("inf")):
         with pytest.raises(ValueError):
             clock.until(bad)
+
+
+def test_has_reached_flips_at_the_boundary():
+    clock = InjectedClock(10)
+    assert not clock.has_reached(12)
+    clock.tick(2)
+    assert clock.has_reached(12)
+    assert clock.has_reached(5)
+
+
+def test_has_reached_rejects_non_finite():
+    clock = InjectedClock()
+    for bad in (float("nan"), float("inf"), float("-inf")):
+        with pytest.raises(ValueError):
+            clock.has_reached(bad)
