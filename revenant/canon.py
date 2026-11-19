@@ -127,3 +127,39 @@ def same_state(a: Any, b: Any, volatile_fields: Iterable[str] = ()) -> bool:
     """True when ``a`` and ``b`` have the same :func:`state_hash` under ``volatile_fields``."""
     fields = tuple(volatile_fields)
     return state_hash(a, fields) == state_hash(b, fields)
+
+
+def _walk(a: Any, b: Any, path: str, out: list[str]) -> None:
+    if isinstance(a, dict) and isinstance(b, dict):
+        for key in sorted(set(a) | set(b)):
+            here = _key_path(path, key)
+            if key not in a or key not in b:
+                out.append(here)
+            else:
+                _walk(a[key], b[key], here, out)
+    elif isinstance(a, list) and isinstance(b, list):
+        for i in range(max(len(a), len(b))):
+            here = f"{path}[{i}]"
+            if i >= len(a) or i >= len(b):
+                out.append(here)
+            else:
+                _walk(a[i], b[i], here, out)
+    elif a != b or type(a) is not type(b):
+        out.append(path)
+
+
+def diff_paths(a: Any, b: Any, volatile_fields: Iterable[str] = ()) -> list[str]:
+    """Return the sorted JSON paths (``$.a[2].b``) where ``a`` and ``b`` differ.
+
+    Both values are canonicalised first (NFC, tuples as lists), so only
+    differences that would change :func:`state_hash` are reported. A key or list
+    index present on one side only is reported at that path. ``volatile_fields``
+    are excluded as in :func:`state_hash`.
+    """
+    patterns = [p.split(".") for p in volatile_fields]
+    if patterns:
+        a = _strip_volatile(a, patterns, ())
+        b = _strip_volatile(b, patterns, ())
+    out: list[str] = []
+    _walk(_normalise(a, "$"), _normalise(b, "$"), "$", out)
+    return sorted(out)

@@ -2,7 +2,14 @@ import hashlib
 
 import pytest
 
-from revenant.canon import CanonError, canonical_json, same_state, short_hash, state_hash
+from revenant.canon import (
+    CanonError,
+    canonical_json,
+    diff_paths,
+    same_state,
+    short_hash,
+    state_hash,
+)
 
 
 def test_key_order_independence():
@@ -227,3 +234,36 @@ def test_canonical_size_matches_encoding_length():
 
     assert canonical_size({"b": 1, "a": [1, 2]}) == len(b'{"a":[1,2],"b":1}')
     assert canonical_size("é") == len(canonical_json("é")) == 4
+
+
+def test_diff_paths_equal_states():
+    assert diff_paths({"a": [1, {"b": 2}]}, {"a": [1, {"b": 2}]}) == []
+
+
+def test_diff_paths_reports_nested_changes():
+    a = {"x": 1, "y": {"z": [1, 2, 3]}}
+    b = {"x": 1, "y": {"z": [1, 9, 3]}}
+    assert diff_paths(a, b) == ["$.y.z[1]"]
+
+
+def test_diff_paths_missing_keys_and_indexes():
+    assert diff_paths({"a": 1}, {"b": 1}) == ["$.a", "$.b"]
+    assert diff_paths({"l": [1]}, {"l": [1, 2]}) == ["$.l[1]"]
+
+
+def test_diff_paths_root_scalar_and_type_change():
+    assert diff_paths(1, 2) == ["$"]
+    assert diff_paths({"n": 1}, {"n": 1.0}) == ["$.n"]
+    assert diff_paths({"n": 1}, {"n": True}) == ["$.n"]
+
+
+def test_diff_paths_honours_volatile_and_normalisation():
+    a = {"meta": {"ts": 1}, "v": "é", "t": (1, 2)}
+    b = {"meta": {"ts": 2}, "v": "é", "t": [1, 2]}
+    assert diff_paths(a, b) == ["$.meta.ts"]
+    assert diff_paths(a, b, volatile_fields=["meta.ts"]) == []
+
+
+def test_diff_paths_agrees_with_state_hash():
+    a, b = {"a": [1, 2]}, {"a": [1, 3]}
+    assert (diff_paths(a, b) == []) == (state_hash(a) == state_hash(b))

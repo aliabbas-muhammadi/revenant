@@ -269,7 +269,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 
 - [x] R217 `InjectedClock.ticks` counts `tick()` and `advance_to()` calls; `reset()` clears it and `fork()` copies it. Tests.
 - [x] R218 `ScriptedModel.last_step()` returns the final step index, or `None` for an empty script. Tests.
-- [ ] R219 `canon.diff_paths(a, b, volatile_fields=())` lists the sorted JSON paths where two states differ. Tests.
+- [x] R219 `canon.diff_paths(a, b, volatile_fields=())` lists the sorted JSON paths where two states differ. Tests.
 - [ ] R220 `Ledger.total_attempts()` sums the attempt counts over every key, `0` when empty. Tests.
 - [ ] R221 `EffectSink.unique()` returns whole records with repeats removed, in first-seen order. Tests.
 - [ ] R222 `Ledger.tool_counts(status=None)` counts keys per tool prefix, optionally by status. Tests.
