@@ -268,7 +268,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R216 Note R208-R215 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
 
 - [x] R217 `InjectedClock.ticks` counts `tick()` and `advance_to()` calls; `reset()` clears it and `fork()` copies it. Tests.
-- [ ] R218 `ScriptedModel.last_step()` returns the final step index, or `None` for an empty script. Tests.
+- [x] R218 `ScriptedModel.last_step()` returns the final step index, or `None` for an empty script. Tests.
 - [ ] R219 `canon.diff_paths(a, b, volatile_fields=())` lists the sorted JSON paths where two states differ. Tests.
 - [ ] R220 `Ledger.total_attempts()` sums the attempt counts over every key, `0` when empty. Tests.
 - [ ] R221 `EffectSink.unique()` returns whole records with repeats removed, in first-seen order. Tests.

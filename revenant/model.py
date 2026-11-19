@@ -83,6 +83,10 @@ class ScriptedModel:
                 return step
         return None
 
+    def last_step(self) -> int | None:
+        """Return the index of the final scripted step, or None for an empty script."""
+        return len(self._script) - 1 if self._script else None
+
     def peek(self, step: int) -> Any:
         """Return the scripted response for ``step`` without any prompt check."""
         return self.respond(step)

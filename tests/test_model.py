@@ -142,3 +142,13 @@ def test_find_returns_first_matching_step():
     assert model.find({"tool": "x"}) == 1
     assert model.find("missing") is None
     assert ScriptedModel([]).find("a") is None
+
+
+def test_last_step_is_final_index():
+    model = ScriptedModel(["a", "b", "c"])
+    assert model.last_step() == 2
+    assert model.respond(model.last_step()) == "c"
+
+
+def test_last_step_none_when_empty():
+    assert ScriptedModel([]).last_step() is None
