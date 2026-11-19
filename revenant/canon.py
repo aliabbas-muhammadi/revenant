@@ -129,6 +129,32 @@ def same_state(a: Any, b: Any, volatile_fields: Iterable[str] = ()) -> bool:
     return state_hash(a, fields) == state_hash(b, fields)
 
 
+def _leaves(obj: Any, path: str, out: list[str]) -> None:
+    if isinstance(obj, dict) and obj:
+        for key in obj:
+            _leaves(obj[key], _key_path(path, key), out)
+    elif isinstance(obj, list) and obj:
+        for i, item in enumerate(obj):
+            _leaves(item, f"{path}[{i}]", out)
+    else:
+        out.append(path)
+
+
+def leaf_paths(obj: Any, volatile_fields: Iterable[str] = ()) -> list[str]:
+    """Return the sorted JSON paths (``$.a[2].b``) of every leaf in ``obj``.
+
+    A leaf is a scalar, ``None`` or an empty dict or list. ``obj`` is
+    canonicalised first and ``volatile_fields`` are excluded as in
+    :func:`state_hash`, so the result lists exactly the values that feed the hash.
+    """
+    patterns = [p.split(".") for p in volatile_fields]
+    if patterns:
+        obj = _strip_volatile(obj, patterns, ())
+    out: list[str] = []
+    _leaves(_normalise(obj, "$"), "$", out)
+    return sorted(out)
+
+
 def _walk(a: Any, b: Any, path: str, out: list[str]) -> None:
     if isinstance(a, dict) and isinstance(b, dict):
         for key in sorted(set(a) | set(b)):

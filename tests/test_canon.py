@@ -6,6 +6,7 @@ from revenant.canon import (
     CanonError,
     canonical_json,
     diff_paths,
+    leaf_paths,
     same_state,
     short_hash,
     state_hash,
@@ -267,3 +268,24 @@ def test_diff_paths_honours_volatile_and_normalisation():
 def test_diff_paths_agrees_with_state_hash():
     a, b = {"a": [1, 2]}, {"a": [1, 3]}
     assert (diff_paths(a, b) == []) == (state_hash(a) == state_hash(b))
+
+
+def test_leaf_paths_lists_scalars_with_json_paths():
+    state = {"b": [1, {"c": "x"}], "a": None}
+    assert leaf_paths(state) == ["$.a", "$.b[0]", "$.b[1].c"]
+
+
+def test_leaf_paths_scalar_root_and_empty_containers():
+    assert leaf_paths(5) == ["$"]
+    assert leaf_paths({"a": {}, "b": []}) == ["$.a", "$.b"]
+    assert leaf_paths({}) == ["$"]
+
+
+def test_leaf_paths_honours_volatile_fields():
+    state = {"meta": {"ts": 1, "id": 2}, "step": 3}
+    assert leaf_paths(state, ["meta.ts"]) == ["$.meta.id", "$.step"]
+
+
+def test_leaf_paths_rejects_what_canonical_json_rejects():
+    with pytest.raises(CanonError):
+        leaf_paths({"a": {1, 2}})
