@@ -218,6 +218,15 @@ class Ledger:
             return len(self)
         return len(self.keys(status))
 
+    def status_counts(self) -> dict[str, int]:
+        """Rows per status; both ``intent`` and ``committed`` are always present."""
+        return {"intent": self.count("intent"), "committed": self.count("committed")}
+
+    def first_unconfirmed(self) -> str | None:
+        """The smallest key still in ``intent``, or None when nothing is unconfirmed."""
+        pending = self.unconfirmed()
+        return pending[0] if pending else None
+
     def max_attempts(self) -> int:
         """The highest attempt count on any key; ``0`` for an empty ledger."""
         row = self._conn.execute("SELECT COALESCE(MAX(attempt_count), 0) FROM effects").fetchone()

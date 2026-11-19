@@ -258,7 +258,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R207 Note R199-R206 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
 
 - [x] R208 `InjectedClock.has_reached(when)` is True once now is at or past `when`; rejects non-finite values. Tests.
-- [ ] R209 `Ledger.status_counts()` returns `{"intent": n, "committed": m}` with both keys always present. Tests.
+- [x] R209 `Ledger.status_counts()` returns `{"intent": n, "committed": m}` with both keys always present. Tests.
 - [ ] R210 `EffectSink.group_by(field)` maps each value of a field to its whole records in append order; unhashable values raise `TypeError`. Tests.
 - [ ] R211 `ScriptedModel.find(response)` returns the first step whose scripted response equals the argument, or `None`. Tests.
 - [ ] R212 `canon.canonical_size(obj)` returns the byte length of the canonical encoding. Tests.

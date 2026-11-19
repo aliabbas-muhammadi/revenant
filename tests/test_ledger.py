@@ -341,3 +341,11 @@ def test_is_empty_until_first_begin(tmp_path):
         assert ledger.is_empty()
         ledger.begin("a:1", {"x": 1})
         assert not ledger.is_empty()
+
+
+def test_status_counts_always_has_both_keys(ledger):
+    assert ledger.status_counts() == {"intent": 0, "committed": 0}
+    ledger.begin("a:1", {"x": 1})
+    ledger.begin("b:1", {"x": 2})
+    ledger.commit("a:1")
+    assert ledger.status_counts() == {"intent": 1, "committed": 1}
