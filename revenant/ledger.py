@@ -184,6 +184,14 @@ class Ledger:
             raise ValueError(f"unknown status {status!r}")
         return [key for key, state, _ in self.entries() if status in (None, state)]
 
+    def committed_keys(self) -> list[str]:
+        """Keys whose effect is committed, sorted."""
+        return self.keys("committed")
+
+    def intent_keys(self) -> list[str]:
+        """Keys still in ``intent`` (the same set as :meth:`unconfirmed`), sorted."""
+        return self.keys("intent")
+
     def tools(self) -> list[str]:
         """Distinct tool names, taken from the ``tool:`` prefix of each key, sorted."""
         return sorted({key.partition(":")[0] for key in self.keys()})

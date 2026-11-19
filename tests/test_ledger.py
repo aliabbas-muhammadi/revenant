@@ -387,3 +387,14 @@ def test_tool_counts_by_prefix_and_status(ledger):
 def test_tool_counts_rejects_unknown_status(ledger):
     with pytest.raises(ValueError):
         ledger.tool_counts("done")
+
+
+def test_committed_and_intent_keys(ledger):
+    assert ledger.committed_keys() == [] and ledger.intent_keys() == []
+    ledger.begin("b:1", {"n": 1})
+    ledger.begin("a:1", {"n": 2})
+    ledger.begin("c:1", {"n": 3})
+    ledger.commit("c:1")
+    ledger.commit("b:1")
+    assert ledger.committed_keys() == ["b:1", "c:1"]
+    assert ledger.intent_keys() == ["a:1"] == ledger.unconfirmed()
