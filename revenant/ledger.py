@@ -244,6 +244,14 @@ class Ledger:
         row = self._conn.execute("SELECT COALESCE(MAX(attempt_count), 0) FROM effects").fetchone()
         return int(row[0])
 
+    def most_attempted(self) -> str | None:
+        """Return the key with the highest attempt count (smallest key on ties), or None."""
+        row = self._conn.execute(
+            "SELECT idempotency_key FROM effects "
+            "ORDER BY attempt_count DESC, idempotency_key ASC LIMIT 1"
+        ).fetchone()
+        return None if row is None else str(row[0])
+
     def total_attempts(self) -> int:
         """The sum of attempt counts over every key; ``0`` for an empty ledger."""
         row = self._conn.execute("SELECT COALESCE(SUM(attempt_count), 0) FROM effects").fetchone()

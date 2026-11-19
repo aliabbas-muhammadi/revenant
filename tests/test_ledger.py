@@ -420,3 +420,21 @@ def test_keys_for_does_not_match_prefix_substrings(ledger):
 def test_keys_for_rejects_unknown_status(ledger):
     with pytest.raises(ValueError):
         ledger.keys_for("send_email", "done")
+
+
+def test_most_attempted_none_when_empty(ledger):
+    assert ledger.most_attempted() is None
+
+
+def test_most_attempted_picks_highest_attempt_count(ledger):
+    ledger.begin("a:1", {"n": 1})
+    ledger.begin("b:1", {"n": 2})
+    ledger.begin("b:1", {"n": 2})
+    ledger.begin("b:1", {"n": 2})
+    assert ledger.most_attempted() == "b:1"
+
+
+def test_most_attempted_breaks_ties_by_smallest_key(ledger):
+    ledger.begin("b:1", {"n": 1})
+    ledger.begin("a:1", {"n": 2})
+    assert ledger.most_attempted() == "a:1"
