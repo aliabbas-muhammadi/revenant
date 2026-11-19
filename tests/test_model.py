@@ -134,3 +134,11 @@ def test_is_pinned_is_false_without_pins_or_out_of_range():
     model = ScriptedModel(["a"], prompt_hashes=[state_hash("p")])
     assert not model.is_pinned(1)
     assert not model.is_pinned(-1)
+
+
+def test_find_returns_first_matching_step():
+    model = ScriptedModel(["a", {"tool": "x"}, "a"])
+    assert model.find("a") == 0
+    assert model.find({"tool": "x"}) == 1
+    assert model.find("missing") is None
+    assert ScriptedModel([]).find("a") is None
