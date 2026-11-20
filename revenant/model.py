@@ -83,6 +83,10 @@ class ScriptedModel:
                 return step
         return None
 
+    def indices_of(self, response: Any) -> list[int]:
+        """Return every step whose scripted response equals ``response``, in step order."""
+        return [step for step, scripted in enumerate(self._script) if scripted == response]
+
     def count(self, response: Any) -> int:
         """Return how many scripted steps have a response equal to ``response``."""
         return sum(1 for scripted in self._script if scripted == response)

@@ -163,3 +163,21 @@ def test_count_matches_equal_responses():
 
 def test_count_empty_script():
     assert ScriptedModel([]).count("a") == 0
+
+
+def test_indices_of_lists_every_matching_step():
+    model = ScriptedModel(["a", "b", "a", "c", "a"])
+    assert model.indices_of("a") == [0, 2, 4]
+    assert model.indices_of("c") == [3]
+
+
+def test_indices_of_missing_response_is_empty():
+    assert ScriptedModel(["a"]).indices_of("z") == []
+    assert ScriptedModel([]).indices_of("a") == []
+
+
+def test_indices_of_agrees_with_find_and_count():
+    model = ScriptedModel([{"x": 1}, {"x": 2}, {"x": 1}])
+    hits = model.indices_of({"x": 1})
+    assert hits[0] == model.find({"x": 1})
+    assert len(hits) == model.count({"x": 1})

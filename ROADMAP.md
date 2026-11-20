@@ -284,3 +284,16 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R229 `canon.leaf_paths(obj, volatile_fields=())` lists the sorted JSON paths of every scalar or empty-container leaf. Tests.
 - [x] R230 `Ledger.most_attempted()` returns the key with the highest attempt count (smallest key on ties), or `None` when empty. Tests.
 - [x] R231 Note R226-R230 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
+
+- [x] R232 `ScriptedModel.indices_of(response)` returns every step whose scripted response equals the argument. Tests.
+- [ ] R233 `InjectedClock.tick_n(n, seconds=1.0)` advances `n` times and returns the new time; negative `n` raises `ValueError`. Tests.
+- [ ] R234 `EffectSink.contains(record)` reports whether an equal whole record exists, regardless of key order. Tests.
+- [ ] R235 `Ledger.keys_with_attempts(n)` lists keys with at least `n` attempts, sorted; `n < 1` raises `ValueError`. Tests.
+- [ ] R236 `canon.excluded_paths(obj, volatile_fields)` lists the sorted JSON paths that volatile fields remove. Tests.
+- [ ] R237 `EffectSink.field_counts(field)` counts whole records per value of a field; unhashable values raise `TypeError`. Tests.
+- [ ] R238 `ScriptedModel.distinct_count()` counts distinct responses by canonical hash. Tests.
+- [ ] R239 Note R232-R238 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
+- [ ] R240 `Ledger.summary_for(tool)` returns a `LedgerSummary` restricted to one tool prefix. Tests.
+- [ ] R241 `EffectSink.index_of(record)` returns the first index of an equal whole record, or `None`. Tests.
+- [ ] R242 `InjectedClock.span(other)` returns the time between two clocks' current values. Tests.
+- [ ] R243 Note R240-R242 in `CHANGELOG.md` and `docs/ledger.md`.
