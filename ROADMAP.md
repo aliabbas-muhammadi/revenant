@@ -298,3 +298,16 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R242 `InjectedClock.span(other)` returns the time between two clocks' current values. Tests.
 - [x] R243 Note R240-R242 in `CHANGELOG.md` and `docs/ledger.md`.
 - [x] R244 `Ledger.tools_with_unconfirmed()` lists the tool prefixes that still have a key in `intent`, sorted. Tests.
+
+- [x] R245 `Ledger.attempt_counts()` returns `{key: attempt_count}` over every row, sorted by key. Tests.
+- [ ] R246 `Ledger.rows_for(tool)` returns `entries()` restricted to the `tool:` prefix, sorted by key. Tests.
+- [ ] R247 `Ledger.describe(key)` returns `{"status": ..., "attempt_count": ..., "payload_hash": ...}` for one key, or `None` for an unknown key. Tests.
+- [ ] R248 `EffectSink.first_for(tool)` returns the earliest whole record naming `tool`, or `None`. Tests.
+- [ ] R249 `EffectSink.fields()` lists the distinct field names across every whole record, sorted. Tests.
+- [ ] R250 `EffectSink.before(n)` returns whole records before index `n`; negative `n` raises `ValueError`. Tests.
+- [ ] R251 `InjectedClock.is_ahead_of(other)` is True when this clock's current time is strictly later than `other`'s. Tests.
+- [ ] R252 `InjectedClock.ticked()` is True once `tick()`, `tick_n()` or `advance_to()` has been called at least once since the start or last `reset()`. Tests.
+- [ ] R253 `ScriptedModel.contains(response)` is True when any scripted step equals `response`. Tests.
+- [ ] R254 `ScriptedModel.tail(n)` returns the last `n` scripted responses; negative `n` raises `ValueError`. Tests.
+- [ ] R255 `canon.leaf_count(obj, volatile_fields=())` returns `len(leaf_paths(obj, volatile_fields))`. Tests.
+- [ ] R256 Note R245-R255 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.

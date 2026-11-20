@@ -214,6 +214,10 @@ class Ledger:
         """Iterate over every key, sorted ascending."""
         return iter(self.keys())
 
+    def attempt_counts(self) -> dict[str, int]:
+        """Return ``{key: attempt_count}`` over every row, sorted by key."""
+        return {key: attempts for key, _, attempts in self.entries()}
+
     def entries(self) -> list[tuple[str, str, int]]:
         """Every row as ``(key, status, attempt_count)``, sorted by key."""
         rows = self._conn.execute(

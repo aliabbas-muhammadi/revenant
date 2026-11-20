@@ -521,3 +521,22 @@ def test_tools_with_unconfirmed_empty_when_all_committed_or_empty(ledger):
     ledger.begin("a:1", {"n": 1})
     ledger.commit("a:1")
     assert ledger.tools_with_unconfirmed() == []
+
+
+def test_attempt_counts_maps_every_key(ledger):
+    ledger.begin("a:1", {"n": 1})
+    ledger.begin("b:1", {"n": 2})
+    ledger.begin("a:1", {"n": 1})
+    assert ledger.attempt_counts() == {"a:1": 2, "b:1": 1}
+
+
+def test_attempt_counts_empty_ledger_is_empty_dict(ledger):
+    assert ledger.attempt_counts() == {}
+
+
+def test_attempt_counts_agrees_with_attempts(ledger):
+    for key in ("a:1", "a:2", "b:1"):
+        ledger.begin(key, {"k": key})
+    ledger.begin("a:1", {"k": "a:1"})
+    counts = ledger.attempt_counts()
+    assert all(counts[key] == ledger.attempts(key) for key in counts)
