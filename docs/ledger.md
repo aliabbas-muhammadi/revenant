@@ -101,3 +101,10 @@ prefix) and `most_attempted()` names the key that was tried most often, smallest
 tie, which points straight at the effect a crash loop kept retrying. On the sink,
 `last_for(tool)` returns the most recent record naming a tool, and
 `ScriptedModel.count(response)` counts how often a response is scripted.
+
+`keys_with_attempts(n)` lists the keys tried at least `n` times (`n` of 1 or more), sorted,
+which narrows `most_attempted()` down to every key a crash loop kept retrying. On the sink,
+`contains(record)` tests for an equal whole record regardless of key order and
+`field_counts(field)` counts records per value of a field. `ScriptedModel.indices_of(response)`
+lists every step with an equal response, `distinct_count()` counts distinct responses and
+`InjectedClock.tick_n(n, seconds)` advances `n` times in one call.

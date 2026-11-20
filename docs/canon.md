@@ -59,3 +59,8 @@ field that moved. A key or index present on one side only is reported at its own
 `leaf_paths(obj, volatile_fields=())` lists the sorted JSON paths of every leaf (a scalar,
 `None` or an empty container) that feeds `state_hash`, which makes it easy to see what a
 volatile-field pattern actually excludes.
+
+`excluded_paths(obj, volatile_fields)` lists the sorted JSON paths that the volatile fields
+remove, using the same matching as `state_hash`. A removed key is listed once at its own path
+and its children are not, so it is the complement of `leaf_paths()` for checking what a
+pattern such as `*.ts` really hides.
