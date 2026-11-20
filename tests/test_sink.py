@@ -328,3 +328,25 @@ def test_field_counts_rejects_unhashable_values(tmp_path):
     sink.append({"to": ["a"]})
     with pytest.raises(TypeError):
         sink.field_counts("to")
+
+
+def test_index_of_returns_first_matching_index(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    for record in [{"a": 1}, {"a": 2, "b": 3}, {"a": 1}]:
+        sink.append(record)
+    assert sink.index_of({"a": 1}) == 0
+    assert sink.index_of({"b": 3, "a": 2}) == 1
+
+
+def test_index_of_missing_record_is_none(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert sink.index_of({"a": 1}) is None
+    sink.append({"a": 1, "b": 2})
+    assert sink.index_of({"a": 1}) is None
+
+
+def test_index_of_agrees_with_contains(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    sink.append({"a": 1})
+    for record in ({"a": 1}, {"a": 2}):
+        assert (sink.index_of(record) is not None) == sink.contains(record)

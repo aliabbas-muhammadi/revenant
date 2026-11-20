@@ -211,6 +211,17 @@ class EffectSink:
             for r in self.read().effects
         )
 
+    def index_of(self, record: dict[str, Any]) -> int | None:
+        """Return the index of the first whole record equal to ``record``, or None.
+
+        Equality is as in :meth:`contains`: equal as JSON, regardless of key order.
+        """
+        marker = json.dumps(record, sort_keys=True, ensure_ascii=False)
+        for index, candidate in enumerate(self.read().effects):
+            if json.dumps(candidate, sort_keys=True, ensure_ascii=False) == marker:
+                return index
+        return None
+
     def is_empty(self) -> bool:
         """True when the sink holds no whole records."""
         return len(self) == 0
