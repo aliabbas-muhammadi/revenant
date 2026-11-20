@@ -153,6 +153,13 @@ class EffectSink:
             return []
         return self.read().effects[-n:]
 
+    def fields(self) -> list[str]:
+        """Return the distinct field names across every whole record, sorted."""
+        names: set[str] = set()
+        for record in self.read().effects:
+            names.update(record)
+        return sorted(names)
+
     def group_by(self, field: str) -> dict[Any, list[dict[str, Any]]]:
         """Map each value of ``field`` to its whole records, in append order.
 

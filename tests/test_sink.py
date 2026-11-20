@@ -370,3 +370,23 @@ def test_first_for_agrees_with_last_for_on_single_record(tmp_path):
     sink = EffectSink(tmp_path / "s.jsonl")
     sink.append({"tool": "a", "n": 1})
     assert sink.first_for("a") == sink.last_for("a")
+
+
+def test_fields_lists_distinct_names_sorted(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    sink.append({"tool": "a", "n": 1})
+    sink.append({"tool": "b", "to": "x"})
+    assert sink.fields() == ["n", "to", "tool"]
+
+
+def test_fields_empty_sink_is_empty(tmp_path):
+    assert EffectSink(tmp_path / "s.jsonl").fields() == []
+
+
+def test_fields_ignores_torn_final_line(tmp_path):
+    path = tmp_path / "s.jsonl"
+    sink = EffectSink(path)
+    sink.append({"tool": "a"})
+    with open(path, "a", encoding="utf-8") as fh:
+        fh.write('{"extra_field": ')
+    assert sink.fields() == ["tool"]
