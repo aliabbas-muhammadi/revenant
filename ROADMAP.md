@@ -297,3 +297,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R241 `EffectSink.index_of(record)` returns the first index of an equal whole record, or `None`. Tests.
 - [x] R242 `InjectedClock.span(other)` returns the time between two clocks' current values. Tests.
 - [x] R243 Note R240-R242 in `CHANGELOG.md` and `docs/ledger.md`.
+- [x] R244 `Ledger.tools_with_unconfirmed()` lists the tool prefixes that still have a key in `intent`, sorted. Tests.

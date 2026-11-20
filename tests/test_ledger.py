@@ -500,3 +500,24 @@ def test_summaries_per_tool_add_up_to_the_whole(ledger):
     assert sum(p.effects for p in parts) == whole.effects
     assert sum(p.suppressed for p in parts) == whole.suppressed
     assert sum(p.unconfirmed for p in parts) == whole.unconfirmed
+
+
+def test_tools_with_unconfirmed_lists_tools_with_intent_keys(ledger):
+    ledger.begin("send_email:1", {"n": 1})
+    ledger.begin("charge_card:1", {"n": 2})
+    ledger.begin("write_file:1", {"n": 3})
+    ledger.commit("charge_card:1")
+    assert ledger.tools_with_unconfirmed() == ["send_email", "write_file"]
+
+
+def test_tools_with_unconfirmed_lists_each_tool_once(ledger):
+    ledger.begin("a:1", {"n": 1})
+    ledger.begin("a:2", {"n": 2})
+    assert ledger.tools_with_unconfirmed() == ["a"]
+
+
+def test_tools_with_unconfirmed_empty_when_all_committed_or_empty(ledger):
+    assert ledger.tools_with_unconfirmed() == []
+    ledger.begin("a:1", {"n": 1})
+    ledger.commit("a:1")
+    assert ledger.tools_with_unconfirmed() == []
