@@ -6,6 +6,7 @@ from revenant.canon import (
     CanonError,
     canonical_json,
     diff_paths,
+    excluded_paths,
     leaf_paths,
     same_state,
     short_hash,
@@ -289,3 +290,34 @@ def test_leaf_paths_honours_volatile_fields():
 def test_leaf_paths_rejects_what_canonical_json_rejects():
     with pytest.raises(CanonError):
         leaf_paths({"a": {1, 2}})
+
+
+def test_excluded_paths_reports_dotted_match():
+    state = {"meta": {"ts": 1, "id": 2}, "step": 3}
+    assert excluded_paths(state, ["meta.ts"]) == ["$.meta.ts"]
+
+
+def test_excluded_paths_lists_each_list_element():
+    state = {"items": [{"ts": 1, "v": 1}, {"ts": 2, "v": 2}]}
+    assert excluded_paths(state, ["items.ts"]) == ["$.items[0].ts", "$.items[1].ts"]
+
+
+def test_excluded_paths_wildcard_matches_any_depth():
+    state = {"ts": 0, "a": {"ts": 1, "b": {"ts": 2, "x": 3}}}
+    assert excluded_paths(state, ["*.ts"]) == ["$.a.b.ts", "$.a.ts", "$.ts"]
+
+
+def test_excluded_paths_reports_removed_subtree_once():
+    state = {"meta": {"ts": 1, "deep": {"ts": 2}}}
+    assert excluded_paths(state, ["meta", "*.ts"]) == ["$.meta"]
+
+
+def test_excluded_paths_empty_when_nothing_matches():
+    assert excluded_paths({"a": 1}, ["b"]) == []
+    assert excluded_paths({"a": 1}, []) == []
+
+
+def test_excluded_paths_agrees_with_leaf_paths():
+    state = {"meta": {"ts": 1, "id": 2}, "step": 3}
+    gone = excluded_paths(state, ["meta.ts"])
+    assert set(leaf_paths(state)) - set(leaf_paths(state, ["meta.ts"])) == set(gone)

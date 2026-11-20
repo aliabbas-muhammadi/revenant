@@ -129,6 +129,36 @@ def same_state(a: Any, b: Any, volatile_fields: Iterable[str] = ()) -> bool:
     return state_hash(a, fields) == state_hash(b, fields)
 
 
+def _excluded(
+    obj: Any, patterns: list[list[str]], trail: tuple[str, ...], path: str, out: list[str]
+) -> None:
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            here = (*trail, _nfc(key) if isinstance(key, str) else str(key))
+            here_path = _key_path(path, here[-1])
+            if any(_matches(here, pat) for pat in patterns):
+                out.append(here_path)
+            else:
+                _excluded(value, patterns, here, here_path, out)
+    elif isinstance(obj, list | tuple):
+        for i, item in enumerate(obj):
+            _excluded(item, patterns, trail, f"{path}[{i}]", out)
+
+
+def excluded_paths(obj: Any, volatile_fields: Iterable[str]) -> list[str]:
+    """Return the sorted JSON paths (``$.a[2].ts``) that ``volatile_fields`` remove from ``obj``.
+
+    Matching follows :func:`state_hash`: a removed key is reported once, at its own
+    path, and its children are not listed. Use it to check what a pattern such as
+    ``*.ts`` really hides before trusting a hash comparison.
+    """
+    patterns = [p.split(".") for p in volatile_fields]
+    out: list[str] = []
+    if patterns:
+        _excluded(obj, patterns, (), "$", out)
+    return sorted(out)
+
+
 def _leaves(obj: Any, path: str, out: list[str]) -> None:
     if isinstance(obj, dict) and obj:
         for key in obj:
