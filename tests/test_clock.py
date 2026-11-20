@@ -203,3 +203,24 @@ def test_span_uses_current_time_not_start():
     assert a.span(b) == -10.0
     b.advance_to(12.5)
     assert a.span(b) == 2.5
+
+
+def test_is_ahead_of_compares_current_time():
+    a, b = InjectedClock(0.0), InjectedClock(0.0)
+    assert not a.is_ahead_of(b)
+    a.tick(5.0)
+    assert a.is_ahead_of(b)
+    assert not b.is_ahead_of(a)
+
+
+def test_is_ahead_of_a_clock_with_itself_or_its_fork_is_false():
+    clock = InjectedClock(3.0)
+    assert not clock.is_ahead_of(clock)
+    assert not clock.is_ahead_of(clock.fork())
+
+
+def test_is_ahead_of_agrees_with_span_sign():
+    a, b = InjectedClock(0.0), InjectedClock(0.0)
+    b.tick(4.0)
+    assert a.is_ahead_of(b) == (a.span(b) < 0)
+    assert b.is_ahead_of(a) == (b.span(a) < 0)

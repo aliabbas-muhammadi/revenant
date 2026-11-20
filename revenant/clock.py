@@ -54,6 +54,10 @@ class InjectedClock:
             raise ValueError("clock time must be finite")
         return self._now >= when
 
+    def is_ahead_of(self, other: InjectedClock) -> bool:
+        """True when this clock's current time is strictly later than ``other``'s."""
+        return self._now > other.now()
+
     def span(self, other: InjectedClock) -> float:
         """Return ``other.now() - self.now()``: positive when ``other`` is ahead."""
         return other.now() - self._now

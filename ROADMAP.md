@@ -305,7 +305,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R248 `EffectSink.first_for(tool)` returns the earliest whole record naming `tool`, or `None`. Tests.
 - [x] R249 `EffectSink.fields()` lists the distinct field names across every whole record, sorted. Tests.
 - [x] R250 `EffectSink.before(n)` returns whole records before index `n`; negative `n` raises `ValueError`. Tests.
-- [ ] R251 `InjectedClock.is_ahead_of(other)` is True when this clock's current time is strictly later than `other`'s. Tests.
+- [x] R251 `InjectedClock.is_ahead_of(other)` is True when this clock's current time is strictly later than `other`'s. Tests.
 - [ ] R252 `InjectedClock.ticked()` is True once `tick()`, `tick_n()` or `advance_to()` has been called at least once since the start or last `reset()`. Tests.
 - [ ] R253 `ScriptedModel.contains(response)` is True when any scripted step equals `response`. Tests.
 - [ ] R254 `ScriptedModel.tail(n)` returns the last `n` scripted responses; negative `n` raises `ValueError`. Tests.
