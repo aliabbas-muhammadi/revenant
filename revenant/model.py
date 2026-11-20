@@ -91,6 +91,10 @@ class ScriptedModel:
         """Return how many scripted steps have a response equal to ``response``."""
         return sum(1 for scripted in self._script if scripted == response)
 
+    def distinct_count(self) -> int:
+        """Count distinct scripted responses, comparing by canonical hash."""
+        return len({state_hash(response) for response in self._script})
+
     def last_step(self) -> int | None:
         """Return the index of the final scripted step, or None for an empty script."""
         return len(self._script) - 1 if self._script else None

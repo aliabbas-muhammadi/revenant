@@ -181,3 +181,16 @@ def test_indices_of_agrees_with_find_and_count():
     hits = model.indices_of({"x": 1})
     assert hits[0] == model.find({"x": 1})
     assert len(hits) == model.count({"x": 1})
+
+
+def test_distinct_count_counts_unique_responses():
+    assert ScriptedModel(["a", "b", "a", "c", "b"]).distinct_count() == 3
+
+
+def test_distinct_count_handles_unhashable_and_key_order():
+    model = ScriptedModel([{"a": 1, "b": 2}, {"b": 2, "a": 1}, [1, 2], [1, 2], [2, 1]])
+    assert model.distinct_count() == 3
+
+
+def test_distinct_count_empty_script_is_zero():
+    assert ScriptedModel([]).distinct_count() == 0

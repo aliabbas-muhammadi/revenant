@@ -160,6 +160,13 @@ class EffectSink:
                 groups.setdefault(record[field], []).append(record)
         return groups
 
+    def field_counts(self, field: str) -> dict[Any, int]:
+        """Count whole records per value of ``field``, in first-seen order.
+
+        Records without the field are skipped; an unhashable value raises ``TypeError``.
+        """
+        return {value: len(records) for value, records in self.group_by(field).items()}
+
     def duplicates(self) -> list[tuple[dict[str, Any], int]]:
         """Whole records that appear more than once, as ``(record, count)`` pairs.
 

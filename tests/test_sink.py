@@ -1,3 +1,5 @@
+import pytest
+
 from revenant.sink import EffectSink
 
 
@@ -303,3 +305,26 @@ def test_contains_is_false_on_missing_file_and_ignores_torn_line(tmp_path):
         fh.write(b'{"a": 2')
     assert sink.contains({"a": 1})
     assert not sink.contains({"a": 2})
+
+
+def test_field_counts_counts_per_value_in_first_seen_order(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    for record in [{"to": "b"}, {"to": "a"}, {"to": "b"}, {"other": 1}]:
+        sink.append(record)
+    counts = sink.field_counts("to")
+    assert counts == {"b": 2, "a": 1}
+    assert list(counts) == ["b", "a"]
+
+
+def test_field_counts_empty_and_missing_field(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert sink.field_counts("to") == {}
+    sink.append({"x": 1})
+    assert sink.field_counts("to") == {}
+
+
+def test_field_counts_rejects_unhashable_values(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    sink.append({"to": ["a"]})
+    with pytest.raises(TypeError):
+        sink.field_counts("to")

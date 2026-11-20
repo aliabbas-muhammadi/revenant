@@ -290,8 +290,8 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R234 `EffectSink.contains(record)` reports whether an equal whole record exists, regardless of key order. Tests.
 - [x] R235 `Ledger.keys_with_attempts(n)` lists keys with at least `n` attempts, sorted; `n < 1` raises `ValueError`. Tests.
 - [x] R236 `canon.excluded_paths(obj, volatile_fields)` lists the sorted JSON paths that volatile fields remove. Tests.
-- [ ] R237 `EffectSink.field_counts(field)` counts whole records per value of a field; unhashable values raise `TypeError`. Tests.
-- [ ] R238 `ScriptedModel.distinct_count()` counts distinct responses by canonical hash. Tests.
+- [x] R237 `EffectSink.field_counts(field)` counts whole records per value of a field; unhashable values raise `TypeError`. Tests.
+- [x] R238 `ScriptedModel.distinct_count()` counts distinct responses by canonical hash. Tests.
 - [ ] R239 Note R232-R238 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
 - [ ] R240 `Ledger.summary_for(tool)` returns a `LedgerSummary` restricted to one tool prefix. Tests.
 - [ ] R241 `EffectSink.index_of(record)` returns the first index of an equal whole record, or `None`. Tests.
