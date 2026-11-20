@@ -558,3 +558,28 @@ def test_rows_for_sorted_and_includes_status(ledger):
 def test_rows_for_unknown_tool_is_empty(ledger):
     ledger.begin("a:1", {"n": 1})
     assert ledger.rows_for("z") == []
+
+
+def test_describe_unknown_key_is_none(ledger):
+    assert ledger.describe("a:1") is None
+
+
+def test_describe_returns_status_attempts_and_hash(ledger):
+    ledger.begin("a:1", {"n": 1})
+    described = ledger.describe("a:1")
+    assert described == {
+        "status": "intent",
+        "attempt_count": 1,
+        "payload_hash": ledger.payload_hash_of("a:1"),
+    }
+
+
+def test_describe_reflects_commit_and_reattempt(ledger):
+    ledger.begin("a:1", {"n": 1})
+    ledger.commit("a:1")
+    ledger.begin("a:1", {"n": 1})
+    assert ledger.describe("a:1") == {
+        "status": "committed",
+        "attempt_count": 2,
+        "payload_hash": ledger.payload_hash_of("a:1"),
+    }

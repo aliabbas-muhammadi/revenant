@@ -168,6 +168,20 @@ class Ledger:
         ).fetchone()
         return None if row is None else str(row[0])
 
+    def describe(self, key: str) -> dict[str, Any] | None:
+        """Return status, attempt_count and payload_hash for ``key`` as a dict.
+
+        Returns None if the ledger has never seen ``key``.
+        """
+        row = self._conn.execute(
+            "SELECT status, attempt_count, payload_hash FROM effects WHERE idempotency_key = ?",
+            (key,),
+        ).fetchone()
+        if row is None:
+            return None
+        status, attempt_count, hashed = row
+        return {"status": status, "attempt_count": attempt_count, "payload_hash": hashed}
+
     def attempts(self, key: str) -> int:
         """Attempt count for ``key``; ``0`` for a key the ledger has never seen."""
         state = self.status(key)
