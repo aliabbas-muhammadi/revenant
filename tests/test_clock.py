@@ -156,3 +156,30 @@ def test_fork_copies_ticks_independently():
     twin = clock.fork()
     twin.tick()
     assert (clock.ticks, twin.ticks) == (1, 2)
+
+
+def test_tick_n_advances_and_counts_each_tick():
+    clock = InjectedClock(10.0)
+    assert clock.tick_n(3, 2.0) == 16.0
+    assert clock.now() == 16.0
+    assert clock.ticks == 3
+
+
+def test_tick_n_default_is_one_second_steps():
+    clock = InjectedClock()
+    assert clock.tick_n(4) == 4.0
+
+
+def test_tick_n_zero_is_a_noop():
+    clock = InjectedClock(5.0)
+    assert clock.tick_n(0) == 5.0
+    assert clock.ticks == 0
+
+
+def test_tick_n_rejects_bad_arguments_without_moving():
+    clock = InjectedClock()
+    for args in [(-1,), (1, -1.0), (1, float("nan")), (0, float("inf"))]:
+        with pytest.raises(ValueError):
+            clock.tick_n(*args)
+    assert clock.now() == 0.0
+    assert clock.ticks == 0

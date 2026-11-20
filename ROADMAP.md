@@ -286,7 +286,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R231 Note R226-R230 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
 
 - [x] R232 `ScriptedModel.indices_of(response)` returns every step whose scripted response equals the argument. Tests.
-- [ ] R233 `InjectedClock.tick_n(n, seconds=1.0)` advances `n` times and returns the new time; negative `n` raises `ValueError`. Tests.
+- [x] R233 `InjectedClock.tick_n(n, seconds=1.0)` advances `n` times and returns the new time; negative `n` raises `ValueError`. Tests.
 - [ ] R234 `EffectSink.contains(record)` reports whether an equal whole record exists, regardless of key order. Tests.
 - [ ] R235 `Ledger.keys_with_attempts(n)` lists keys with at least `n` attempts, sorted; `n < 1` raises `ValueError`. Tests.
 - [ ] R236 `canon.excluded_paths(obj, volatile_fields)` lists the sorted JSON paths that volatile fields remove. Tests.

@@ -74,6 +74,22 @@ class InjectedClock:
         self._ticks += 1
         return self._now
 
+    def tick_n(self, n: int, seconds: float = 1.0) -> float:
+        """Advance ``n`` times by ``seconds`` each and return the new time.
+
+        Each step counts as one tick. ``n`` must not be negative; ``seconds`` is
+        validated as in :meth:`tick`, even when ``n`` is zero.
+        """
+        if n < 0:
+            raise ValueError("tick count must not be negative")
+        if not math.isfinite(seconds):
+            raise ValueError("clock tick must be finite")
+        if seconds < 0:
+            raise ValueError("clock cannot move backwards")
+        for _ in range(n):
+            self.tick(seconds)
+        return self._now
+
     def advance_to(self, when: float) -> float:
         """Move to the absolute time ``when`` and return it.
 
