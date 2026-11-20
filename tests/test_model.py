@@ -194,3 +194,20 @@ def test_distinct_count_handles_unhashable_and_key_order():
 
 def test_distinct_count_empty_script_is_zero():
     assert ScriptedModel([]).distinct_count() == 0
+
+
+def test_contains_matches_a_scripted_response():
+    model = ScriptedModel(["a", "b", "a"])
+    assert model.contains("a")
+    assert model.contains("b")
+    assert not model.contains("z")
+
+
+def test_contains_empty_script_is_false():
+    assert not ScriptedModel([]).contains("a")
+
+
+def test_contains_agrees_with_find():
+    model = ScriptedModel([{"x": 1}, {"x": 2}])
+    for response in ({"x": 1}, {"x": 9}):
+        assert model.contains(response) == (model.find(response) is not None)

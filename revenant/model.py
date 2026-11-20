@@ -76,6 +76,10 @@ class ScriptedModel:
             raise ValueError("window bounds must not be negative")
         return self._script[start:stop]
 
+    def contains(self, response: Any) -> bool:
+        """True when any scripted step has a response equal to ``response``."""
+        return self.find(response) is not None
+
     def find(self, response: Any) -> int | None:
         """Return the first step whose scripted response equals ``response``, or None."""
         for step, scripted in enumerate(self._script):
