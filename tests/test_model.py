@@ -211,3 +211,20 @@ def test_contains_agrees_with_find():
     model = ScriptedModel([{"x": 1}, {"x": 2}])
     for response in ({"x": 1}, {"x": 9}):
         assert model.contains(response) == (model.find(response) is not None)
+
+
+def test_tail_returns_last_responses_in_order():
+    model = ScriptedModel(["a", "b", "c", "d"])
+    assert model.tail(2) == ["c", "d"]
+    assert model.tail(0) == []
+    assert model.tail(9) == ["a", "b", "c", "d"]
+
+
+def test_tail_rejects_negative():
+    with pytest.raises(ValueError):
+        ScriptedModel(["a"]).tail(-1)
+
+
+def test_tail_and_window_agree_on_the_end():
+    model = ScriptedModel(["a", "b", "c", "d"])
+    assert model.tail(2) == model.window(2, 4)

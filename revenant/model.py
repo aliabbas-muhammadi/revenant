@@ -80,6 +80,14 @@ class ScriptedModel:
         """True when any scripted step has a response equal to ``response``."""
         return self.find(response) is not None
 
+    def tail(self, n: int) -> list[Any]:
+        """Return the last ``n`` scripted responses, in step order; ``n`` must not be negative."""
+        if n < 0:
+            raise ValueError("tail() count must not be negative")
+        if n == 0:
+            return []
+        return self._script[-n:]
+
     def find(self, response: Any) -> int | None:
         """Return the first step whose scripted response equals ``response``, or None."""
         for step, scripted in enumerate(self._script):
