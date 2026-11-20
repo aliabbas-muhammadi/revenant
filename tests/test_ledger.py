@@ -540,3 +540,21 @@ def test_attempt_counts_agrees_with_attempts(ledger):
     ledger.begin("a:1", {"k": "a:1"})
     counts = ledger.attempt_counts()
     assert all(counts[key] == ledger.attempts(key) for key in counts)
+
+
+def test_rows_for_matches_tool_prefix_only(ledger):
+    ledger.begin("send:1", {"n": 1})
+    ledger.begin("send_email:1", {"n": 2})
+    assert ledger.rows_for("send") == [("send:1", "intent", 1)]
+
+
+def test_rows_for_sorted_and_includes_status(ledger):
+    ledger.begin("a:2", {"n": 2})
+    ledger.begin("a:1", {"n": 1})
+    ledger.commit("a:1")
+    assert ledger.rows_for("a") == [("a:1", "committed", 1), ("a:2", "intent", 1)]
+
+
+def test_rows_for_unknown_tool_is_empty(ledger):
+    ledger.begin("a:1", {"n": 1})
+    assert ledger.rows_for("z") == []

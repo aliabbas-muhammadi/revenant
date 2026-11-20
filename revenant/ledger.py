@@ -196,6 +196,10 @@ class Ledger:
         """Keys with the ``tool:`` prefix, sorted, optionally only those in ``status``."""
         return [key for key in self.keys(status) if key.partition(":")[0] == tool]
 
+    def rows_for(self, tool: str) -> list[tuple[str, str, int]]:
+        """``entries()`` restricted to keys with the ``tool:`` prefix, sorted by key."""
+        return [row for row in self.entries() if row[0].partition(":")[0] == tool]
+
     def keys_with_attempts(self, n: int) -> list[str]:
         """Keys attempted at least ``n`` times, sorted; ``n`` must be at least 1."""
         if n < 1:
