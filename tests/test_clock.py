@@ -183,3 +183,23 @@ def test_tick_n_rejects_bad_arguments_without_moving():
             clock.tick_n(*args)
     assert clock.now() == 0.0
     assert clock.ticks == 0
+
+
+def test_span_is_positive_when_other_is_ahead():
+    a, b = InjectedClock(0.0), InjectedClock(0.0)
+    b.tick(5.0)
+    assert a.span(b) == 5.0
+    assert b.span(a) == -5.0
+
+
+def test_span_of_a_clock_with_itself_and_its_fork_is_zero():
+    clock = InjectedClock(3.0)
+    assert clock.span(clock) == 0.0
+    assert clock.span(clock.fork()) == 0.0
+
+
+def test_span_uses_current_time_not_start():
+    a, b = InjectedClock(10.0), InjectedClock(0.0)
+    assert a.span(b) == -10.0
+    b.advance_to(12.5)
+    assert a.span(b) == 2.5

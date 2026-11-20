@@ -54,6 +54,10 @@ class InjectedClock:
             raise ValueError("clock time must be finite")
         return self._now >= when
 
+    def span(self, other: InjectedClock) -> float:
+        """Return ``other.now() - self.now()``: positive when ``other`` is ahead."""
+        return other.now() - self._now
+
     def fork(self) -> InjectedClock:
         """Return an independent clock with the same start and current time."""
         twin = InjectedClock(self._start)

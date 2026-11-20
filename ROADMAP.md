@@ -294,6 +294,6 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R238 `ScriptedModel.distinct_count()` counts distinct responses by canonical hash. Tests.
 - [x] R239 Note R232-R238 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
 - [x] R240 `Ledger.summary_for(tool)` returns a `LedgerSummary` restricted to one tool prefix. Tests.
-- [ ] R241 `EffectSink.index_of(record)` returns the first index of an equal whole record, or `None`. Tests.
-- [ ] R242 `InjectedClock.span(other)` returns the time between two clocks' current values. Tests.
+- [x] R241 `EffectSink.index_of(record)` returns the first index of an equal whole record, or `None`. Tests.
+- [x] R242 `InjectedClock.span(other)` returns the time between two clocks' current values. Tests.
 - [ ] R243 Note R240-R242 in `CHANGELOG.md` and `docs/ledger.md`.
