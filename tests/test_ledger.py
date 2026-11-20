@@ -438,3 +438,26 @@ def test_most_attempted_breaks_ties_by_smallest_key(ledger):
     ledger.begin("b:1", {"n": 1})
     ledger.begin("a:1", {"n": 2})
     assert ledger.most_attempted() == "a:1"
+
+
+def test_keys_with_attempts_filters_by_threshold(ledger):
+    ledger.begin("a:1", {"n": 1})
+    ledger.begin("b:1", {"n": 2})
+    ledger.begin("b:1", {"n": 2})
+    ledger.begin("c:1", {"n": 3})
+    for _ in range(2):
+        ledger.begin("c:1", {"n": 3})
+    assert ledger.keys_with_attempts(1) == ["a:1", "b:1", "c:1"]
+    assert ledger.keys_with_attempts(2) == ["b:1", "c:1"]
+    assert ledger.keys_with_attempts(3) == ["c:1"]
+    assert ledger.keys_with_attempts(4) == []
+
+
+def test_keys_with_attempts_empty_ledger(ledger):
+    assert ledger.keys_with_attempts(1) == []
+
+
+def test_keys_with_attempts_rejects_small_n(ledger):
+    for n in (0, -1):
+        with pytest.raises(ValueError):
+            ledger.keys_with_attempts(n)

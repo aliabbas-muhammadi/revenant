@@ -288,7 +288,7 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R232 `ScriptedModel.indices_of(response)` returns every step whose scripted response equals the argument. Tests.
 - [x] R233 `InjectedClock.tick_n(n, seconds=1.0)` advances `n` times and returns the new time; negative `n` raises `ValueError`. Tests.
 - [x] R234 `EffectSink.contains(record)` reports whether an equal whole record exists, regardless of key order. Tests.
-- [ ] R235 `Ledger.keys_with_attempts(n)` lists keys with at least `n` attempts, sorted; `n < 1` raises `ValueError`. Tests.
+- [x] R235 `Ledger.keys_with_attempts(n)` lists keys with at least `n` attempts, sorted; `n < 1` raises `ValueError`. Tests.
 - [ ] R236 `canon.excluded_paths(obj, volatile_fields)` lists the sorted JSON paths that volatile fields remove. Tests.
 - [ ] R237 `EffectSink.field_counts(field)` counts whole records per value of a field; unhashable values raise `TypeError`. Tests.
 - [ ] R238 `ScriptedModel.distinct_count()` counts distinct responses by canonical hash. Tests.
