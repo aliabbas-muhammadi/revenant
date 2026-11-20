@@ -461,3 +461,42 @@ def test_keys_with_attempts_rejects_small_n(ledger):
     for n in (0, -1):
         with pytest.raises(ValueError):
             ledger.keys_with_attempts(n)
+
+
+def test_summary_for_restricts_to_one_tool(ledger):
+    ledger.begin("send_email:1", {"n": 1})
+    ledger.commit("send_email:1")
+    ledger.begin("send_email:1", {"n": 1})  # suppressed re-attempt
+    ledger.begin("send_email:2", {"n": 2})  # crash residue, still intent
+    ledger.begin("charge_card:1", {"n": 3})
+    ledger.commit("charge_card:1")
+    assert ledger.summary_for("send_email") == LedgerSummary(
+        attempts=3, effects=1, suppressed=1, unconfirmed=1
+    )
+    assert ledger.summary_for("charge_card") == LedgerSummary(
+        attempts=1, effects=1, suppressed=0, unconfirmed=0
+    )
+
+
+def test_summary_for_unknown_tool_is_all_zero(ledger):
+    ledger.begin("send_email:1", {"n": 1})
+    assert ledger.summary_for("write_file") == LedgerSummary(0, 0, 0, 0)
+
+
+def test_summary_for_matches_exact_prefix_only(ledger):
+    ledger.begin("send:1", {"n": 1})
+    ledger.begin("send_email:1", {"n": 2})
+    assert ledger.summary_for("send").attempts == 1
+
+
+def test_summaries_per_tool_add_up_to_the_whole(ledger):
+    for key in ("a:1", "a:2", "b:1"):
+        ledger.begin(key, {"k": key})
+    ledger.commit("a:1")
+    ledger.begin("a:1", {"k": "a:1"})
+    parts = [ledger.summary_for(t) for t in ledger.tools()]
+    whole = ledger.summary()
+    assert sum(p.attempts for p in parts) == whole.attempts
+    assert sum(p.effects for p in parts) == whole.effects
+    assert sum(p.suppressed for p in parts) == whole.suppressed
+    assert sum(p.unconfirmed for p in parts) == whole.unconfirmed

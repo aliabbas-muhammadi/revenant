@@ -311,6 +311,23 @@ class Ledger:
         ).fetchall()
         return {int(n): int(c) for n, c in rows}
 
+    def summary_for(self, tool: str) -> LedgerSummary:
+        """Like :meth:`summary`, restricted to keys with the ``tool:`` prefix.
+
+        A tool with no keys gives an all-zero summary.
+        """
+        attempts = effects = suppressed = unconfirmed = 0
+        for key, status, count in self.entries():
+            if key.partition(":")[0] != tool:
+                continue
+            attempts += count
+            if status == "committed":
+                effects += 1
+                suppressed += count - 1
+            else:
+                unconfirmed += 1
+        return LedgerSummary(attempts, effects, suppressed, unconfirmed)
+
     def summary(self) -> LedgerSummary:
         """Return attempts, committed effects, suppressed attempts and unconfirmed keys."""
         row = self._conn.execute(
