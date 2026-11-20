@@ -108,3 +108,8 @@ which narrows `most_attempted()` down to every key a crash loop kept retrying. O
 `field_counts(field)` counts records per value of a field. `ScriptedModel.indices_of(response)`
 lists every step with an equal response, `distinct_count()` counts distinct responses and
 `InjectedClock.tick_n(n, seconds)` advances `n` times in one call.
+
+`summary_for(tool)` is `summary()` restricted to one tool prefix, so a mid-step sweep can say
+which tool left the unconfirmed keys; the per-tool summaries add up to the whole. On the sink,
+`index_of(record)` gives the position of the first equal record (the companion of
+`contains()`), and `InjectedClock.span(other)` returns how far another clock is ahead.

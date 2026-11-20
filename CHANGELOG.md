@@ -35,6 +35,7 @@ All notable changes to this project are documented here. The format follows
 - `ScriptedModel.indices_of()` and `distinct_count()`, `InjectedClock.tick_n()`,
   `EffectSink.contains()` and `field_counts()`, `Ledger.keys_with_attempts()` and
   `canon.excluded_paths()`.
+- `Ledger.summary_for()`, `EffectSink.index_of()` and `InjectedClock.span()`.
 
 ### Fixed
 - `InjectedClock` rejects NaN and infinite values.
