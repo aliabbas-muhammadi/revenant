@@ -280,3 +280,26 @@ def test_last_for_ignores_torn_final_line(tmp_path):
     with open(path, "a", encoding="utf-8") as fh:
         fh.write('{"tool": "send_email", "n": ')
     assert sink.last_for("send_email") == {"tool": "send_email", "n": 1}
+
+
+def test_contains_matches_equal_record_regardless_of_key_order(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    sink.append({"tool": "send_email", "to": "a@x", "n": 1})
+    assert sink.contains({"n": 1, "to": "a@x", "tool": "send_email"})
+
+
+def test_contains_requires_the_whole_record_to_match(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    sink.append({"tool": "send_email", "n": 1})
+    assert not sink.contains({"tool": "send_email"})
+    assert not sink.contains({"tool": "send_email", "n": 2})
+
+
+def test_contains_is_false_on_missing_file_and_ignores_torn_line(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert not sink.contains({"a": 1})
+    sink.append({"a": 1})
+    with open(sink.path, "ab") as fh:
+        fh.write(b'{"a": 2')
+    assert sink.contains({"a": 1})
+    assert not sink.contains({"a": 2})

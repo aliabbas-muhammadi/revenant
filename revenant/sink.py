@@ -198,6 +198,14 @@ class EffectSink:
             records = [r for r in records if r.get("tool") == tool]
         return len(records)
 
+    def contains(self, record: dict[str, Any]) -> bool:
+        """True when an equal whole record exists, regardless of key order."""
+        marker = json.dumps(record, sort_keys=True, ensure_ascii=False)
+        return any(
+            json.dumps(r, sort_keys=True, ensure_ascii=False) == marker
+            for r in self.read().effects
+        )
+
     def is_empty(self) -> bool:
         """True when the sink holds no whole records."""
         return len(self) == 0
