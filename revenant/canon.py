@@ -185,6 +185,11 @@ def leaf_paths(obj: Any, volatile_fields: Iterable[str] = ()) -> list[str]:
     return sorted(out)
 
 
+def leaf_count(obj: Any, volatile_fields: Iterable[str] = ()) -> int:
+    """Return the number of leaves :func:`leaf_paths` would list for ``obj``."""
+    return len(leaf_paths(obj, volatile_fields))
+
+
 def _walk(a: Any, b: Any, path: str, out: list[str]) -> None:
     if isinstance(a, dict) and isinstance(b, dict):
         for key in sorted(set(a) | set(b)):

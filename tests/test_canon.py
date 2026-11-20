@@ -7,6 +7,7 @@ from revenant.canon import (
     canonical_json,
     diff_paths,
     excluded_paths,
+    leaf_count,
     leaf_paths,
     same_state,
     short_hash,
@@ -321,3 +322,19 @@ def test_excluded_paths_agrees_with_leaf_paths():
     state = {"meta": {"ts": 1, "id": 2}, "step": 3}
     gone = excluded_paths(state, ["meta.ts"])
     assert set(leaf_paths(state)) - set(leaf_paths(state, ["meta.ts"])) == set(gone)
+
+
+def test_leaf_count_matches_leaf_paths_length():
+    state = {"b": [1, {"c": "x"}], "a": None}
+    assert leaf_count(state) == len(leaf_paths(state))
+
+
+def test_leaf_count_honours_volatile_fields():
+    state = {"meta": {"ts": 1, "id": 2}, "step": 3}
+    assert leaf_count(state, ["meta.ts"]) == 2
+
+
+def test_leaf_count_scalar_root_and_empty_containers():
+    assert leaf_count(5) == 1
+    assert leaf_count({"a": {}, "b": []}) == 2
+    assert leaf_count({}) == 1
