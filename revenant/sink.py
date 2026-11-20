@@ -114,6 +114,11 @@ class EffectSink:
         matches = self.filter(tool)
         return matches[-1] if matches else None
 
+    def first_for(self, tool: str) -> dict[str, Any] | None:
+        """Return the earliest whole record naming ``tool``, or None if there is none."""
+        matches = self.filter(tool)
+        return matches[0] if matches else None
+
     def count(self, tool: str) -> int:
         """Count whole records whose ``tool`` field equals ``tool``."""
         return self.by_tool().get(tool, 0)

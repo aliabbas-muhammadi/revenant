@@ -350,3 +350,23 @@ def test_index_of_agrees_with_contains(tmp_path):
     sink.append({"a": 1})
     for record in ({"a": 1}, {"a": 2}):
         assert (sink.index_of(record) is not None) == sink.contains(record)
+
+
+def test_first_for_returns_earliest_matching_record(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    sink.append({"tool": "a", "n": 1})
+    sink.append({"tool": "b", "n": 2})
+    sink.append({"tool": "a", "n": 3})
+    assert sink.first_for("a") == {"tool": "a", "n": 1}
+
+
+def test_first_for_missing_tool_is_none(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    sink.append({"tool": "a", "n": 1})
+    assert sink.first_for("z") is None
+
+
+def test_first_for_agrees_with_last_for_on_single_record(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    sink.append({"tool": "a", "n": 1})
+    assert sink.first_for("a") == sink.last_for("a")
