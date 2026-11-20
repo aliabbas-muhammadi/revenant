@@ -64,3 +64,6 @@ volatile-field pattern actually excludes.
 remove, using the same matching as `state_hash`. A removed key is listed once at its own path
 and its children are not, so it is the complement of `leaf_paths()` for checking what a
 pattern such as `*.ts` really hides.
+
+`leaf_count(obj, volatile_fields=())` is `len(leaf_paths(obj, volatile_fields))`: the number of
+values that feed `state_hash`, without building the path list when only the count is needed.

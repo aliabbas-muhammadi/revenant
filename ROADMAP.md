@@ -310,4 +310,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R253 `ScriptedModel.contains(response)` is True when any scripted step equals `response`. Tests.
 - [x] R254 `ScriptedModel.tail(n)` returns the last `n` scripted responses; negative `n` raises `ValueError`. Tests.
 - [x] R255 `canon.leaf_count(obj, volatile_fields=())` returns `len(leaf_paths(obj, volatile_fields))`. Tests.
-- [ ] R256 Note R245-R255 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
+- [x] R256 Note R245-R255 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.

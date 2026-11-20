@@ -36,6 +36,9 @@ All notable changes to this project are documented here. The format follows
   `EffectSink.contains()` and `field_counts()`, `Ledger.keys_with_attempts()` and
   `canon.excluded_paths()`.
 - `Ledger.summary_for()`, `EffectSink.index_of()` and `InjectedClock.span()`.
+- `Ledger.attempt_counts()`, `rows_for()` and `describe()`, `EffectSink.first_for()`,
+  `fields()` and `before()`, `InjectedClock.is_ahead_of()` and `ticked()`,
+  `ScriptedModel.contains()` and `tail()`, and `canon.leaf_count()`.
 
 ### Fixed
 - `InjectedClock` rejects NaN and infinite values.

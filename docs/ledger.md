@@ -113,3 +113,14 @@ lists every step with an equal response, `distinct_count()` counts distinct resp
 which tool left the unconfirmed keys; the per-tool summaries add up to the whole. On the sink,
 `index_of(record)` gives the position of the first equal record (the companion of
 `contains()`), and `InjectedClock.span(other)` returns how far another clock is ahead.
+
+`attempt_counts()` maps every key to its attempt count in one call, and `rows_for(tool)` is
+`entries()` restricted to a tool prefix, so a report can list one tool's rows without filtering
+`entries()` itself. `describe(key)` gathers status, attempt count and payload hash for a single
+key into one dict (`None` for an unknown key), which is what a CLI inspector wants instead of
+three separate lookups. On the sink, `first_for(tool)` is the earliest-record counterpart to
+`last_for(tool)`, `fields()` lists every field name seen across whole records, and `before(n)`
+is the complement of `since(n)`: `before(n) + since(n) == effects()`. `InjectedClock.is_ahead_of(other)`
+compares current time directly, and `ticked()` reports whether the clock has ever been moved,
+which is not the same as `is_at_start()` once a tick of zero seconds has run. `ScriptedModel.contains(response)`
+is the boolean form of `find(response)`, and `tail(n)` is the last-`n` counterpart to `window()`.
