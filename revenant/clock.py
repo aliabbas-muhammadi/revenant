@@ -42,6 +42,14 @@ class InjectedClock:
         """True when no time has passed since the start value."""
         return self._now == self._start
 
+    def ticked(self) -> bool:
+        """True once ``tick()``, ``tick_n()`` or ``advance_to()`` has been called.
+
+        Unlike :meth:`is_at_start`, this tracks calls rather than the time
+        value, so ``tick(0.0)`` or ``advance_to(start)`` still counts.
+        """
+        return self._ticks > 0
+
     def until(self, when: float) -> float:
         """Return the seconds from now until ``when``, or ``0.0`` if it has passed."""
         if not math.isfinite(when):

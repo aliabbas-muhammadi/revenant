@@ -224,3 +224,24 @@ def test_is_ahead_of_agrees_with_span_sign():
     b.tick(4.0)
     assert a.is_ahead_of(b) == (a.span(b) < 0)
     assert b.is_ahead_of(a) == (b.span(a) < 0)
+
+
+def test_ticked_is_false_until_a_move():
+    clock = InjectedClock(5.0)
+    assert not clock.ticked()
+    clock.tick(0.0)
+    assert clock.ticked()
+
+
+def test_ticked_true_even_when_time_does_not_change():
+    clock = InjectedClock(2.0)
+    clock.advance_to(2.0)
+    assert clock.ticked()
+    assert clock.is_at_start()
+
+
+def test_ticked_resets_with_reset():
+    clock = InjectedClock(0.0)
+    clock.tick(1.0)
+    clock.reset()
+    assert not clock.ticked()
