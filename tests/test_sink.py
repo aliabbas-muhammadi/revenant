@@ -390,3 +390,24 @@ def test_fields_ignores_torn_final_line(tmp_path):
     with open(path, "a", encoding="utf-8") as fh:
         fh.write('{"extra_field": ')
     assert sink.fields() == ["tool"]
+
+
+def test_before_returns_records_before_index(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    for n in range(4):
+        sink.append({"n": n})
+    assert sink.before(2) == [{"n": 0}, {"n": 1}]
+    assert sink.before(0) == []
+    assert sink.before(9) == sink.effects()
+
+
+def test_before_rejects_negative(tmp_path):
+    with pytest.raises(ValueError):
+        EffectSink(tmp_path / "s.jsonl").before(-1)
+
+
+def test_before_and_since_are_complementary(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    for n in range(5):
+        sink.append({"n": n})
+    assert sink.before(3) + sink.since(3) == sink.effects()

@@ -145,6 +145,12 @@ class EffectSink:
             raise ValueError("since() index must not be negative")
         return self.read().effects[n:]
 
+    def before(self, n: int) -> list[dict[str, Any]]:
+        """Return whole records before index ``n``; ``n`` must not be negative."""
+        if n < 0:
+            raise ValueError("before() index must not be negative")
+        return self.read().effects[:n]
+
     def tail(self, n: int) -> list[dict[str, Any]]:
         """Return the last ``n`` whole records in append order; ``n`` must not be negative."""
         if n < 0:
