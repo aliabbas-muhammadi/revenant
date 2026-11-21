@@ -124,3 +124,7 @@ is the complement of `since(n)`: `before(n) + since(n) == effects()`. `InjectedC
 compares current time directly, and `ticked()` reports whether the clock has ever been moved,
 which is not the same as `is_at_start()` once a tick of zero seconds has run. `ScriptedModel.contains(response)`
 is the boolean form of `find(response)`, and `tail(n)` is the last-`n` counterpart to `window()`.
+
+`Ledger.is_unconfirmed(key)` is true only while a key is still in `intent`; unknown and committed keys
+are false. `EffectSink.has_duplicates()` is the boolean form of `duplicates()`, and
+`ScriptedModel.is_empty()` is true for a zero-step script.

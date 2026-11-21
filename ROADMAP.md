@@ -315,4 +315,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R258 `EffectSink.has_duplicates()` is True when any whole record appears more than once. Tests.
 - [x] R259 `ScriptedModel.is_empty()` is True for a zero-step script. Tests.
 - [x] R260 `canon.first_diff_path(a, b, volatile_fields=())` returns the first path from `diff_paths`, or `None` when the states match. Tests.
-- [ ] R261 Note R257-R260 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
+- [x] R261 Note R257-R260 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.

@@ -67,3 +67,6 @@ pattern such as `*.ts` really hides.
 
 `leaf_count(obj, volatile_fields=())` is `len(leaf_paths(obj, volatile_fields))`: the number of
 values that feed `state_hash`, without building the path list when only the count is needed.
+
+`first_diff_path(a, b, volatile_fields=())` returns the first path from `diff_paths`, or `None` when
+the two states hash the same.
