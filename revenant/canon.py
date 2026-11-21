@@ -224,3 +224,9 @@ def diff_paths(a: Any, b: Any, volatile_fields: Iterable[str] = ()) -> list[str]
     out: list[str] = []
     _walk(_normalise(a, "$"), _normalise(b, "$"), "$", out)
     return sorted(out)
+
+
+def first_diff_path(a: Any, b: Any, volatile_fields: Iterable[str] = ()) -> str | None:
+    """Return the first path from :func:`diff_paths`, or None when the states match."""
+    paths = diff_paths(a, b, volatile_fields)
+    return paths[0] if paths else None

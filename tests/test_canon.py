@@ -338,3 +338,11 @@ def test_leaf_count_scalar_root_and_empty_containers():
     assert leaf_count(5) == 1
     assert leaf_count({"a": {}, "b": []}) == 2
     assert leaf_count({}) == 1
+
+
+def test_first_diff_path():
+    from revenant.canon import first_diff_path
+
+    assert first_diff_path({"a": 1}, {"a": 1}) is None
+    assert first_diff_path({"a": 1, "b": 2}, {"a": 2, "b": 3}) == "$.a"
+    assert first_diff_path({"a": 1, "t": 1}, {"a": 1, "t": 2}, ["t"]) is None
