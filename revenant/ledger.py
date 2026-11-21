@@ -313,6 +313,11 @@ class Ledger:
         ).fetchall()
         return [r[0] for r in rows]
 
+    def is_unconfirmed(self, key: str) -> bool:
+        """True only while ``key`` is still in ``intent``; unknown keys are False."""
+        state = self.status(key)
+        return state is not None and state[0] == "intent"
+
     def tools_with_unconfirmed(self) -> list[str]:
         """Tool prefixes that still have a key in ``intent``, sorted."""
         return sorted({key.partition(":")[0] for key in self.intent_keys()})

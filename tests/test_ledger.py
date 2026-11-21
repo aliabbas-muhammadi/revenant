@@ -583,3 +583,11 @@ def test_describe_reflects_commit_and_reattempt(ledger):
         "attempt_count": 2,
         "payload_hash": ledger.payload_hash_of("a:1"),
     }
+
+
+def test_is_unconfirmed_tracks_intent(ledger):
+    assert not ledger.is_unconfirmed("a:1")
+    ledger.begin("a:1", {"n": 1})
+    assert ledger.is_unconfirmed("a:1")
+    ledger.commit("a:1")
+    assert not ledger.is_unconfirmed("a:1")
