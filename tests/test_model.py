@@ -228,3 +228,8 @@ def test_tail_rejects_negative():
 def test_tail_and_window_agree_on_the_end():
     model = ScriptedModel(["a", "b", "c", "d"])
     assert model.tail(2) == model.window(2, 4)
+
+
+def test_is_empty():
+    assert ScriptedModel([]).is_empty()
+    assert not ScriptedModel(["a"]).is_empty()
