@@ -240,6 +240,10 @@ class EffectSink:
                 return index
         return None
 
+    def has_duplicates(self) -> bool:
+        """True when any whole record appears more than once."""
+        return bool(self.duplicates())
+
     def is_empty(self) -> bool:
         """True when the sink holds no whole records."""
         return len(self) == 0

@@ -411,3 +411,13 @@ def test_before_and_since_are_complementary(tmp_path):
     for n in range(5):
         sink.append({"n": n})
     assert sink.before(3) + sink.since(3) == sink.effects()
+
+
+def test_has_duplicates(tmp_path):
+    sink = EffectSink(tmp_path / "s.jsonl")
+    assert not sink.has_duplicates()
+    sink.append({"tool": "a", "n": 1})
+    sink.append({"tool": "a", "n": 2})
+    assert not sink.has_duplicates()
+    sink.append({"n": 1, "tool": "a"})
+    assert sink.has_duplicates()
