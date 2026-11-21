@@ -80,6 +80,12 @@ class ScriptedModel:
         """True when any scripted step has a response equal to ``response``."""
         return self.find(response) is not None
 
+    def head(self, n: int) -> list[Any]:
+        """Return the first ``n`` scripted responses, in step order; ``n`` must not be negative."""
+        if n < 0:
+            raise ValueError("head() count must not be negative")
+        return self._script[:n]
+
     def tail(self, n: int) -> list[Any]:
         """Return the last ``n`` scripted responses, in step order; ``n`` must not be negative."""
         if n < 0:

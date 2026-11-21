@@ -316,3 +316,4 @@ Append new tasks here (continuing the R numbering) only when everything above is
 - [x] R259 `ScriptedModel.is_empty()` is True for a zero-step script. Tests.
 - [x] R260 `canon.first_diff_path(a, b, volatile_fields=())` returns the first path from `diff_paths`, or `None` when the states match. Tests.
 - [x] R261 Note R257-R260 in `CHANGELOG.md`, `docs/ledger.md` and `docs/canon.md`.
+- [x] R262 `ScriptedModel.head(n)` returns the first `n` scripted responses; negative `n` raises `ValueError`. Tests.

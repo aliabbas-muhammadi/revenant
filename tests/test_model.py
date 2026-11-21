@@ -233,3 +233,15 @@ def test_tail_and_window_agree_on_the_end():
 def test_is_empty():
     assert ScriptedModel([]).is_empty()
     assert not ScriptedModel(["a"]).is_empty()
+
+
+def test_head_returns_first_responses_in_order():
+    model = ScriptedModel(["a", "b", "c"])
+    assert model.head(2) == ["a", "b"]
+    assert model.head(0) == []
+    assert model.head(10) == ["a", "b", "c"]
+
+
+def test_head_rejects_negative():
+    with pytest.raises(ValueError):
+        ScriptedModel(["a"]).head(-1)

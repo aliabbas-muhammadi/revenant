@@ -40,7 +40,7 @@ All notable changes to this project are documented here. The format follows
   `fields()` and `before()`, `InjectedClock.is_ahead_of()` and `ticked()`,
   `ScriptedModel.contains()` and `tail()`, and `canon.leaf_count()`.
 - `Ledger.is_unconfirmed()`, `EffectSink.has_duplicates()`, `ScriptedModel.is_empty()` and
-  `canon.first_diff_path()`.
+  `canon.first_diff_path()`, and `ScriptedModel.head()`.
 
 ### Fixed
 - `InjectedClock` rejects NaN and infinite values.
